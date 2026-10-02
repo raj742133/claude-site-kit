@@ -1,0 +1,181 @@
+{
+  "photoColors": [
+    "#1b2a4a",
+    "#c9a227",
+    "#2f4474",
+    "#8a6d12"
+  ],
+  "records": [
+    {
+      "title": "A. Thornbury",
+      "subtitle": "14 Mill Lane, Harrogate",
+      "status": "open",
+      "category": "Purchase",
+      "owner": "R. Halden",
+      "source": "Estate agent",
+      "metrics": {
+        "fee": 1450
+      },
+      "hoursAgo": 4,
+      "captions": [
+        "Title register"
+      ],
+      "items": [
+        [
+          "Instruction received",
+          1,
+          "closed"
+        ],
+        [
+          "Searches ordered",
+          1,
+          "open"
+        ],
+        [
+          "Contract report",
+          0
+        ]
+      ]
+    },
+    {
+      "title": "Okafor family trust",
+      "subtitle": "3 Beck Road, York",
+      "status": "review",
+      "category": "Sale",
+      "owner": "S. Marlowe",
+      "source": "Existing client",
+      "metrics": {
+        "fee": 980
+      },
+      "hoursAgo": 11,
+      "items": [
+        [
+          "Instruction received",
+          1,
+          "closed"
+        ],
+        [
+          "Draft contract",
+          1,
+          "review"
+        ],
+        [
+          "Enquiries",
+          0
+        ]
+      ]
+    },
+    {
+      "title": "J. & P. Lindqvist",
+      "subtitle": "27 Carr Street, Leeds",
+      "status": "open",
+      "category": "Remortgage",
+      "owner": "R. Halden",
+      "source": "Broker",
+      "metrics": {
+        "fee": 620
+      },
+      "hoursAgo": 18,
+      "items": [
+        [
+          "Instruction received",
+          1,
+          "closed"
+        ],
+        [
+          "Lender conditions",
+          0
+        ]
+      ]
+    },
+    {
+      "title": "Brightwell Lettings Ltd",
+      "subtitle": "Unit 4, Foundry Court, Hull",
+      "status": "review",
+      "category": "Lease",
+      "owner": "S. Marlowe",
+      "source": "Existing client",
+      "metrics": {
+        "fee": 2300
+      },
+      "hoursAgo": 30,
+      "items": [
+        [
+          "Heads of terms",
+          1,
+          "closed"
+        ],
+        [
+          "Draft lease",
+          1,
+          "review"
+        ],
+        [
+          "Landlord comments",
+          0
+        ]
+      ]
+    },
+    {
+      "title": "M. Abara",
+      "subtitle": "9 Orchard Close, Ripon",
+      "status": "closed",
+      "category": "Purchase",
+      "owner": "T. Yeo",
+      "source": "Estate agent",
+      "metrics": {
+        "fee": 1300
+      },
+      "hoursAgo": 52,
+      "items": [
+        [
+          "Completion",
+          1,
+          "closed"
+        ]
+      ]
+    },
+    {
+      "title": "D. Calloway",
+      "subtitle": "61 Station Road, Selby",
+      "status": "open",
+      "category": "Sale",
+      "owner": "T. Yeo",
+      "source": "Website",
+      "metrics": {
+        "fee": 890
+      },
+      "hoursAgo": 70,
+      "items": [
+        [
+          "Instruction received",
+          1,
+          "closed"
+        ],
+        [
+          "Sales pack",
+          0
+        ]
+      ]
+    },
+    {
+      "title": "Ferris & Dunn",
+      "subtitle": "2 Wharf Row, Whitby",
+      "status": "closed",
+      "category": "Remortgage",
+      "owner": "R. Halden",
+      "source": "Broker",
+      "metrics": {
+        "fee": 540
+      },
+      "hoursAgo": 96,
+      "items": [
+        [
+          "Completion",
+          1,
+          "closed"
+        ]
+      ]
+    }
+  ]
+}

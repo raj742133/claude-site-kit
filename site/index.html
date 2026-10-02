@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>site-kit · a Claude Code skill that builds your website</title>
+<meta name="description" content="site-kit is a Claude Code skill that generates a complete Next.js site - landing page, sign-in, MFA, dashboard, publishing and connect-a-phone - restyled for your brand and tested in a real browser.">
+<meta name="theme-color" content="#f3f5fa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0a0e16" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="site-kit - a Claude Code skill that builds your website">
+<meta property="og:description" content="Pick the modules, give it your brand. Get a working Next.js site with a real backend, tested at desktop and phone sizes.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap">
+<link rel="stylesheet" href="style.css">
+<script>try{var t=localStorage.getItem('sitekit-theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t}catch(e){}</script>
+<noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="wrap top-in">
+    <a class="brand" href="#top" aria-label="site-kit home">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5.5 L40 14.75 V33.25 L24 42.5 L8 33.25 V14.75 Z" fill="none" stroke="var(--primary)" stroke-width="5" stroke-linejoin="round"/><circle cx="24" cy="24" r="6.5" fill="var(--signal)"/></svg>
+      site-kit
+    </a>
+    <nav id="nav" aria-label="Main">
+      <a href="#modules">Modules</a>
+      <a href="#how">How it works</a>
+      <a href="#gallery">Gallery</a>
+      <a href="#install">Install</a>
+      <a href="#tested">Tested</a>
+      <a href="#faq">FAQ</a>
+      <a class="btn gh" href="https://github.com/raj742133/claude-site-kit" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.25.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.58.23 2.75.11 3.04.74.8 1.18 1.83 1.18 3.08 0 4.41-2.69 5.38-5.25 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>
+        GitHub
+      </a>
+    </nav>
+    <button class="icon-btn" id="theme" type="button" aria-label="Switch colour theme" title="Switch colour theme">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7Z"/></svg>
+    </button>
+    <button class="icon-btn menu-btn" id="menu" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+<!-- ============================ HERO ============================ -->
+<div class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="pill reveal"><i></i> A skill for Claude Code &middot; MIT licensed</span>
+      <h1 class="reveal">Tell Claude your brand. Get a <em>working website</em>.</h1>
+      <p class="lead reveal">site-kit generates a complete Next.js site, backend included, from six modules you pick &mdash; landing page, sign-in, authenticator MFA, records dashboard, release publishing and a connect-your-phone page. Your colours, your words, your data. Then it tests the result in a real browser, at desktop and phone sizes.</p>
+      <div class="cta reveal">
+        <a class="btn primary" href="#install">Install the skill</a>
+        <a class="btn" href="#gallery">See what it makes</a>
+      </div>
+      <div class="copyline reveal">
+        <code><b>$</b> git clone https://github.com/raj742133/claude-site-kit &amp;&amp; cd claude-site-kit &amp;&amp; ./install.sh</code>
+        <button class="copy" type="button" data-copy="git clone https://github.com/raj742133/claude-site-kit && cd claude-site-kit && ./install.sh">Copy</button>
+      </div>
+      <div class="facts reveal">
+        <div><b>6</b>modules, pick any</div>
+        <div><b>87</b>browser checks on the full kit</div>
+        <div><b>3</b>screen widths tested</div>
+        <div><b>0</b>invented facts or numbers</div>
+      </div>
+    </div>
+    <div class="stage reveal">
+      <div class="browser">
+        <div class="browser-bar"><i></i><i></i><i></i><span>beanandbarrel.example &mdash; generated by site-kit</span></div>
+        <img src="assets/shots/coffee/landing-hero.jpg" width="1440" height="900" alt="A generated landing page for a fictional coffee roaster, Bean &amp; Barrel: headline, download card with QR code, brown and amber palette">
+      </div>
+      <div class="float"><div class="browser"><div class="browser-bar"><i></i><i></i><i></i></div><img src="assets/shots/coffee/dashboard.jpg" width="1440" height="900" alt="The generated orders dashboard with stat cards and order cards" loading="lazy"></div></div>
+      <div class="phone"><img src="assets/shots/coffee/landing-mobile.jpg" width="780" height="1688" alt="The same landing page on a phone" loading="lazy"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================ MODULES ============================ -->
+<section id="modules">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Modules</span>
+      <h2>Pick the pieces. Skip the rest.</h2>
+      <p>Each module is a self-contained slice of the site with its own pages, API routes, database tables and settings. Choose one or all six; dependencies are added for you.</p>
+    </div>
+    <div class="cards">
+      <article class="card reveal">
+        <div class="shot"><img src="assets/shots/coffee/landing-story.jpg" width="1440" height="900" alt="Landing page story section with a phone mock-up" loading="lazy"></div>
+        <div class="body">
+          <h3>Landing page <code>landing</code></h3>
+          <p>A public home page with an animated mark, a scroll-driven story with phone mock-ups, proof numbers, features, FAQ and a download card with a QR code.</p>
+          <ul><li>Headline, steps and FAQ come from your config</li><li>Proof and feature sections stay off until you give real facts</li></ul>
+        </div>
+      </article>
+      <article class="card reveal">
+        <div class="shot"><img src="assets/shots/coffee/signin.jpg" width="1440" height="900" alt="Shared password sign-in page" loading="lazy"></div>
+        <div class="body">
+          <h3>Sign in <code>signin</code></h3>
+          <p>A shared-password gate in front of the private pages: signed cookie, constant-time compare, safe <code>?next=</code> redirect, edge middleware.</p>
+          <ul><li>API callers get <b>401</b>, not a redirect page</li><li>Open-redirect attempts are ignored</li></ul>
+        </div>
+      </article>
+      <article class="card reveal">
+        <div class="shot"><img src="assets/shots/coffee/admin-enroll.jpg" width="1440" height="900" alt="Authenticator enrolment screen with a QR code" loading="lazy"></div>
+        <div class="body">
+          <h3>MFA accounts <code>mfa</code></h3>
+          <p>Named accounts with password and authenticator-app codes. First-run setup, single-use invite links, lockout and an activity log.</p>
+          <ul><li>TOTP &plusmn;1 step, a used code is refused</li><li>5 wrong tries lock the account for 15 minutes</li></ul>
+        </div>
+      </article>
+      <article class="card reveal">
+        <div class="shot"><img src="assets/shots/coffee/admin-publish-form.jpg" width="1440" height="900" alt="Publishing form with file drop zone and release notes editor" loading="lazy"></div>
+        <div class="body">
+          <h3>Publishing <code>publishing</code></h3>
+          <p>Upload a version, write notes in a rich editor, choose stable or testing, show it on the home page. Real APK parsing, or any file types you list.</p>
+          <ul><li>Build numbers must rise; downloads are byte-identical</li><li>Testers get codes and see testing builds only</li></ul>
+          <span class="needs">needs: mfa (added automatically)</span>
+        </div>
+      </article>
+      <article class="card reveal">
+        <div class="shot"><img src="assets/shots/coffee/dashboard.jpg" width="1440" height="900" alt="Dashboard with stat cards, filter chips and record cards" loading="lazy"></div>
+        <div class="body">
+          <h3>Dashboard <code>dashboard</code></h3>
+          <p>Stat cards, status chips, search and facet filters over a card grid of records, plus a detail page with files, line items and one-click status changes.</p>
+          <ul><li>You name the statuses, labels and metrics</li><li>Fed by the ingest API, idempotent per record id</li></ul>
+          <span class="needs">needs: signin, api (added automatically)</span>
+        </div>
+      </article>
+      <article class="card reveal">
+        <div class="shot"><img src="assets/shots/coffee/connect.jpg" width="1440" height="900" alt="Connect a tablet page with a link and a curl example" loading="lazy"></div>
+        <div class="body">
+          <h3>Connect to phone <code>connect</code></h3>
+          <p>One page that shows the link (address plus key) to paste into your app, a copy button and a ready-made <code>curl</code> example.</p>
+          <ul><li>The key stays in the URL fragment, never sent to the server</li><li>Uses the same ingest token as your clients</li></ul>
+          <span class="needs">needs: signin, api (added automatically)</span>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ HOW IT WORKS ============================ -->
+<section id="how" class="band">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">How it works</span>
+      <h2>Four steps, one conversation.</h2>
+      <p>You describe the site; Claude does the rest and shows its work. The panel on the right is real output from a run of the kit.</p>
+    </div>
+    <div class="steps">
+      <div class="step-list" role="tablist" aria-label="Steps">
+        <button class="step on reveal" role="tab" aria-selected="true" data-pane="0"><span class="n">1</span><span><h3>Ask</h3><p>Claude asks which modules you want, then your brand name, two colours, logo style and what you call things &mdash; orders, cases, scans.</p></span></button>
+        <button class="step reveal" role="tab" aria-selected="false" data-pane="1"><span class="n">2</span><span><h3>Configure</h3><p>Your answers become one <code>site.json</code>. Anything you skip falls back to a sensible default; nothing factual is invented.</p></span></button>
+        <button class="step reveal" role="tab" aria-selected="false" data-pane="2"><span class="n">3</span><span><h3>Generate</h3><p>A complete Next.js 15 project: pages, API routes, database schema, storage, middleware, <code>.env</code> with random dev secrets, README.</p></span></button>
+        <button class="step reveal" role="tab" aria-selected="false" data-pane="3"><span class="n">4</span><span><h3>Verify</h3><p>It builds the site and drives it in Chromium at 1280, 390 and 360 px: sign-in, MFA enrolment, publishing, ingest, filters, no sideways scroll.</p></span></button>
+      </div>
+      <div class="term reveal" aria-live="polite">
+        <div class="term-bar"><i></i><i></i><i></i><span>claude &mdash; site-kit</span></div>
+        <div class="term-body">
+<pre class="pane on"><span class="u">you</span>    Use site-kit to make a landing page, a dashboard and
+       a connect page for my coffee roastery, Bean &amp; Barrel.
+
+<span class="k">claude</span> Which modules do you want?
+       <span class="g">[x]</span> Landing page      <span class="d">[ ]</span> Publishing page
+       <span class="g">[x]</span> Dashboard         <span class="g">[x]</span> Connect to phone
+       <span class="g">[x]</span> Sign in           <span class="d">[ ]</span> MFA accounts
+
+<span class="u">you</span>    All the ticked ones. Brown and amber, a drop logo.
+       We call them orders, and the device is a tablet.
+
+<span class="k">claude</span> Got it. Statuses for an order? <span class="d">(new, roasting,
+       shipped, issue)</span> And one number to total up?
+       <span class="d">(order total, in &pound;)</span></pre>
+<pre class="pane"><span class="d">// site.json (shortened)</span>
+{
+  <span class="k">"brand"</span>: {
+    <span class="k">"name"</span>: <span class="y">"Bean &amp; Barrel"</span>,
+    <span class="k">"logo"</span>: { <span class="k">"style"</span>: <span class="y">"drop"</span> },
+    <span class="k">"colors"</span>: { <span class="k">"primary"</span>: <span class="y">"#7a4a21"</span>, <span class="k">"signal"</span>: <span class="y">"#e8a33d"</span> }
+  },
+  <span class="k">"vocab"</span>: { <span class="k">"record"</span>: <span class="y">"order"</span>, <span class="k">"records"</span>: <span class="y">"orders"</span>, <span class="k">"device"</span>: <span class="y">"tablet"</span> },
+  <span class="k">"modules"</span>: [<span class="y">"landing"</span>, <span class="y">"signin"</span>, <span class="y">"dashboard"</span>, <span class="y">"connect"</span>],
+  <span class="k">"dashboard"</span>: {
+    <span class="k">"statuses"</span>: [ <span class="d">new, roasting, shipped, issue</span> ],
+    <span class="k">"metrics"</span>: [{ <span class="k">"key"</span>: <span class="y">"total"</span>, <span class="k">"unit"</span>: <span class="y">"&pound;"</span> }]
+  }
+}</pre>
+<pre class="pane"><span class="u">$</span> node scaffold.mjs --config site.json --out ./bean-and-barrel
+
+site-kit: wrote 61 files to ./bean-and-barrel
+  brand    Bean &amp; Barrel (bean-and-barrel), logo drop,
+           primary #7a4a21, signal #e8a33d
+  modules  api, signin, landing, dashboard, connect
+           <span class="d">(added as dependencies: api)</span>
+  sign-in  password <span class="d">(development only; stored in .env.local)</span>
+  api key  <span class="d">(Bearer token for /api/ingest)</span>
+
+  next:  cd bean-and-barrel &amp;&amp; npm install &amp;&amp; npm run dev</pre>
+<pre class="pane"><span class="u">$</span> node verify.mjs --site ./bean-and-barrel
+
+  <span class="g">ok</span>    landing &middot; mobile: no horizontal scroll after scrolling
+  <span class="g">ok</span>    sign-in &middot; an open redirect in ?next is ignored
+  <span class="g">ok</span>    api &middot; ingest stores a record with its file, and is idempotent
+  <span class="g">ok</span>    dashboard &middot; mobile: a status chip filters
+  <span class="g">ok</span>    dashboard &middot; mobile: dashboard controls are finger-sized
+  <span class="g">ok</span>    connect &middot; mobile: shows the link with the key and copies it
+  <span class="g">ok</span>    hydration &middot; /dashboard hydrates cleanly 6 times
+  <span class="g">ok</span>    console &middot; no browser console errors
+
+<span class="g">All checks passed</span> <span class="d">(screenshots + report.json saved)</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ GALLERY ============================ -->
+<section id="gallery">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">What it makes</span>
+      <h2>One kit. Any brand.</h2>
+      <p>Same code, different config. Each of these was generated from a short JSON file, built, and driven in a browser. The names, numbers and photos are fictional demo data.</p>
+    </div>
+    <div class="tabs reveal" role="tablist" aria-label="Example sites" id="brand-tabs"></div>
+    <div class="gal reveal" id="gallery-body">
+      <div class="gal-main"><div class="browser"><div class="browser-bar"><i></i><i></i><i></i><span id="g-url"></span></div><img id="g-main" src="" width="1440" height="900" alt=""></div></div>
+      <div class="gal-phone"><div class="phone"><img id="g-phone" src="" width="780" height="1688" alt="" loading="lazy"></div></div>
+      <div class="gal-side"><div class="browser"><div class="browser-bar"><i></i><i></i><i></i></div><img id="g-side" src="" width="1440" height="900" alt="" loading="lazy"></div></div>
+    </div>
+    <div class="gal-meta reveal">
+      <div><h3 id="g-name"></h3><p class="muted" id="g-tag"></p></div>
+      <div class="chips" id="g-modules"></div>
+      <div class="swatches" id="g-sw"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ PHONES ============================ -->
+<section class="band" id="mobile">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Mobile first</span>
+      <h2>Made for the phone in your hand.</h2>
+      <p>Every page is checked at 390 px and 360 px wide: no sideways scrolling, tables that scroll inside their card, filters in one swipeable row, and controls at least 44 px tall on touch screens.</p>
+    </div>
+    <div class="phones">
+      <figure class="reveal"><div class="phone"><img src="assets/shots/coffee/landing-mobile.jpg" width="780" height="1688" alt="Landing page on a phone" loading="lazy"></div><figcaption>Landing page</figcaption></figure>
+      <figure class="reveal"><div class="phone"><img src="assets/shots/coffee/dashboard-mobile.jpg" width="780" height="1688" alt="Dashboard on a phone" loading="lazy"></div><figcaption>Dashboard</figcaption></figure>
+      <figure class="reveal"><div class="phone"><img src="assets/shots/coffee/record-mobile.jpg" width="780" height="1688" alt="Order detail on a phone" loading="lazy"></div><figcaption>Record detail</figcaption></figure>
+      <figure class="reveal"><div class="phone"><img src="assets/shots/coffee/admin-mobile.jpg" width="780" height="1688" alt="Publishing area on a phone" loading="lazy"></div><figcaption>Publishing</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ DARK ============================ -->
+<section id="dark">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Light and dark</span>
+      <h2>Two palettes from two colours.</h2>
+      <p>Give it a primary and an accent colour. It derives the washes, the text colours (checked for contrast) and a lighter dark-mode variant. Dark follows the device, with a toggle in every header.</p>
+    </div>
+    <div class="duo">
+      <figure class="reveal"><div class="browser"><div class="browser-bar"><i></i><i></i><i></i></div><img src="assets/shots/coffee/landing-hero.jpg" width="1440" height="900" alt="Landing page in light mode" loading="lazy"></div><figcaption>Light</figcaption></figure>
+      <figure class="reveal"><div class="browser"><div class="browser-bar"><i></i><i></i><i></i></div><img src="assets/shots/coffee/landing-hero-dark.jpg" width="1440" height="900" alt="Landing page in dark mode" loading="lazy"></div><figcaption>Dark</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ BACKEND ============================ -->
+<section class="band" id="backend">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Under the hood</span>
+      <h2>A real backend, not a mock-up.</h2>
+      <p>The output is an ordinary Next.js 15 / React 19 / TypeScript project that you own. No runtime dependency on this skill.</p>
+    </div>
+    <div class="feat">
+      <div class="reveal"><h3><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Layered sign-in</h3><p>Shared-password cookie, named MFA accounts, a bearer ingest token and per-tester codes &mdash; four separate layers, never merged.</p></div>
+      <div class="reveal"><h3><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>Direct-to-storage uploads</h3><p>Clients get short-lived signed URLs and PUT files straight to storage; the app only sees small JSON. Local, S3/R2 or Azure Blob.</p></div>
+      <div class="reveal"><h3><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg>Idempotent ingest</h3><p>Re-sending the same record id updates it instead of duplicating it, so a phone that retries after losing signal does no harm.</p></div>
+      <div class="reveal"><h3><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>Postgres, with zero setup</h3><p>Runs on embedded Postgres (PGlite) out of the box and switches to your <code>DATABASE_URL</code> in production. Schema is created for you.</p></div>
+      <div class="reveal"><h3><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M12 3l8 3v6c0 4.4-3.1 8.2-8 9-4.9-.8-8-4.6-8-9V6l8-3Z"/></svg>Secure by default</h3><p>Scrypt password hashes, HMAC-signed cookies, constant-time compares, escaped config text, replay-proof authenticator codes.</p></div>
+      <div class="reveal"><h3><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>Your vocabulary</h3><p>Tell it a record is an &ldquo;order&rdquo;, a &ldquo;matter&rdquo; or a &ldquo;loaf&rdquo; and every label, heading and empty state follows.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ INSTALL ============================ -->
+<section id="install">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Install</span>
+      <h2>Two minutes, then ask Claude.</h2>
+      <p>A skill is a folder Claude Code reads at the start of a session. Installing site-kit means copying one folder into <code>~/.claude/skills/</code>.</p>
+    </div>
+    <div class="install">
+      <div class="reveal">
+        <div class="os-tabs" role="tablist" aria-label="Operating system">
+          <button role="tab" aria-selected="true" data-os="mac">macOS / Linux</button>
+          <button role="tab" aria-selected="false" data-os="win">Windows</button>
+          <button role="tab" aria-selected="false" data-os="manual">Manual</button>
+        </div>
+        <div class="panel on" data-panel="mac">
+          <div class="code"><span class="lbl">1 &middot; Get the repo and install</span><pre><code><span class="c"># personal install: available in every project</span>
+git clone https://github.com/raj742133/claude-site-kit
+cd claude-site-kit
+./install.sh</code></pre><button class="copy" type="button" data-copy="git clone https://github.com/raj742133/claude-site-kit&#10;cd claude-site-kit&#10;./install.sh">Copy</button></div>
+          <div class="code"><span class="lbl">Or only for one project (commit it to share with your team)</span><pre><code>cd your-project
+/path/to/claude-site-kit/install.sh --project</code></pre><button class="copy" type="button" data-copy="cd your-project&#10;/path/to/claude-site-kit/install.sh --project">Copy</button></div>
+        </div>
+        <div class="panel" data-panel="win">
+          <div class="code"><span class="lbl">1 &middot; PowerShell</span><pre><code><span class="c"># personal install: available in every project</span>
+git clone https://github.com/raj742133/claude-site-kit
+cd claude-site-kit
+.\install.ps1</code></pre><button class="copy" type="button" data-copy="git clone https://github.com/raj742133/claude-site-kit&#10;cd claude-site-kit&#10;.\install.ps1">Copy</button></div>
+          <div class="code"><span class="lbl">Or only for one project</span><pre><code>cd your-project
+C:\path\to\claude-site-kit\install.ps1 -Project</code></pre><button class="copy" type="button" data-copy="cd your-project&#10;C:\path\to\claude-site-kit\install.ps1 -Project">Copy</button></div>
+          <p class="muted" style="font-size:13.5px">If PowerShell blocks the script: <code>powershell -ExecutionPolicy Bypass -File .\install.ps1</code></p>
+        </div>
+        <div class="panel" data-panel="manual">
+          <div class="code"><span class="lbl">Copy the folder yourself</span><pre><code>git clone https://github.com/raj742133/claude-site-kit
+mkdir -p ~/.claude/skills
+cp -R claude-site-kit/skill/site-kit ~/.claude/skills/</code></pre><button class="copy" type="button" data-copy="git clone https://github.com/raj742133/claude-site-kit&#10;mkdir -p ~/.claude/skills&#10;cp -R claude-site-kit/skill/site-kit ~/.claude/skills/">Copy</button></div>
+          <p class="muted" style="font-size:14px">On Windows the target is <code>%USERPROFILE%\.claude\skills\site-kit</code>. For a single project, copy it to <code>.claude/skills/site-kit</code> inside that project instead.</p>
+        </div>
+        <div class="code"><span class="lbl">2 &middot; Once, for the browser tests</span><pre><code>npm i playwright
+npx playwright install chromium</code></pre><button class="copy" type="button" data-copy="npm i playwright&#10;npx playwright install chromium">Copy</button></div>
+        <h3 style="font-size:18px;margin:26px 0 4px">3 &middot; Start a new Claude Code session and ask</h3>
+        <div class="prompts">
+          <q>Use site-kit to make a landing page and a dashboard for my business.</q>
+          <q>/site-kit</q>
+          <q>I need a publishing page where my team uploads releases, with MFA sign-in.</q>
+        </div>
+      </div>
+      <aside class="req reveal">
+        <h3>What you need</h3>
+        <ul>
+          <li><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg><span><b>Claude Code</b>, any recent version that supports skills</span></li>
+          <li><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg><span><b>Node.js 20 or newer</b> (tested on 24)</span></li>
+          <li><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg><span><b>~700 MB</b> of disk for the generated project&rsquo;s install</span></li>
+          <li><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg><span><b>Playwright + Chromium</b> for the verification step (optional but recommended)</span></li>
+        </ul>
+        <h3 style="margin-top:22px">Check it worked</h3>
+        <ul>
+          <li><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg><span><code>ls ~/.claude/skills/site-kit/SKILL.md</code> exists</span></li>
+          <li><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg><span>In a new session, <code>/site-kit</code> appears when you type a slash</span></li>
+        </ul>
+        <h3 style="margin-top:22px">Use it without Claude</h3>
+        <p class="muted" style="font-size:14px">The generator is plain Node. Write a <code>site.json</code> (even just <code>{"brand":{"name":"Acme"}}</code>) and run <code>node ~/.claude/skills/site-kit/scripts/scaffold.mjs --config site.json --out ./my-site</code>.</p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ TESTED ============================ -->
+<section class="band" id="tested">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Tested, and honest about it</span>
+      <h2>Generated, built, and driven in a browser.</h2>
+      <p>Every example below was scaffolded from its config, type-checked, built for production and exercised with Playwright in Chromium. Results are checks passed out of checks run on the final templates.</p>
+    </div>
+    <div class="tested reveal">
+      <div><b>10</b><span>different sites generated and run</span></div>
+      <div><b>520</b><span>browser checks passed across the ten sites</span></div>
+      <div><b>3</b><span>viewports: 1280, 390, 360 px</span></div>
+      <div><b>2</b><span>real Android APKs parsed, published and downloaded back</span></div>
+      <div><b>6&times;</b><span>warm-cache load of every page type, no hydration errors</span></div>
+    </div>
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>Site</th><th>What it exercises</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Bean &amp; Barrel</td><td>all six modules, PDF/ZIP publishing, testers</td><td class="ok">87 / 87</td></tr>
+          <tr><td>PulseFit</td><td>all six modules, two real Android APKs parsed and published</td><td class="ok">77 / 77</td></tr>
+          <tr><td>Halden Legal</td><td>landing, sign-in, dashboard, connect; monogram logo, navy and gold</td><td class="ok">60 / 60</td></tr>
+          <tr><td>Pixel Studio</td><td>landing and MFA only</td><td class="ok">34 / 34</td></tr>
+          <tr><td>Sunny Side Bakery</td><td>near-white brand colours (contrast adjustment)</td><td class="ok">49 / 49</td></tr>
+          <tr><td>Midnight Courier</td><td>near-black brand colours, other fonts, PDF/CSV publishing</td><td class="ok">45 / 45</td></tr>
+          <tr><td>Quotes, tags, braces</td><td>a brand name full of <code>"</code>, <code>&lt;b&gt;</code>, <code>{x}</code>, backticks and a backslash</td><td class="ok">57 / 57</td></tr>
+          <tr><td>Orbit Labs</td><td>a single module: landing only</td><td class="ok">12 / 12</td></tr>
+          <tr><td>Field Notes Press</td><td>a single module: publishing only (brings MFA and the API)</td><td class="ok">24 / 24</td></tr>
+          <tr><td>Acme Co</td><td>just a brand name, everything else defaulted</td><td class="ok">75 / 75</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="two">
+      <div class="req reveal"><h3>Checked</h3><ul>
+        <li><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg><span>Sign-in, wrong password, open-redirect attempts, sign-out</span></li>
+        <li><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg><span>MFA enrolment with its own TOTP, replay refusal, single-use invites</span></li>
+        <li><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg><span>Upload, publish, build-number ordering, byte-identical downloads</span></li>
+        <li><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg><span>Ingest: auth, idempotency, bad ids and statuses refused</span></li>
+        <li><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg><span>No sideways scroll on phones; finger-sized controls; no console errors</span></li>
+      </ul></div>
+      <div class="req no reveal"><h3>Not covered yet</h3><ul>
+        <li><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg><span><code>next dev</code>: it crashed with PGlite on the Node versions tried here; production builds are what is tested</span></li>
+        <li><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg><span>Real phones, Safari, Firefox and tablets &mdash; only Chromium at three widths</span></li>
+        <li><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg><span>S3 and Azure storage against a real bucket; a real Postgres server</span></li>
+        <li><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg><span>Brand names over ~24 characters in the phone header</span></li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ FAQ ============================ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="sec-head reveal"><span class="eyebrow">FAQ</span><h2>Questions people ask.</h2></div>
+    <div class="faq">
+      <details class="reveal"><summary>Does the generated site depend on site-kit?</summary><p>No. You get a normal Next.js project in a folder of your choice. Delete the skill and the site keeps working.</p></details>
+      <details class="reveal"><summary>Can I generate just one page, like only a landing page?</summary><p>Yes. Choose only <code>landing</code> and you get just that, with no database or sign-in. Dependencies are added only when a module needs them.</p></details>
+      <details class="reveal"><summary>Where does my data live?</summary><p>In your own database and storage. In development it is an embedded Postgres in a folder inside the project plus local files. For production you point <code>DATABASE_URL</code> at Postgres and choose local, S3/R2 or Azure Blob storage.</p></details>
+      <details class="reveal"><summary>Does it make up numbers or testimonials?</summary><p>No. Sections that need facts (proof numbers, feature lists, compatibility) are off until you give real content. The demo screenshots here use clearly fictional data.</p></details>
+      <details class="reveal"><summary>How secure is the sign-in?</summary><p>It follows common practice: scrypt hashes, signed cookies, authenticator codes that cannot be reused, lockout after repeated failures. It has not had an independent security audit, so review it before putting anything sensitive behind it.</p></details>
+      <details class="reveal"><summary>Why does verification need Playwright?</summary><p>Because a page that builds is not necessarily a page that works. The verifier signs in, enrols an authenticator, publishes a file and filters a list in a real browser, at phone width, and reports exactly what failed.</p></details>
+      <details class="reveal"><summary>Can I change the design afterwards?</summary><p>Yes. The colours are CSS variables at the top of <code>globals.css</code>, the logo is one file, and everything else is ordinary React you can edit. Re-running the generator into a fresh folder gives you a clean baseline to compare against.</p></details>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div><b style="color:var(--ink)">site-kit</b> &middot; a Claude Code skill &middot; MIT licence<br>Screenshots show fictional brands and data.</div>
+    <nav aria-label="Footer">
+      <a href="https://github.com/raj742133/claude-site-kit" rel="noopener">GitHub</a>
+      <a href="https://github.com/raj742133/claude-site-kit/tree/main/skill/site-kit" rel="noopener">Skill source</a>
+      <a href="https://github.com/raj742133/claude-site-kit/tree/main/skill/site-kit/examples" rel="noopener">Example configs</a>
+      <a href="https://github.com/raj742133/claude-site-kit/issues" rel="noopener">Issues</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="app.js" defer></script>
+</body>
+</html>

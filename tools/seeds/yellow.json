@@ -1,0 +1,88 @@
+{
+  "photoColors": [
+    "#e0b100",
+    "#8a5a1c",
+    "#f4d35e",
+    "#c27c0e"
+  ],
+  "records": [
+    {
+      "title": "Seeded sourdough",
+      "subtitle": "Morning bake",
+      "status": "reviewed",
+      "category": "Bread",
+      "owner": "Ines",
+      "source": "Oven 1",
+      "hoursAgo": 2,
+      "items": [
+        [
+          "Loaves",
+          48
+        ]
+      ]
+    },
+    {
+      "title": "Cardamom buns",
+      "subtitle": "Morning bake",
+      "status": "new",
+      "category": "Pastry",
+      "owner": "Luca",
+      "source": "Oven 2",
+      "hoursAgo": 3,
+      "items": [
+        [
+          "Buns",
+          120
+        ]
+      ]
+    },
+    {
+      "title": "Rye and caraway",
+      "subtitle": "Morning bake",
+      "status": "attention",
+      "category": "Bread",
+      "owner": "Ines",
+      "source": "Oven 1",
+      "hoursAgo": 4,
+      "data": {
+        "Note": "Crust too dark on tray 3"
+      },
+      "items": [
+        [
+          "Loaves",
+          30
+        ]
+      ]
+    },
+    {
+      "title": "Almond croissants",
+      "subtitle": "Second bake",
+      "status": "new",
+      "category": "Pastry",
+      "owner": "Luca",
+      "source": "Oven 2",
+      "hoursAgo": 6,
+      "items": [
+        [
+          "Croissants",
+          64
+        ]
+      ]
+    },
+    {
+      "title": "Focaccia, rosemary",
+      "subtitle": "Second bake",
+      "status": "reviewed",
+      "category": "Bread",
+      "owner": "Ines",
+      "source": "Oven 1",
+      "hoursAgo": 8,
+      "items": [
+        [
+          "Trays",
+          12
+        ]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,235 @@
+{
+  "photoColors": [
+    "#7a4a21",
+    "#e8a33d",
+    "#4b2e17",
+    "#c9873b"
+  ],
+  "admin": {
+    "name": "Mara Quinn",
+    "username": "mara.quinn"
+  },
+  "releases": [
+    {
+      "version": "1.0.0",
+      "name": "Spring price list",
+      "kb": 180,
+      "notes": "First price list: eight single origins, three blends."
+    },
+    {
+      "version": "1.1.0",
+      "name": "Summer price list",
+      "kb": 240,
+      "notes": "Two new Ethiopian lots. Cold-brew blend back on the list."
+    },
+    {
+      "version": "1.2.0",
+      "name": "Autumn price list",
+      "kb": 310,
+      "notes": "New Colombia Huila. Subscription prices cut by 5 percent."
+    }
+  ],
+  "records": [
+    {
+      "title": "Hollis Deli",
+      "subtitle": "LS1 4AP",
+      "status": "shipped",
+      "category": "Light",
+      "owner": "Jonah",
+      "source": "Website",
+      "metrics": {
+        "total": 184.5
+      },
+      "hoursAgo": 3,
+      "captions": [
+        "Packed and labelled"
+      ],
+      "items": [
+        [
+          "Ethiopia Guji 1 kg",
+          6,
+          "shipped"
+        ],
+        [
+          "Brazil Santos 1 kg",
+          4,
+          "shipped"
+        ]
+      ]
+    },
+    {
+      "title": "Priya Raman",
+      "subtitle": "M20 2QX",
+      "status": "roasting",
+      "category": "Medium",
+      "owner": "Aiko",
+      "source": "Subscription",
+      "metrics": {
+        "total": 24
+      },
+      "hoursAgo": 5,
+      "items": [
+        [
+          "Colombia Huila 250 g",
+          2,
+          "roasting"
+        ]
+      ]
+    },
+    {
+      "title": "The Corner Cup",
+      "subtitle": "S1 2HE",
+      "status": "new",
+      "category": "Dark",
+      "owner": "Jonah",
+      "source": "Phone",
+      "metrics": {
+        "total": 96
+      },
+      "hoursAgo": 6,
+      "items": [
+        [
+          "House espresso 1 kg",
+          3
+        ],
+        [
+          "Decaf 500 g",
+          2
+        ]
+      ]
+    },
+    {
+      "title": "Tomás Ferreira",
+      "subtitle": "BS3 1AB",
+      "status": "shipped",
+      "category": "Light",
+      "owner": "Aiko",
+      "source": "Website",
+      "metrics": {
+        "total": 31.5
+      },
+      "hoursAgo": 9,
+      "items": [
+        [
+          "Kenya Nyeri 250 g",
+          3,
+          "shipped"
+        ]
+      ]
+    },
+    {
+      "title": "Lantern Bakehouse",
+      "subtitle": "NE1 5DL",
+      "status": "issue",
+      "category": "Medium",
+      "owner": "Mara",
+      "source": "Website",
+      "metrics": {
+        "total": 142
+      },
+      "hoursAgo": 12,
+      "data": {
+        "Issue": "Courier reported a damaged box"
+      },
+      "captions": [
+        "Box as received"
+      ],
+      "items": [
+        [
+          "Brazil Santos 1 kg",
+          5,
+          "issue"
+        ],
+        [
+          "Peru Cajamarca 500 g",
+          2
+        ]
+      ]
+    },
+    {
+      "title": "Nora Whitfield",
+      "subtitle": "EH3 9GL",
+      "status": "roasting",
+      "category": "Light",
+      "owner": "Jonah",
+      "source": "Subscription",
+      "metrics": {
+        "total": 18
+      },
+      "hoursAgo": 14,
+      "items": [
+        [
+          "Ethiopia Guji 250 g",
+          1,
+          "roasting"
+        ],
+        [
+          "Rwanda Gakenke 250 g",
+          1,
+          "roasting"
+        ]
+      ]
+    },
+    {
+      "title": "Harbour Books & Coffee",
+      "subtitle": "BN1 1AA",
+      "status": "shipped",
+      "category": "Dark",
+      "owner": "Aiko",
+      "source": "Phone",
+      "metrics": {
+        "total": 212
+      },
+      "hoursAgo": 20,
+      "items": [
+        [
+          "House espresso 1 kg",
+          8,
+          "shipped"
+        ]
+      ]
+    },
+    {
+      "title": "Sam Okonkwo",
+      "subtitle": "CF10 3NB",
+      "status": "new",
+      "category": "Medium",
+      "owner": "Mara",
+      "source": "Website",
+      "metrics": {
+        "total": 27
+      },
+      "hoursAgo": 22,
+      "items": [
+        [
+          "Colombia Huila 250 g",
+          3
+        ]
+      ]
+    },
+    {
+      "title": "Elm Street Cafe",
+      "subtitle": "OX1 1DP",
+      "status": "shipped",
+      "category": "Light",
+      "owner": "Jonah",
+      "source": "Website",
+      "metrics": {
+        "total": 158
+      },
+      "hoursAgo": 28,
+      "items": [
+        [
+          "Kenya Nyeri 1 kg",
+          4,
+          "shipped"
+        ],
+        [
+          "Ethiopia Guji 1 kg",
+          2,
+          "shipped"
+        ]
+      ]
+    }
+  ]
+}
