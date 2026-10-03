@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="https://claude-site-kit.vercel.app"><b>Live site</b></a> &nbsp;·&nbsp;
+  <a href="https://sitewright-skill.vercel.app"><b>Live site</b></a> &nbsp;·&nbsp;
   <a href="#install">Install</a> &nbsp;·&nbsp;
   <a href="#what-it-makes">Screenshots</a> &nbsp;·&nbsp;
   <a href="#modules">Modules</a> &nbsp;·&nbsp;
@@ -130,7 +130,7 @@ Add motion without adding a library. Pick from a menu and the generated site get
   </tr>
 </table>
 
-**[Try every effect live](https://claude-site-kit.vercel.app/demo/effects/)**: pick a combination, change the brand colours, and copy the exact config. The same page can be generated for your own site with the `fxgallery` module.
+**[Try every effect live](https://sitewright-skill.vercel.app/demo/effects/)**: pick a combination, change the brand colours, and copy the exact config. The same page can be generated for your own site with the `fxgallery` module.
 
 ```jsonc
 "effects": {
@@ -155,16 +155,16 @@ You need [Claude Code](https://claude.com/claude-code) and Node.js 20 or newer. 
 ### macOS / Linux
 
 ```bash
-git clone https://github.com/raj742133/claude-site-kit
-cd claude-site-kit
+git clone https://github.com/raj742133/sitewright
+cd sitewright
 ./install.sh
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
-git clone https://github.com/raj742133/claude-site-kit
-cd claude-site-kit
+git clone https://github.com/raj742133/sitewright
+cd sitewright
 .\install.ps1
 ```
 
@@ -176,15 +176,15 @@ Installs into `.claude/skills/` of the current folder, so you can commit it and 
 
 ```bash
 cd your-project
-/path/to/claude-site-kit/install.sh --project          # macOS / Linux
-C:\path\to\claude-site-kit\install.ps1 -Project         # Windows
+/path/to/sitewright/install.sh --project          # macOS / Linux
+C:\path\to\sitewright\install.ps1 -Project         # Windows
 ```
 
 ### Manual
 
 ```bash
 mkdir -p ~/.claude/skills
-cp -R claude-site-kit/skill/sitewright ~/.claude/skills/
+cp -R sitewright/skill/sitewright ~/.claude/skills/
 ```
 
 On Windows the target is `%USERPROFILE%\.claude\skills\sitewright`.

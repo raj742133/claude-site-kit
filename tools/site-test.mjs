@@ -2,8 +2,8 @@
 // End-to-end test of the Sitewright website, local or live.
 //
 //   cd <folder where `npm i playwright axe-core` has been run>
-//   node site-test.mjs --url http://localhost:4400/ --repo D:/claude-site-kit --out D:/tmp/site-test
-//   node site-test.mjs --url https://claude-site-kit.vercel.app/ --repo D:/claude-site-kit
+//   node site-test.mjs --url http://localhost:4400/ --repo D:/sitewright --out D:/tmp/site-test
+//   node site-test.mjs --url https://sitewright-skill.vercel.app/ --repo D:/sitewright
 //
 // Covers: HTTP and SEO, every link and image, responsive layout at five widths, every interaction (theme, menu, tabs, copy buttons,
 // FAQ, the embedded live demo), keyboard use, reduced motion, accessibility (axe-core), and whether the numbers and claims on the
@@ -152,7 +152,7 @@ section = 'content';
 const text = html.replace(/<script[\s\S]*?<\/script>/g, '').replace(/<style[\s\S]*?<\/style>/g, '').replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;|&#\d+;/g, ' ').replace(/\s+/g, ' ');
 await check('the product is called Sitewright everywhere (no old name, no placeholders, no broken values)', async () => {
   truthy((text.match(/Sitewright/g) ?? []).length >= 8, 'brand name appears');
-  eq((html.match(/(?<!claude-)site-kit/g) ?? []).length, 0, 'leftover "site-kit"');
+  eq((html.match(/site-kit/g) ?? []).length, 0, 'leftover "site-kit"');
   const junk = (text.match(/\b(undefined|NaN|null|lorem|TODO|FIXME|__[A-Z_]+__)\b|\[object Object\]/gi) ?? []);
   eq(junk.join(','), '', 'placeholder or broken text');
 });
@@ -192,9 +192,9 @@ await check('install commands copy-paste correctly and point at files that exist
   const cmds = [...html.matchAll(/data-copy="([^"]+)"/g)].map((m) => m[1].replace(/&#10;/g, '\n').replace(/&amp;/g, '&'));
   truthy(cmds.length >= 5, `${cmds.length} copy buttons`);
   const joined = cmds.join('\n');
-  truthy(joined.includes('git clone https://github.com/raj742133/claude-site-kit'), 'clone URL');
+  truthy(joined.includes('git clone https://github.com/raj742133/sitewright'), 'clone URL');
   for (const f of ['install.sh', 'install.ps1', 'skill/sitewright/SKILL.md']) truthy(fs.existsSync(path.join(REPO, f)), `${f} exists in the repo`);
-  truthy(joined.includes('cp -R claude-site-kit/skill/sitewright'), 'manual copy path');
+  truthy(joined.includes('cp -R sitewright/skill/sitewright'), 'manual copy path');
   for (const rel of ['skill/sitewright/examples', 'skill/sitewright']) truthy(fs.existsSync(path.join(REPO, rel)), `${rel} exists`);
   const skillMd = fs.readFileSync(path.join(REPO, 'skill/sitewright/SKILL.md'), 'utf8');
   truthy(/^name: sitewright$/m.test(skillMd), 'SKILL.md name matches the command shown (/sitewright)');
