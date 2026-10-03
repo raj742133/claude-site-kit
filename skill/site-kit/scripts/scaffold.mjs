@@ -15,6 +15,8 @@ import { MODULES, resolveModules } from './modules.mjs';
 import { DEFAULTS, deepMerge, interpolate } from './defaults.mjs';
 import { buildPalette, paletteCss, onColour } from './lib/color.mjs';
 import { logoComponent, faviconSvg, LOGO_STYLES } from './lib/logo.mjs';
+import { resolveEffects, BUTTON_SELECTOR, CARD_SELECTOR } from './effects.mjs';
+import { generateFx } from './lib/fxgen.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const TEMPLATES = path.join(HERE, '..', 'templates');
@@ -142,10 +144,22 @@ if (has('landing') && cfg.landing.faq?.length) flags.add('faq');
 if (cfg.storage?.provider === 's3') flags.add('s3');
 if (cfg.storage?.provider === 'azure') flags.add('azure');
 
+// effects (animated backgrounds, headline animations, button and card micro-interactions): see effects.mjs
+let fx;
+try { fx = resolveEffects(cfg.effects ?? {}); } catch (e) { fail(e.message); }
+const fxGallery = has('fxgallery');
+if (fxGallery && modules.every((m) => m === 'base' || m === 'fxgallery')) flags.add('fx_home');
+if (fx.active || fxGallery) flags.add('fx');
+if (has('landing') && fx.heroBackground !== 'territory' && fx.heroBackground !== 'none') flags.add('fx_bg');
+if (has('landing') && fx.heroBackground === 'none') flags.add('fx_nobg');
+if (has('landing') && fx.headline !== 'none') flags.add('fx_headline');
+if ((has('signin') || has('mfa')) && fx.loginBackground !== 'none') flags.add('fx_login_bg');
+if (has('dashboard') && fx.extras.includes('count-up')) flags.add('fx_countup');
+
 // palette
 const palette = buildPalette({ primary: cfg.brand.colors.primary, signal: cfg.brand.colors.signal, neutral: cfg.brand.colors.neutralHue });
 
-const loginRedirect = has('dashboard') ? '/dashboard' : has('connect') ? '/connect' : has('mfa') ? '/admin' : '/';
+const loginRedirect = has('dashboard') ? '/dashboard' : has('connect') ? '/connect' : has('mfa') ? '/admin' : has('fxgallery') ? '/effects' : '/';
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const exts = cfg.publishing.extensions.map((e) => (e.startsWith('.') ? e : `.${e}`).toLowerCase());
 const fontQuery = (f, w) => `family=${encodeURIComponent(f).replace(/%20/g, '+')}:wght@${w}`;
@@ -177,6 +191,10 @@ const tokens = {
 };
 const PLAIN = ['BRAND', 'ISSUER', 'AREA', 'AREA_LOWER', 'ARTIFACT', 'DEVICE', 'RECORD', 'RECORDS', 'RECORD_CAP', 'RECORDS_CAP', 'AREA_LOWER_NAV', 'PACKAGE_NAME', 'NAV_CONNECT'];
 for (const k of PLAIN) tokens[k] = safe(tokens[k]);
+const fxAttrs = [['buttons', fx.buttons, 'none'], ['cards', fx.cards, 'none'], ['reveal', fx.reveal, 'rise']].filter(([, v, d]) => v !== d).map(([k, v]) => ` data-fx-${k}="${v}"`).join('');
+tokens.FX_HTML_ATTRS = fxGallery ? '' : fxAttrs;
+tokens.FX_BTN = BUTTON_SELECTOR;
+tokens.FX_CARD = CARD_SELECTOR;
 
 // ---- copy -----------------------------------------------------------------------------------------------------------------
 const written = new Map();
@@ -201,6 +219,9 @@ for (const id of modules) for (const [rel, flag] of Object.entries(MODULES[id].f
 put('src/components/brand/Logo.tsx', logoComponent({ style: cfg.brand.logo.style, letter, name: brandName.replace(/[`$\\]/g, '') }));
 put('src/app/icon.svg', faviconSvg({ style: cfg.brand.logo.style, letter }, palette.light.primary, palette.light.signal, palette.light['on-primary']));
 
+// ---- effects layer ---------------------------------------------------------------------------------------------------------
+if (flags.has('fx')) generateFx({ fx, flags, all: fxGallery, templates: TEMPLATES, tokens, put, fill });
+
 const nav = [];
 if (has('dashboard')) nav.push({ id: 'dashboard', label: cfg.nav.dashboard, href: '/dashboard' });
 if (has('connect')) nav.push({ id: 'connect', label: cfg.nav.connect, href: '/connect' });
@@ -210,7 +231,7 @@ if (has('landing')) nav.push({ id: 'home', label: cfg.nav.home, href: '/' });
 put('src/content/nav.json', JSON.stringify({ items: nav, homeAfterLogin: loginRedirect }, null, 2) + '\n');
 
 // the content file the components read: exactly the resolved config, minus build-only keys
-const site = { ...cfg, modules, flags: [...flags] };
+const site = { ...cfg, modules, flags: [...flags], effects: fx };
 delete site.storage;
 put('src/content/site.json', JSON.stringify(site, null, 2) + '\n');
 

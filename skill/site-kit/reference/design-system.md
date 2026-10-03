@@ -21,6 +21,10 @@ Landing: hero with territory canvas and drawing mark, `Story` (sticky phone mock
 
 Reveal-on-scroll (IntersectionObserver), number flip, bar growth, the logo path drawing itself then becoming a road, a dotted territory canvas, lenis smooth scroll on the landing page only. All gated by `prefers-reduced-motion`.
 
+## Effects
+
+An optional animated layer (hero backgrounds, headline animations, button/card micro-interactions, reveal styles) sits on top of this design system and reads the same tokens (`--primary`, `--signal`, `--surface`, `--ink`), so every effect follows the brand colours and the light/dark theme. See `effects.md`.
+
 ## Responsive rules (every page, verified at 1280 / 390 / 360)
 
 - `viewport: width=device-width, initialScale=1` and `themeColor` per scheme.

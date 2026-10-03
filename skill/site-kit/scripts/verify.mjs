@@ -89,10 +89,10 @@ const VIEWPORTS = { desktop: { width: 1280, height: 800 }, mobile: { width: 390,
 const consoleErrors = [];
 const IGNORED = /status of (400|401|403|409) |fonts\.(googleapis|gstatic)|favicon|net::ERR_(INTERNET_DISCONNECTED|NAME_NOT_RESOLVED|CONNECTION)|Failed to load resource.*(font|googleapis)/i;
 
-async function newPage(browser, vp, name) {
+async function newPage(browser, vp, name, extra = {}) {
   const ctx = await browser.newContext({
     viewport: VIEWPORTS[vp], deviceScaleFactor: vp === 'desktop' ? 1 : 2, isMobile: vp !== 'desktop', hasTouch: vp !== 'desktop',
-    permissions: ['clipboard-read', 'clipboard-write'], acceptDownloads: true,
+    permissions: ['clipboard-read', 'clipboard-write'], acceptDownloads: true, ...extra,
   });
   const page = await ctx.newPage();
   page.on('console', (m) => { if (m.type() === 'error' && !IGNORED.test(m.text())) consoleErrors.push(`[${name}] ${m.text()}`); });
@@ -142,7 +142,8 @@ async function checkLanding(browser) {
       const h1 = (await page.locator('h1.lp-h1').innerText()).replace(/\s+/g, ' ');
       truthy(h1.includes(site.landing.accent), `h1 "${h1}" contains the accent "${site.landing.accent}"`);
       eq(await page.locator('.st-step').count(), site.landing.story.steps.length, 'story steps');
-      truthy(await page.locator('.lp-territory canvas').count(), 'territory canvas');
+      // the dotted territory is the default hero background; a chosen effect replaces it (checked in the effects section)
+      if ((site.effects?.heroBackground ?? 'territory') === 'territory') truthy(await page.locator('.lp-territory canvas').count(), 'territory canvas');
       truthy(await page.locator('.route svg').count(), 'road svg');
     });
     await check(`${vp}: no horizontal scroll after scrolling the whole page`, async () => { await scrollThrough(page); await noOverflow(page, 'landing'); });
@@ -586,8 +587,16 @@ async function checkPublishing(browser, page, user) {
     await publish('1.1.0', 2, 'Second release', 'Second notes');
     await page.getByText(/Published 1.1.0/).waitFor(); await page.waitForLoadState('networkidle');
     const sw = page.locator('.version').first().locator('label.switch');
+    const seen = [];
+    const onResponse = (r) => { if (/\/api\/admin\/releases/.test(r.url()) && r.request().method() !== 'GET') seen.push(`${r.request().method()} ${r.status()}`); };
+    page.on('response', onResponse);
     await sw.locator('.track').click();
-    await page.waitForFunction(() => document.querySelector('.version input[type=checkbox]')?.checked === true);
+    try {
+      await page.waitForFunction(() => document.querySelector('.version input[type=checkbox]')?.checked === true, undefined, { timeout: 10000, polling: 100 });
+    } catch {
+      const state = await page.evaluate(() => [...document.querySelectorAll('.version')].map((v) => `${(v.querySelector('h3, b, strong')?.textContent ?? '?').slice(0, 24)}:${[...v.querySelectorAll('input[type=checkbox]')].map((i) => (i.checked ? 'on' : 'off')).join('/')}`).join(' | '));
+      throw new Error(`the home-page switch did not turn on. requests: [${seen.join(', ')}]; versions: ${state}`);
+    } finally { page.off('response', onResponse); }
   });
   if (has('landing')) await check('the home page now offers it and the download is the exact file', async () => {
     const r = await api('/'); const html = await r.text();
@@ -633,11 +642,236 @@ async function checkPublishing(browser, page, user) {
   await shot(page, 'admin-after');
 }
 
+// ---- effects ---------------------------------------------------------------------------------------------------------------------
+const FX = site.effects ?? { active: false };
+const headlineText = () => String(site.landing?.headline ?? '').replace('{accent}', site.landing?.accent ?? '').replace(/\s+/g, ' ').trim();
+
+/** Counts canvas clears (one per drawn frame), so "is this animating?" is a measurement, not a guess. */
+const frameCounter = `(() => { window.__fxFrames = 0; const c = CanvasRenderingContext2D.prototype.clearRect; CanvasRenderingContext2D.prototype.clearRect = function (...a) { window.__fxFrames++; return c.apply(this, a); }; })();`;
+
+/** What assistive technology would read from an element: its text, skipping anything aria-hidden. */
+const readableText = (el) => el.evaluate((h) => {
+  const walk = (n) => (n.nodeType === 3 ? n.nodeValue : n.nodeType === 1 && n.getAttribute('aria-hidden') !== 'true' ? [...n.childNodes].map(walk).join('') : '');
+  return walk(h).replace(/\s+/g, ' ').trim();
+});
+
+async function checkEffects(browser) {
+  const wantsGallery = has('fxgallery');
+  if (!FX.active && !wantsGallery) return;
+  section = 'effects';
+  const canvasBg = ['dots', 'particles', 'stars'];
+
+  if (has('landing') && FX.active) {
+    for (const vp of ['desktop', 'mobile']) {
+      const { ctx, page } = await newPage(browser, vp, `fx-landing-${vp}`);
+      await page.addInitScript(frameCounter);
+      await page.goto(`${BASE}/`, { waitUntil: 'networkidle' });
+      await page.waitForTimeout(2600);
+
+      if (FX.heroBackground !== 'territory') await check(`${vp}: the hero background is ${FX.heroBackground === 'none' ? 'removed' : FX.heroBackground}`, async () => {
+        const n = await page.locator('.lp-hero .fx-bg').count();
+        if (FX.heroBackground === 'none') { eq(n, 0, 'no background element'); eq(await page.locator('.lp-territory').count(), 0, 'default territory removed'); return; }
+        eq(n, 1, '.fx-bg elements in the hero');
+        const box = await page.locator('.lp-hero .fx-bg').boundingBox();
+        truthy(box && box.width > 200 && box.height > 200, `background size ${JSON.stringify(box)}`);
+        eq(await page.locator('.lp-hero .fx-bg').getAttribute('aria-hidden'), 'true', 'decorative: hidden from screen readers');
+        eq(await page.locator('.lp-territory').count(), 0, 'default territory replaced');
+      });
+
+      if (canvasBg.includes(FX.heroBackground)) {
+        await check(`${vp}: the canvas draws, and stops drawing when scrolled off screen`, async () => {
+          const painted = await page.evaluate(() => { const c = document.querySelector('.lp-hero canvas.fx-bg'); const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let n = 0; for (let i = 3; i < d.length; i += 4 * 61) if (d[i] > 0) n++; return n; });
+          truthy(painted > 8, `${painted} painted samples`);
+          const run = async () => { await page.evaluate(() => { window.__fxFrames = 0; }); await page.waitForTimeout(600); return page.evaluate(() => window.__fxFrames); };
+          const onScreen = await run();
+          truthy(onScreen >= 10, `${onScreen} frames in 600ms while visible`);
+          await page.evaluate(() => window.scrollTo(0, document.querySelector('.lp-hero').getBoundingClientRect().bottom + window.scrollY + 900)); await page.waitForTimeout(500);
+          const away = await run();
+          truthy(away <= 2, `${away} frames in 600ms while off screen (should be about 0)`);
+          await page.evaluate(() => window.scrollTo(0, 0));
+        });
+      }
+
+      if (FX.headline !== 'none') await check(`${vp}: the ${FX.headline} headline keeps its real text for screen readers and settles fully visible`, async () => {
+        eq(await readableText(page.locator('h1.lp-h1').first()), headlineText(), 'text read by assistive tech');
+        const hidden = await page.evaluate(() => [...document.querySelectorAll('.lp-h1 .fx-c, .lp-h1 .fx-wi, .lp-h1 .fx-grad, .lp-h1 .fx-shim, .lp-h1 .fx-scr')].filter((e) => { const cs = getComputedStyle(e); return Number(cs.opacity) < 0.99 || cs.visibility === 'hidden'; }).length);
+        eq(hidden, 0, 'pieces still hidden after the animation');
+        const box = await page.locator('.lp-h1').boundingBox();
+        truthy(box && box.height > 30 && box.width <= VIEWPORTS[vp].width, `headline box ${JSON.stringify(box)}`);
+        await noOverflow(page, 'landing with effects');
+      });
+
+      if (FX.reveal !== 'rise') await check(`${vp}: scroll-reveal style "${FX.reveal}" is applied and everything still appears`, async () => {
+        eq(await page.evaluate(() => document.documentElement.dataset.fxReveal), FX.reveal, 'data-fx-reveal');
+        await scrollThrough(page); await page.waitForTimeout(1200);
+        eq(await page.evaluate(() => [...document.querySelectorAll('.rv')].filter((e) => Number(getComputedStyle(e).opacity) < 0.95).length), 0, 'sections left hidden');
+      });
+
+      if (vp === 'desktop') {
+        if (FX.buttons !== 'none') await check(`desktop: button effect "${FX.buttons}" works`, async () => {
+          eq(await page.evaluate(() => document.documentElement.dataset.fxButtons), FX.buttons, 'data-fx-buttons');
+          const btn = page.locator('.btn.primary:visible').first();
+          await btn.scrollIntoViewIfNeeded(); const b = await btn.boundingBox();
+          if (FX.buttons === 'magnetic') {
+            await page.mouse.move(b.x + b.width - 4, b.y + b.height / 2); await page.waitForTimeout(450);
+            const t = await btn.evaluate((e) => getComputedStyle(e).translate);
+            truthy(t && t !== 'none' && t !== '0px', `translate while hovered: ${t}`);
+          } else if (FX.buttons === 'ripple') {
+            await page.mouse.move(b.x + 10, b.y + 10); await page.mouse.down(); await page.waitForTimeout(80);
+            truthy((await btn.locator('.fx-ripple').count()) >= 1, 'ripple element'); await page.mouse.move(2, 2); await page.mouse.up();
+          } else {
+            const content = await btn.evaluate((e, k) => getComputedStyle(e, k).content, FX.buttons === 'shine' ? '::after' : '::before');
+            truthy(content && content !== 'none' && content !== 'normal', `pseudo-element content ${content}`);
+          }
+        });
+        if (FX.cards !== 'none') await check(`desktop: card effect "${FX.cards}" works`, async () => {
+          eq(await page.evaluate(() => document.documentElement.dataset.fxCards), FX.cards, 'data-fx-cards');
+          const card = page.locator('.why-card, .cta, .stat-card').filter({ visible: true }).first();
+          if (!(await card.count())) return; // a minimal landing page may have none; the dashboard check covers it
+          await card.scrollIntoViewIfNeeded(); await page.waitForTimeout(900);
+          const b = await card.boundingBox();
+          await page.mouse.move(b.x + b.width * 0.7, b.y + b.height * 0.3); await page.waitForTimeout(450);
+          if (FX.cards === 'tilt' || FX.cards === 'spotlight') truthy(await card.evaluate((e) => e.classList.contains('fx-hot')), 'card got the fx-hot class');
+          if (FX.cards === 'tilt') truthy((await card.evaluate((e) => e.style.getPropertyValue('--fx-rx'))).endsWith('deg'), 'tilt angle set');
+          if (FX.cards === 'lift') eq(await card.evaluate((e) => getComputedStyle(e).translate), '0px -6px', 'lift');
+          if (FX.cards === 'glow-border') truthy((await card.evaluate((e) => getComputedStyle(e, '::before').content)) !== 'none', 'glow ring');
+        });
+        if (FX.extras.includes('cursor-glow')) await check('desktop: the cursor glow follows the pointer', async () => {
+          await page.mouse.move(300, 300); await page.mouse.move(520, 420); await page.waitForTimeout(500);
+          eq(await page.locator('.fx-cursor.on').count(), 1, 'glow element is on');
+        });
+        if (FX.extras.includes('scroll-progress')) await check('desktop: the scroll progress bar fills as you scroll', async () => {
+          await page.evaluate(() => window.scrollTo(0, 0)); await page.waitForTimeout(200);
+          const at0 = await page.locator('.fx-progress').evaluate((e) => e.style.transform);
+          await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight)); await page.waitForTimeout(400);
+          const end = await page.locator('.fx-progress').evaluate((e) => e.style.transform);
+          truthy(at0 !== end && /scaleX\(1\)/.test(end), `bar ${at0} -> ${end}`);
+        });
+        if (FX.extras.includes('click-spark')) await check('desktop: a click makes sparks, and they clean themselves up', async () => {
+          await page.mouse.click(400, 300); await page.waitForTimeout(120);
+          truthy((await page.locator('.fx-spark').count()) >= 4, 'sparks appeared');
+          await page.waitForTimeout(1200);
+          eq(await page.locator('.fx-spark').count(), 0, 'sparks left behind');
+        });
+      } else {
+        await check('mobile: pointer-only effects stay off on a touch screen', async () => {
+          eq(await page.locator('.fx-cursor').count(), 0, 'cursor glow on touch');
+          eq(await page.locator('.fx-hot').count(), 0, 'hover state stuck on touch');
+        });
+      }
+      await shot(page, `fx-landing-${vp}`);
+      await ctx.close();
+    }
+
+    await check('reduced motion: the headline is fully visible at once and nothing loops', async () => {
+      const { ctx, page } = await newPage(browser, 'desktop', 'fx-reduced', { reducedMotion: 'reduce' });
+      await page.addInitScript(frameCounter);
+      await page.goto(`${BASE}/`, { waitUntil: 'domcontentloaded' });
+      await page.waitForTimeout(250);
+      const hiddenNow = await page.evaluate(() => [...document.querySelectorAll('.lp-h1 .fx-c, .lp-h1 .fx-wi, .lp-h1 .fx-grad, .lp-h1 .fx-shim')].filter((e) => Number(getComputedStyle(e).opacity) < 0.99 || getComputedStyle(e).visibility === 'hidden').length);
+      eq(hiddenNow, 0, 'headline pieces hidden under reduced motion');
+      await page.waitForTimeout(700);
+      const running = await page.evaluate(() => document.getAnimations().filter((a) => a.playState === 'running' && a.effect?.target?.closest?.('.fx-bg, .lp-h1')).length);
+      eq(running, 0, 'running animations under reduced motion');
+      const frames = await page.evaluate(() => { window.__fxFrames = 0; return new Promise((r) => setTimeout(() => r(window.__fxFrames), 600)); });
+      truthy(frames <= 3, `${frames} canvas frames in 600ms under reduced motion (a still frame only)`);
+      await ctx.close();
+    });
+  }
+
+  if (FX.loginBackground !== 'none' && has('signin')) {
+    const { ctx, page } = await newPage(browser, 'desktop', 'fx-login');
+    await page.goto(`${BASE}/login`, { waitUntil: 'networkidle' }); await page.waitForTimeout(600);
+    await check(`sign-in page shows the ${FX.loginBackground} background behind the card, and still signs in`, async () => {
+      eq(await page.locator('.login-wrap > .fx-bg').count(), 1, 'background on sign-in page');
+      await shot(page, 'fx-login');
+      await page.locator('input[name=password]').fill(env.DASHBOARD_PASSWORD); await page.getByRole('button', { name: 'Sign in' }).click();
+      await page.waitForURL((u) => !u.pathname.startsWith('/login'));
+    });
+    await ctx.close();
+  }
+
+  if (has('dashboard') && (FX.cards === 'tilt' || FX.cards === 'spotlight' || FX.extras.includes('count-up'))) {
+    const { ctx, page } = await newPage(browser, 'desktop', 'fx-dashboard');
+    await page.goto(`${BASE}/login`); await page.locator('input[name=password]').fill(env.DASHBOARD_PASSWORD); await page.getByRole('button', { name: 'Sign in' }).click();
+    await page.waitForURL(/\/dashboard/); await page.waitForLoadState('networkidle');
+    if (FX.extras.includes('count-up')) await check('dashboard: stat numbers count up and end on the true value', async () => {
+      await page.waitForTimeout(2200);
+      eq(await page.locator('[data-fx-pending]').count(), 0, 'numbers still hidden');
+      const shown = await page.locator('.stat-card .stat-n').first().innerText();
+      eq(Number(shown.replace(/\D/g, '')), await page.locator('.rec-card').count(), `first stat "${shown}" against the cards listed`);
+    });
+    if (FX.cards === 'tilt' || FX.cards === 'spotlight') await check(`dashboard: the record cards react to the pointer (${FX.cards}) and still open`, async () => {
+      const card = page.locator('.rec-card').first(); const b = await card.boundingBox();
+      await page.mouse.move(b.x + b.width * 0.6, b.y + b.height * 0.4); await page.waitForTimeout(400);
+      truthy(await card.evaluate((e) => e.classList.contains('fx-hot')), 'fx-hot on the record card');
+      await card.click(); await page.waitForURL(/\/records\//);
+    });
+    await shot(page, 'fx-dashboard');
+    await ctx.close();
+  }
+
+  if (wantsGallery) {
+    section = 'gallery';
+    const fxmod = await import('./effects.mjs');
+    const { ctx, page } = await newPage(browser, 'desktop', 'fx-gallery');
+    await page.goto(`${BASE}/effects`, { waitUntil: 'networkidle' }); await page.waitForTimeout(800);
+    // "Spotlight" and "Glow border" exist in two groups, so every lookup is scoped to its group
+    const radio = (group, name) => page.getByRole('radiogroup', { name: group, exact: true }).getByRole('radio', { name, exact: true });
+    await check('every hero background can be chosen and mounts', async () => {
+      for (const [id, e] of Object.entries(fxmod.BACKGROUNDS)) {
+        await radio('Hero background', e.label).click(); await page.waitForTimeout(250);
+        eq(await page.locator('.fxg-hero .fx-bg').count(), 1, `background ${id}`);
+      }
+    });
+    await check('every headline animation keeps the sample text readable', async () => {
+      for (const [id, e] of Object.entries(fxmod.HEADLINES)) {
+        await radio('Headline animation', e.label).click(); await page.waitForTimeout(2200);
+        eq(await readableText(page.locator('.fxg-h1')), 'Your work, beautifully in motion.', `headline ${id}`);
+      }
+    });
+    await check('button, card and reveal choices set the matching attributes', async () => {
+      for (const [id, e] of Object.entries(fxmod.BUTTONS)) { await radio('Buttons', e.label).click(); eq(await page.locator('.fxg-hero').getAttribute('data-fx-buttons'), id, 'buttons'); }
+      for (const [id, e] of Object.entries(fxmod.CARDS)) { await radio('Cards', e.label).click(); eq(await page.locator('.fxg-below').getAttribute('data-fx-cards'), id, 'cards'); }
+      for (const [id, e] of Object.entries(fxmod.REVEALS)) { if (id === 'rise') continue; await radio('Scroll reveal', e.label).click(); eq(await page.locator('.fxg-below').getAttribute('data-fx-reveal'), id, 'reveal'); }
+    });
+    await check('presets load, and the copied config is valid for the generator', async () => {
+      for (const name of Object.keys(fxmod.PRESETS)) {
+        await page.getByRole('button', { name, exact: true }).click(); await page.waitForTimeout(150);
+        const json = JSON.parse(await page.locator('.fxg-code pre code').innerText());
+        const r = fxmod.resolveEffects(json.effects);
+        eq(r.headline, fxmod.PRESETS[name].headline, `preset ${name} headline`);
+        eq(r.cards, fxmod.PRESETS[name].cards, `preset ${name} cards`);
+      }
+    });
+    await check('extras can be switched on and off without leaving anything behind', async () => {
+      for (const e of Object.values(fxmod.EXTRAS)) {
+        const chip = page.getByRole('checkbox', { name: e.label, exact: true });
+        await chip.click(); await page.waitForTimeout(150); await chip.click(); await page.waitForTimeout(250);
+      }
+      eq(await page.locator('.fx-cursor, .fx-progress, .fx-spark').count(), 0, 'leftover extra elements');
+    });
+    await check('colour pickers recolour the preview', async () => {
+      await page.getByLabel('Primary').fill('#ff0066'); await page.waitForTimeout(200);
+      eq(await page.locator('.fxg-hero').evaluate((e) => getComputedStyle(e).getPropertyValue('--primary').trim()), '#ff0066', 'primary');
+    });
+    await shot(page, 'fx-gallery');
+    const m = await newPage(browser, 'mobile', 'fx-gallery-mobile');
+    await m.page.goto(`${BASE}/effects`, { waitUntil: 'networkidle' }); await m.page.waitForTimeout(800);
+    await check('mobile: the gallery fits the screen and its controls are finger-sized', async () => {
+      await noOverflow(m.page, 'gallery'); await tapTargets(m.page, 'gallery');
+    });
+    await shot(m.page, 'fx-gallery-mobile');
+    await ctx.close(); await m.ctx.close();
+  }
+}
+
 async function checkHydration(browser) {
   section = 'hydration';
   // Real browsers hit pages with a WARM cache (scripts already downloaded for the page before). That is when a server-rendered page
   // that streams in pieces can start hydrating too early - a React #418 error - so load every page type right after the home page.
-  const targets = ['/login', '/connect', '/dashboard', '/admin/login', '/admin/setup'].filter((u) => {
+  const targets = ['/login', '/connect', '/dashboard', '/admin/login', '/admin/setup', '/effects'].filter((u) => {
+    if (u === '/effects') return has('fxgallery');
     if (u === '/login') return has('signin');
     if (u === '/connect') return has('connect');
     if (u === '/dashboard') return has('dashboard');
@@ -666,6 +900,7 @@ try {
   if (has('signin')) await checkSignin(browser);
   await checkApiAndDashboard(browser);
   await checkConnect(browser);
+  await checkEffects(browser);
   await checkAdmin(browser);
   await checkHydration(browser);
   section = 'console';

@@ -21,7 +21,7 @@ export function SiteHeader({ active, signOut = '__SIGN_OUT__', sub = '__AREA_LOW
           <span className="brand-t">__BRAND__ <span>{sub}</span></span>
         </Link>
         <nav aria-label="Main">
-          {nav.items.map((i) => (
+          {(nav.items as { id: string; href: string; label: string }[]).map((i) => (
             <Link key={i.id} href={i.href} className={active === i.id ? 'on' : ''}>{i.label}</Link>
           ))}
         </nav>

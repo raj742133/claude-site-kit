@@ -1,6 +1,10 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
 import { THEME_SCRIPT } from '@/lib/theme';
+//#if fx
+import '@/components/fx/fx.css';
+import { FxMicro } from '@/components/fx/micro';
+//#endif
 
 export const metadata: Metadata = {
   title: __TITLE_JSON__,
@@ -23,7 +27,7 @@ const FONTS = '__FONTS_URL__';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="__LANG__" suppressHydrationWarning>
+    <html lang="__LANG__" suppressHydrationWarning__FX_HTML_ATTRS__>
       <head>
         {/* The saved light/dark choice, before the first paint - see ThemeToggle. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
@@ -31,7 +35,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link rel="stylesheet" href={FONTS} />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        {/*#if fx*/}
+        <FxMicro />
+        {/*#endif*/}
+      </body>
     </html>
   );
 }

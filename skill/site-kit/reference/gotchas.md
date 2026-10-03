@@ -18,6 +18,12 @@ Production (`next build && next start`) works on both. The verifier uses product
 - Files containing backslashes (regexes) get mangled when written through a shell heredoc. Write them with a file tool.
 - There is no `pkill` in Git Bash; stop servers with `taskkill //PID <pid> //F` or PowerShell `Stop-Process`.
 
+## Testing animated pages
+- Headless Chromium has no GPU, so a big blurred or constantly repainting background can drop the frame rate to a few fps. Playwright's default `waitForFunction` polls with `requestAnimationFrame`, so on such a page a wait that should take 100 ms can run out its timeout. Use `{ polling: 100 }` for waits on state (the verifier does).
+- A mouse press that is released over a link becomes a click and navigates away, which then breaks every later check on that page ("Execution context was destroyed"). In a test that presses a button to see its ripple, move the mouse off the button before releasing.
+- Measure "is it animating" by counting canvas frames (wrap `CanvasRenderingContext2D.prototype.clearRect` in an init script) instead of guessing; that is how the verifier proves a background stops drawing when scrolled off screen.
+- The same effect can be reached from two groups (`Spotlight` is both a background and a card effect, `Glow border` both a button and a card effect), so look controls up inside their `radiogroup`.
+
 ## Things the generated code does on purpose
 - Fonts are `<link>`ed in the browser instead of `next/font`, so a build never depends on reaching Google.
 - The Edge middleware only checks that the session cookie is present and well-formed; handlers verify the HMAC. Do not "tighten" the middleware (no `node:crypto` on the Edge).

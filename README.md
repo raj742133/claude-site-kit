@@ -105,8 +105,48 @@ Pick any combination. Dependencies are added for you (`publishing` brings `mfa`;
 | `publishing` | Upload versions, rich release notes, stable/testing channels, testers with codes, update-check endpoint, public download. Real APK parsing, or any file types you list | `mfa` |
 | `dashboard` | Stat cards, filters, search, record cards, detail page with files, line items and status actions | `signin`, `api` |
 | `connect` | A page with the link (address + key) to paste into your app, a copy button and a `curl` example | `signin`, `api` |
+| `fxgallery` | A public `/effects` page: every animated effect live on a sample hero, a colour picker, and the config to copy | none |
 
 Internally there are two more: `base` (design system, database, storage) and `api` (ingest, signed uploads, file serving, health), added automatically when needed.
+
+## Effects (optional)
+
+Add motion without adding a library. Pick from a menu and the generated site gets only what you chose: **10 animated hero backgrounds**, **8 headline text animations**, **4 button** and **4 card** micro-interactions, **5 scroll-reveal styles** and **4 extras** (cursor glow, scroll progress, click sparks, count-up numbers). Seven presets bundle sensible combinations: `calm`, `aurora-glass`, `tech-grid`, `playful`, `cosmic`, `editorial`, `minimal`.
+
+<table>
+  <tr>
+    <td width="20%"><img src="site/assets/fx/bg-aurora.jpg" alt="Aurora hero background"><br><sub><b>Aurora</b></sub></td>
+    <td width="20%"><img src="site/assets/fx/bg-mesh.jpg" alt="Gradient mesh hero background"><br><sub><b>Gradient mesh</b></sub></td>
+    <td width="20%"><img src="site/assets/fx/bg-dots.jpg" alt="Dot grid hero background"><br><sub><b>Dot grid</b></sub></td>
+    <td width="20%"><img src="site/assets/fx/bg-particles.jpg" alt="Particles hero background"><br><sub><b>Particles</b></sub></td>
+    <td width="20%"><img src="site/assets/fx/bg-stars.jpg" alt="Starfield hero background"><br><sub><b>Starfield</b></sub></td>
+  </tr>
+  <tr>
+    <td width="20%"><img src="site/assets/fx/bg-beams.jpg" alt="Light beams hero background"><br><sub><b>Light beams</b></sub></td>
+    <td width="20%"><img src="site/assets/fx/bg-waves.jpg" alt="Waves hero background"><br><sub><b>Waves</b></sub></td>
+    <td width="20%"><img src="site/assets/fx/bg-grid.jpg" alt="Perspective grid hero background"><br><sub><b>Perspective grid</b></sub></td>
+    <td width="20%"><img src="site/assets/fx/bg-grain.jpg" alt="Grain gradient hero background"><br><sub><b>Grain gradient</b></sub></td>
+    <td width="20%"><img src="site/assets/fx/bg-spotlight.jpg" alt="Spotlight hero background"><br><sub><b>Spotlight</b></sub></td>
+  </tr>
+</table>
+
+**[Try every effect live](https://claude-site-kit.vercel.app/demo/effects/)**: pick a combination, change the brand colours, and copy the exact config. The same page can be generated for your own site with the `fxgallery` module.
+
+```jsonc
+"effects": {
+  "preset": "aurora-glass",
+  "heroBackground": "aurora",
+  "headline": "split-words",
+  "buttons": "glow-border",
+  "cards": "spotlight",
+  "reveal": "blur",
+  "extras": ["cursor-glow", "count-up"]
+}
+```
+
+All of it is original, dependency-free code (no GSAP or Three.js). It honours `prefers-reduced-motion`, skips pointer-follow effects on touch screens, pauses canvases that are off screen, and keeps the real headline text for screen readers. See [`reference/effects.md`](skill/site-kit/reference/effects.md) for the full catalogue.
+
+> The idea comes from animated-component libraries such as [React Bits](https://reactbits.dev). Their licence (MIT with the Commons Clause) does not allow redistributing the components inside another package, so these effects are written from scratch for this kit.
 
 ## Install
 
@@ -171,9 +211,11 @@ Ask in plain words:
 
 > I need a publishing page where my team uploads releases, with MFA sign-in.
 
+> Give the landing page an aurora background and a split-words headline.
+
 > /site-kit
 
-Claude will ask which modules you want, then your brand name, two colours, logo style and what you call things (orders, cases, scans). It writes a `site.json`, runs the generator, installs, builds, and runs the verifier. It reports what passed and what it could not check.
+Claude will ask which modules you want, then your brand name, two colours, logo style and what you call things (orders, cases, scans), and whether you want an animated style (a preset, piece by piece, or a look at the live gallery first). It writes a `site.json`, runs the generator, installs, builds, and runs the verifier. It reports what passed and what it could not check.
 
 ### Without Claude
 
@@ -195,7 +237,7 @@ node ~/.claude/skills/site-kit/scripts/verify.mjs --site ./my-site --port 4010 -
 
 ## Examples
 
-Five complete configs ship in [`skill/site-kit/examples`](skill/site-kit/examples):
+Seven complete configs ship in [`skill/site-kit/examples`](skill/site-kit/examples):
 
 | Config | Brand | Modules | Shows |
 | --- | --- | --- | --- |
@@ -204,6 +246,8 @@ Five complete configs ship in [`skill/site-kit/examples`](skill/site-kit/example
 | [`legal.json`](skill/site-kit/examples/legal.json) | Halden Legal | landing, sign-in, dashboard, connect | monogram logo, navy and gold, "matters" vocabulary |
 | [`studio.json`](skill/site-kit/examples/studio.json) | Pixel Studio | landing, MFA | square logo, purple and cyan |
 | [`minimal.json`](skill/site-kit/examples/minimal.json) | Acme Co | defaults | a brand name and nothing else |
+| [`coffee-effects.json`](skill/site-kit/examples/coffee-effects.json) | Bean & Barrel | all six | `coffee.json` plus an `effects` block (aurora-glass preset, beams on the sign-in page) |
+| [`gallery.json`](skill/site-kit/examples/gallery.json) | Effect Lab | `fxgallery` | just the live effects gallery |
 
 The full list of config keys is in [`reference/config.md`](skill/site-kit/reference/config.md).
 
@@ -219,7 +263,7 @@ The full list of config keys is in [`reference/config.md`](skill/site-kit/refere
 
 ## How it is tested
 
-Each example was scaffolded from its config, type-checked, built for production and driven with Playwright in Chromium at 1280, 390 and 360 px. Checks include sign-in and open-redirect refusal, full MFA enrolment with an independent TOTP implementation, replay refusal, single-use invites, publishing with build-number ordering and byte-identical downloads, ingest auth and idempotency, filters, no horizontal scroll, finger-sized controls, repeated warm-cache loads of every page type for hydration errors, and console errors.
+Each example was scaffolded from its config, type-checked, built for production and driven with Playwright in Chromium at 1280, 390 and 360 px. Checks include sign-in and open-redirect refusal, full MFA enrolment with an independent TOTP implementation, replay refusal, single-use invites, publishing with build-number ordering and byte-identical downloads, ingest auth and idempotency, filters, no horizontal scroll, finger-sized controls, repeated warm-cache loads of every page type for hydration errors, and console errors. For the effects it also checks that headline text stays readable to assistive technology, that canvas backgrounds stop drawing when scrolled off screen, that reduced-motion shows the final state, and that touch screens skip hover effects.
 
 | Site | What it exercises | Result |
 | --- | --- | --- |
@@ -233,8 +277,13 @@ Each example was scaffolded from its config, type-checked, built for production 
 | Orbit Labs | a single module: landing only | 12/12 |
 | Field Notes Press | a single module: publishing only (brings MFA and the API) | 24/24 |
 | Acme Co | just a brand name, everything else defaulted | 75/75 |
+| Bean & Barrel + effects | aurora-glass preset, beams behind the sign-in card, cursor glow, scroll progress, count-up | 102/102 |
+| Play House | particles, split letters, ripple buttons, tilt cards, click sparks, stars on sign-in | 70/70 |
+| Ripple Works | waves, rotating headline word, magnetic buttons, glow-border cards, slide reveal | 36/36 |
+| Grid Labs | tech-grid preset: perspective grid, decode headline, spotlight cards | 60/60 |
+| Effect Lab | the live effects gallery: every background, headline, button, card, reveal and extra | 9/9 |
 
-Ten sites, 520 checks, all passing on the final templates.
+Fifteen sites, 797 checks, all passing on the final templates.
 
 Details of every check are in [`reference/testing.md`](skill/site-kit/reference/testing.md).
 
@@ -252,9 +301,10 @@ Details of every check are in [`reference/testing.md`](skill/site-kit/reference/
 skill/site-kit/        the skill: SKILL.md, scripts, templates, examples, reference docs
   scripts/             scaffold.mjs (generator), verify.mjs (browser verifier), modules.mjs, defaults.mjs
   templates/           base + one folder per module, mirroring the generated project
+  templates/fx/        the effects: backgrounds, headline animations, micro-interactions, css
   examples/            five complete configs
-  reference/           config keys, modules, design system, testing, gotchas
-site/                  the website (static HTML/CSS/JS), deployed on Vercel
+  reference/           config keys, modules, design system, effects, testing, gotchas
+site/                  the website (static HTML/CSS/JS) plus demo/, the exported live effects gallery; deployed on Vercel
 tools/                 how the screenshots, banner and social image were made
 install.sh, install.ps1
 ```

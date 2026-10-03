@@ -6,7 +6,10 @@ const config: NextConfig = {
   images: { unoptimized: true },
   // A self-contained server (.next/standalone/server.js) with only the node_modules it uses: deploy that folder and start it
   // with `node server.js`.
-  output: 'standalone',
+  // SITEKIT_EXPORT=1 builds plain static files instead (only valid for sites without API routes, e.g. the effects gallery).
+  ...(process.env.SITEKIT_EXPORT === '1'
+    ? { output: 'export' as const, trailingSlash: true, basePath: process.env.SITEKIT_BASE_PATH ?? '' }
+    : { output: 'standalone' as const }),
   // The local storage driver reads paths built at runtime, so the file tracer would copy whatever sits in those folders into
   // the bundle - your uploaded files, on a developer machine. Never ship them.
   outputFileTracingExcludes: {

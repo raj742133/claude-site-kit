@@ -35,6 +35,7 @@
       <a href="#modules">Modules</a>
       <a href="#how">How it works</a>
       <a href="#gallery">Gallery</a>
+      <a href="#effects">Effects</a>
       <a href="#install">Install</a>
       <a href="#tested">Tested</a>
       <a href="#faq">FAQ</a>
@@ -247,8 +248,51 @@ site-kit: wrote 61 files to ./bean-and-barrel
   </div>
 </section>
 
+<!-- ============================ EFFECTS ============================ -->
+<section id="effects" class="band">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Effects</span>
+      <h2>Add motion, without adding a library.</h2>
+      <p>An optional style layer: animated hero backgrounds, headline animations and button and card micro-interactions, picked from a menu. Original, dependency-free code (no GSAP or Three.js), so a site only carries the effects it chose.</p>
+    </div>
+
+    <div class="fx-tiles">
+      <figure class="fx-tile reveal"><img src="assets/fx/bg-aurora.jpg" width="700" height="380" alt="Aurora hero background behind a headline" loading="lazy"><figcaption><b>Aurora</b><span>Soft colour clouds drifting. CSS only.</span></figcaption></figure>
+      <figure class="fx-tile reveal"><img src="assets/fx/bg-mesh.jpg" width="700" height="380" alt="Gradient mesh hero background behind a headline" loading="lazy"><figcaption><b>Gradient mesh</b><span>A slowly shifting mesh. CSS only.</span></figcaption></figure>
+      <figure class="fx-tile reveal"><img src="assets/fx/bg-dots.jpg" width="700" height="380" alt="Dot grid hero background behind a headline" loading="lazy"><figcaption><b>Dot grid</b><span>Dots swell and glow around the pointer.</span></figcaption></figure>
+      <figure class="fx-tile reveal"><img src="assets/fx/bg-particles.jpg" width="700" height="380" alt="Particles hero background behind a headline" loading="lazy"><figcaption><b>Particles</b><span>Linked particles the pointer pulls together.</span></figcaption></figure>
+      <figure class="fx-tile reveal"><img src="assets/fx/bg-stars.jpg" width="700" height="380" alt="Starfield hero background behind a headline" loading="lazy"><figcaption><b>Starfield</b><span>Twinkling stars with pointer parallax.</span></figcaption></figure>
+      <figure class="fx-tile reveal"><img src="assets/fx/bg-beams.jpg" width="700" height="380" alt="Light beams hero background behind a headline" loading="lazy"><figcaption><b>Light beams</b><span>Beams of light sweeping down. CSS only.</span></figcaption></figure>
+      <figure class="fx-tile reveal"><img src="assets/fx/bg-waves.jpg" width="700" height="380" alt="Waves hero background behind a headline" loading="lazy"><figcaption><b>Waves</b><span>Layered waves rolling along the edge.</span></figcaption></figure>
+      <figure class="fx-tile reveal"><img src="assets/fx/bg-grid.jpg" width="700" height="380" alt="Perspective grid hero background behind a headline" loading="lazy"><figcaption><b>Perspective grid</b><span>A grid receding to the horizon.</span></figcaption></figure>
+      <figure class="fx-tile reveal"><img src="assets/fx/bg-grain.jpg" width="700" height="380" alt="Grain gradient hero background behind a headline" loading="lazy"><figcaption><b>Grain gradient</b><span>Gradient washes under film grain.</span></figcaption></figure>
+      <figure class="fx-tile reveal"><img src="assets/fx/bg-spotlight.jpg" width="700" height="380" alt="Spotlight hero background behind a headline" loading="lazy"><figcaption><b>Spotlight</b><span>A soft light that follows the pointer.</span></figcaption></figure>
+    </div>
+
+    <div class="fx-cols">
+      <div class="req reveal"><h3>8 headline animations</h3>
+        <div class="fx-chips"><span>Split letters</span><span>Split words</span><span>Blur in</span><span>Typewriter</span><span>Gradient accent</span><span>Shimmer</span><span>Decode</span><span>Rotating word</span></div>
+        <p class="muted" style="font-size:13.5px;margin-top:12px">The real text always stays for screen readers and search engines; the animation only changes how it appears.</p></div>
+      <div class="req reveal"><h3>Buttons, cards and reveals</h3>
+        <div class="fx-chips"><span>Magnetic</span><span>Shine</span><span>Ripple</span><span>Glow border</span><span>Tilt</span><span>Spotlight</span><span>Lift</span><span>Fade</span><span>Scale</span><span>Blur</span><span>Slide</span></div>
+        <p class="muted" style="font-size:13.5px;margin-top:12px">They act on every card and primary button the site already has, so nothing needs rewiring.</p></div>
+      <div class="req reveal"><h3>Extras, and the rules</h3>
+        <div class="fx-chips"><span>Cursor glow</span><span>Scroll progress</span><span>Click sparks</span><span>Count-up numbers</span></div>
+        <p class="muted" style="font-size:13.5px;margin-top:12px">Reduced-motion is honoured, touch screens skip pointer-follow effects, and canvases pause when off screen. Each rule is checked by the verifier.</p></div>
+    </div>
+
+    <div class="fx-live reveal">
+      <div class="fx-live-head"><div><h3>Try every one, live</h3><p class="muted">Pick a background, headline, button and card style, change the brand colours, then copy the config. This is the same <code>/effects</code> page the skill can generate for your own site.</p></div>
+        <a class="btn primary" href="demo/effects/" rel="noopener">Open full screen</a></div>
+      <div class="browser"><div class="browser-bar"><i></i><i></i><i></i><span>claude-site-kit.vercel.app/demo/effects</span></div>
+        <iframe class="fx-frame" src="demo/effects/" title="Live effects gallery" loading="lazy"></iframe></div>
+    </div>
+  </div>
+</section>
+
 <!-- ============================ PHONES ============================ -->
-<section class="band" id="mobile">
+<section id="mobile">
   <div class="wrap">
     <div class="sec-head reveal">
       <span class="eyebrow">Mobile first</span>
@@ -265,7 +309,7 @@ site-kit: wrote 61 files to ./bean-and-barrel
 </section>
 
 <!-- ============================ DARK ============================ -->
-<section id="dark">
+<section class="band" id="dark">
   <div class="wrap">
     <div class="sec-head reveal">
       <span class="eyebrow">Light and dark</span>
@@ -280,7 +324,7 @@ site-kit: wrote 61 files to ./bean-and-barrel
 </section>
 
 <!-- ============================ BACKEND ============================ -->
-<section class="band" id="backend">
+<section id="backend">
   <div class="wrap">
     <div class="sec-head reveal">
       <span class="eyebrow">Under the hood</span>
@@ -299,7 +343,7 @@ site-kit: wrote 61 files to ./bean-and-barrel
 </section>
 
 <!-- ============================ INSTALL ============================ -->
-<section id="install">
+<section class="band" id="install">
   <div class="wrap">
     <div class="sec-head reveal">
       <span class="eyebrow">Install</span>
@@ -343,6 +387,7 @@ npx playwright install chromium</code></pre><button class="copy" type="button" d
           <q>Use site-kit to make a landing page and a dashboard for my business.</q>
           <q>/site-kit</q>
           <q>I need a publishing page where my team uploads releases, with MFA sign-in.</q>
+          <q>Give the landing page an aurora background and a split-words headline.</q>
         </div>
       </div>
       <aside class="req reveal">
@@ -366,7 +411,7 @@ npx playwright install chromium</code></pre><button class="copy" type="button" d
 </section>
 
 <!-- ============================ TESTED ============================ -->
-<section class="band" id="tested">
+<section id="tested">
   <div class="wrap">
     <div class="sec-head reveal">
       <span class="eyebrow">Tested, and honest about it</span>
@@ -374,8 +419,8 @@ npx playwright install chromium</code></pre><button class="copy" type="button" d
       <p>Every example below was scaffolded from its config, type-checked, built for production and exercised with Playwright in Chromium. Results are checks passed out of checks run on the final templates.</p>
     </div>
     <div class="tested reveal">
-      <div><b>10</b><span>different sites generated and run</span></div>
-      <div><b>520</b><span>browser checks passed across the ten sites</span></div>
+      <div><b>15</b><span>different sites generated and run</span></div>
+      <div><b>797</b><span>browser checks passed across the fifteen sites</span></div>
       <div><b>3</b><span>viewports: 1280, 390, 360 px</span></div>
       <div><b>2</b><span>real Android APKs parsed, published and downloaded back</span></div>
       <div><b>6&times;</b><span>warm-cache load of every page type, no hydration errors</span></div>
@@ -394,6 +439,11 @@ npx playwright install chromium</code></pre><button class="copy" type="button" d
           <tr><td>Orbit Labs</td><td>a single module: landing only</td><td class="ok">12 / 12</td></tr>
           <tr><td>Field Notes Press</td><td>a single module: publishing only (brings MFA and the API)</td><td class="ok">24 / 24</td></tr>
           <tr><td>Acme Co</td><td>just a brand name, everything else defaulted</td><td class="ok">75 / 75</td></tr>
+          <tr><td>Bean &amp; Barrel + effects</td><td>aurora-glass preset, beams behind the sign-in card, cursor glow, scroll progress, count-up</td><td class="ok">102 / 102</td></tr>
+          <tr><td>Play House</td><td>particles, split letters, ripple buttons, tilt cards, click sparks, stars on sign-in</td><td class="ok">70 / 70</td></tr>
+          <tr><td>Ripple Works</td><td>waves, rotating headline word, magnetic buttons, glow-border cards, slide reveal</td><td class="ok">36 / 36</td></tr>
+          <tr><td>Grid Labs</td><td>tech-grid preset: perspective grid, decode headline, spotlight cards</td><td class="ok">60 / 60</td></tr>
+          <tr><td>Effect Lab</td><td>the live effects gallery: every background, headline, button, card, reveal and extra</td><td class="ok">9 / 9</td></tr>
         </tbody>
       </table>
     </div>
@@ -404,6 +454,7 @@ npx playwright install chromium</code></pre><button class="copy" type="button" d
         <li><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg><span>Upload, publish, build-number ordering, byte-identical downloads</span></li>
         <li><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg><span>Ingest: auth, idempotency, bad ids and statuses refused</span></li>
         <li><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg><span>No sideways scroll on phones; finger-sized controls; no console errors</span></li>
+        <li><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg><span>Effects: headline text stays readable to screen readers, canvases stop drawing off screen, reduced-motion shows the final state, touch screens skip hover effects</span></li>
       </ul></div>
       <div class="req no reveal"><h3>Not covered yet</h3><ul>
         <li><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg><span><code>next dev</code>: it crashed with PGlite on the Node versions tried here; production builds are what is tested</span></li>
@@ -416,7 +467,7 @@ npx playwright install chromium</code></pre><button class="copy" type="button" d
 </section>
 
 <!-- ============================ FAQ ============================ -->
-<section id="faq">
+<section class="band" id="faq">
   <div class="wrap">
     <div class="sec-head reveal"><span class="eyebrow">FAQ</span><h2>Questions people ask.</h2></div>
     <div class="faq">
@@ -425,6 +476,8 @@ npx playwright install chromium</code></pre><button class="copy" type="button" d
       <details class="reveal"><summary>Where does my data live?</summary><p>In your own database and storage. In development it is an embedded Postgres in a folder inside the project plus local files. For production you point <code>DATABASE_URL</code> at Postgres and choose local, S3/R2 or Azure Blob storage.</p></details>
       <details class="reveal"><summary>Does it make up numbers or testimonials?</summary><p>No. Sections that need facts (proof numbers, feature lists, compatibility) are off until you give real content. The demo screenshots here use clearly fictional data.</p></details>
       <details class="reveal"><summary>How secure is the sign-in?</summary><p>It follows common practice: scrypt hashes, signed cookies, authenticator codes that cannot be reused, lockout after repeated failures. It has not had an independent security audit, so review it before putting anything sensitive behind it.</p></details>
+      <details class="reveal"><summary>Where do the effects come from? Is this React Bits?</summary><p>No. Libraries like React Bits show what animated, copy-paste components can do, but their licence (MIT with the Commons Clause) does not allow redistributing them inside another package. These effects are written fresh for this kit, need no animation library, and are MIT licensed like the rest.</p></details>
+      <details class="reveal"><summary>Do the effects slow the site down or hurt accessibility?</summary><p>They are built to avoid both: canvases pause off screen and in background tabs, pixel density is capped, pointer-follow effects are skipped on touch screens, and <code>prefers-reduced-motion</code> shows the final state at once. Headline animations keep the real text for screen readers. The verifier measures the pausing and checks the text.</p></details>
       <details class="reveal"><summary>Why does verification need Playwright?</summary><p>Because a page that builds is not necessarily a page that works. The verifier signs in, enrols an authenticator, publishes a file and filters a list in a real browser, at phone width, and reports exactly what failed.</p></details>
       <details class="reveal"><summary>Can I change the design afterwards?</summary><p>Yes. The colours are CSS variables at the top of <code>globals.css</code>, the logo is one file, and everything else is ordinary React you can edit. Re-running the generator into a fresh folder gives you a clean baseline to compare against.</p></details>
     </div>

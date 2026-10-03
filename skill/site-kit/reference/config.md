@@ -57,7 +57,20 @@ backticks, backslashes, braces, `<`, `>` and `$` are removed) so user copy can n
                   "metrics": [{ "key": "total", "label": "total", "unit": "£" }],
                   "stats": [{ "label": "orders", "kind": "count|sum|distinct|status", "metric": "total", "field": "title", "status": "issue", "prefix": "£", "tone": "accent" }],
                   "itemsLabel": "Items", "filesLabel": "Photos", "search": "" },
-  "connect":    { "title": "", "sub": "", "where": "Settings → Dashboard", "curl": true }
+  "connect":    { "title": "", "sub": "", "where": "Settings → Dashboard", "curl": true },
+
+  // optional animated style layer; omit it for the default look. Full list, presets and rules: reference/effects.md
+  "effects": {
+    "preset": "aurora-glass",            // minimal | calm | aurora-glass | tech-grid | playful | cosmic | editorial
+    "heroBackground": "aurora",          // territory (default) | none | aurora | mesh | dots | particles | stars | beams | waves | grid | grain | spotlight
+    "loginBackground": "none",           // same list except territory
+    "headline": "split-words",           // none | split-chars | split-words | blur-in | typewriter | gradient | shimmer | scramble | rotate
+    "rotateWords": [],                   // for headline "rotate": 2-8 words
+    "buttons": "glow-border",            // none | magnetic | shine | ripple | glow-border
+    "cards": "spotlight",                // none | tilt | spotlight | glow-border | lift
+    "reveal": "blur",                    // rise (default) | fade | scale | blur | slide
+    "extras": ["cursor-glow"]            // cursor-glow | scroll-progress | click-spark | count-up
+  }
 }
 ```
 
@@ -70,3 +83,4 @@ backticks, backslashes, braces, `<`, `>` and `$` are removed) so user copy can n
 - Statuses: the first is what a new record gets; `tone` picks a colour token.
 - `story.steps[].screen.kind` picks the phone mock-up layout. 3-4 steps look best.
 - Copy in `examples/*.json` is fictional demo content, as the files say.
+- `effects` keys override the preset; an unknown id stops the generator with the list of valid ones. `headline: "rotate"` needs `rotateWords`. `examples/coffee-effects.json` is `coffee.json` plus an effects block.

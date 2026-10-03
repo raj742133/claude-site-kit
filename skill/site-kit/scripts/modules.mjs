@@ -183,6 +183,11 @@ export const MODULES = {
     title: 'Dashboard (records)', requires: ['signin', 'api'],
     summary: 'Stat cards, filter chips, search, facet selects and a card grid of records with thumbnails and status flags; a detail page with facts, a photo/file gallery, line items and one-click status changes. Fed by /api/ingest.',
   },
+  fxgallery: {
+    title: 'Effects gallery', requires: [],
+    summary: 'A /effects page: every animated background, headline animation, button and card effect running live on a sample hero, with a colour picker and the exact effects config to paste into site.json.',
+    open: ['/effects'],
+  },
   connect: {
     title: 'Connect a phone / client', requires: ['signin', 'api'],
     summary: 'A page that shows the one link (address + #key=) to paste into the client, a copy button, a curl example and the latest download.',
@@ -191,7 +196,7 @@ export const MODULES = {
 
 /** Expands `wanted` with everything it requires, base first, in a stable order. */
 export function resolveModules(wanted) {
-  const order = ['base', 'api', 'signin', 'mfa', 'publishing', 'landing', 'dashboard', 'connect'];
+  const order = ['base', 'api', 'signin', 'mfa', 'publishing', 'landing', 'dashboard', 'connect', 'fxgallery'];
   const set = new Set(['base']);
   const add = (id) => {
     if (!MODULES[id]) throw new Error(`Unknown module "${id}". Known: ${Object.keys(MODULES).filter((k) => !MODULES[k].internal).join(', ')}`);

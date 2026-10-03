@@ -13,6 +13,7 @@ Directive lines (`//#if x`, `//#else`, `//#endif`, `{/*#if x*/}`) are removed fr
 | api | `/api/ingest`, `/api/uploads/sign`, `/api/file`, `/api/health`, `/api/local-storage/[...key]` | `records`, `record_items`, `record_files` | `INGEST_TOKEN` |
 | dashboard | `/dashboard`, `/records/[id]`, `/api/records/[id]` (PATCH status, DELETE) | - | - |
 | connect | `/connect` | - | - |
+| fxgallery | `/effects` (and `/` when it is the only module) | - | - |
 
 Authentication layers (do not merge them):
 1. shared password cookie -> `/dashboard`, `/connect`, `/records/*`, `/api/file`
