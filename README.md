@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="https://__LIVE_URL__"><b>Live site</b></a> &nbsp;·&nbsp;
+  <a href="https://claude-site-kit.vercel.app"><b>Live site</b></a> &nbsp;·&nbsp;
   <a href="#install">Install</a> &nbsp;·&nbsp;
   <a href="#what-it-makes">Screenshots</a> &nbsp;·&nbsp;
   <a href="#modules">Modules</a> &nbsp;·&nbsp;
