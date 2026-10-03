@@ -5,6 +5,11 @@
 <h1 align="center">Sitewright</h1>
 
 <p align="center">
+  <a href="launch/brag-output/brag.mp4"><img src="launch/brag-output/brag.jpg" alt="Watch the 22-second Sitewright launch video" width="720"></a><br>
+  <sub><b>Watch the 22-second launch video</b> (<a href="launch/README.md">how it was made</a>)</sub>
+</p>
+
+<p align="center">
   <b>A Claude Code skill that builds your website.</b><br>
   Landing page, sign-in, authenticator MFA, records dashboard, release publishing and a connect-your-phone page,<br>
   restyled with your brand, wired to a real backend, and tested in a real browser.
@@ -305,6 +310,7 @@ skill/sitewright/      the skill: SKILL.md, scripts, templates, examples, refere
   examples/            seven complete configs
   reference/           config keys, modules, design system, effects, testing, gotchas
 site/                  the website (static HTML/CSS/JS) plus demo/, the exported live effects gallery; deployed on Vercel
+launch/                the launch video (mp4, poster, plan) and the Hyperframes project that renders it
 tools/                 how the screenshots, banner and social image were made
 install.sh, install.ps1
 ```

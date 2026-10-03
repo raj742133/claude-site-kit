@@ -1,0 +1,2 @@
+Introducing Sitewright: Tell Claude your brand. Get a working website.
+Built with Next.js 15 and tested in a real browser with Playwright. https://sitewright-skill.vercel.app

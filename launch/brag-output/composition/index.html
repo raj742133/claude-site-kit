@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1920, height=1080" />
+  <title>Sitewright - launch video</title>
+  <script src="assets/gsap.min.js"></script>
+  <script src="assets/audio-data.js"></script>
+  <style>
+    :root { --bg:#f3f5fa; --ink:#0d1424; --muted:#55607a; --blue:#1e5bd8; --cyan:#14a6cc; --line:#c9d1e0; --ok:#3dd9ae; }
+    html, body { margin:0; background:var(--bg); }
+    #root { position:relative; width:100%; height:100%; overflow:hidden; background:var(--bg); color:var(--ink); font-family:'Montserrat', sans-serif; }
+    .clip { position:absolute; inset:0; }
+    .layer { position:absolute; inset:0; }
+    #dots { background-image:radial-gradient(rgba(13,20,36,0.20) 2.4px, transparent 3px); background-size:48px 48px;
+            -webkit-mask-image:radial-gradient(75% 85% at 62% 42%, #000 20%, transparent 100%); mask-image:radial-gradient(75% 85% at 62% 42%, #000 20%, transparent 100%); }
+    #glowA { position:absolute; width:1500px; height:1500px; right:-520px; top:-700px; border-radius:50%; background:radial-gradient(closest-side, rgba(30,91,216,0.34), rgba(30,91,216,0)); }
+    #glowB { position:absolute; width:1300px; height:1300px; left:-520px; bottom:-760px; border-radius:50%; background:radial-gradient(closest-side, rgba(20,166,204,0.30), rgba(20,166,204,0)); }
+    #grain { opacity:0.5; mix-blend-mode:multiply; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.05  0 0 0 0 0.08  0 0 0 0 0.14  0 0 0 0.10 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+    .scene { position:absolute; inset:0; }
+    /* explicit font-family so the compiler embeds JetBrains Mono (it does not read the family out of the font: shorthand) */
+    .brandrow .tag, #term .bar span, #term .body, .bw .bb span, .brand .hx, #modlist, #ourl { font-family:'JetBrains Mono', monospace; }
+
+    /* scene 1 */
+    .brandrow { position:absolute; left:140px; top:96px; right:140px; display:flex; align-items:center; justify-content:space-between; }
+    .brandrow .wm { display:flex; align-items:center; gap:22px; font-weight:800; font-size:44px; letter-spacing:-0.02em; }
+    .brandrow .wm svg { width:64px; height:64px; }
+    .brandrow .tag { font:500 26px 'JetBrains Mono', monospace; letter-spacing:0.16em; color:var(--muted); text-transform:uppercase; }
+    .hook { position:absolute; left:140px; right:140px; top:330px; margin:0; font-size:132px; line-height:1.12; letter-spacing:-0.035em; font-weight:700; }
+    .hook .line { display:block; white-space:pre-wrap; }
+    .hook .blue { color:var(--blue); font-weight:800; }
+    #rule { position:absolute; left:144px; top:692px; width:520px; height:8px; border-radius:4px; background:var(--cyan); transform-origin:0 50%; }
+    .c { opacity:0; }
+    .cr { display:inline; position:relative; opacity:0; }
+    .cr::after { content:''; position:absolute; left:0.06em; top:0.14em; width:0.065em; height:1em; background:var(--blue); }
+    #ghost { position:absolute; right:-40px; bottom:-120px; width:760px; height:760px; }
+    #ghost svg { width:100%; height:100%; }
+
+    /* scene 2 */
+    #term { position:absolute; left:110px; top:140px; width:1010px; height:800px; background:#0d1424; border:3px solid #33405e; border-radius:30px; overflow:hidden; box-shadow:0 50px 110px -40px rgba(13,20,36,0.7); }
+    #term .bar { height:78px; display:flex; align-items:center; gap:14px; padding:0 34px; border-bottom:2px solid rgba(255,255,255,0.1); }
+    #term .bar i { width:18px; height:18px; border-radius:50%; background:rgba(255,255,255,0.22); }
+    #term .bar span { margin-left:16px; font:500 26px 'JetBrains Mono', monospace; color:#8191b3; }
+    #term .body { padding:36px 48px; font:500 30px/1.5 'JetBrains Mono', monospace; color:#dbe4f7; }
+    .row { display:flex; gap:24px; margin:0 0 20px; }
+    .who { flex:none; width:122px; font-weight:700; }
+    .who.you { color:#ffffff; } .who.cl { color:#7cc4ff; }
+    .type { white-space:pre-wrap; display:block; }
+    #cl, .mod { opacity:0; }
+    .mods { list-style:none; margin:6px 0 0 146px; padding:0; }
+    .mod { display:flex; gap:20px; margin:0 0 10px; color:#9aa7c2; }
+    .mod .bx { width:76px; flex:none; position:relative; }
+    .mod .xx { position:absolute; left:0; top:0; opacity:0; color:var(--ok); font-weight:700; }
+    #tagline2 { position:absolute; left:1190px; top:250px; width:700px; font-size:70px; line-height:1.08; font-weight:700; letter-spacing:-0.03em; }
+    #tagline2 .b { color:var(--blue); font-weight:800; display:block; }
+    #tagline2 span.a { display:block; }
+    #modlist { position:absolute; left:1194px; top:560px; width:660px; font:500 28px/1.7 'JetBrains Mono', monospace; color:var(--muted); letter-spacing:0.02em; }
+
+    /* scene 3 */
+    #h3 { position:absolute; left:140px; top:100px; width:1000px; margin:0; font-size:72px; line-height:1.1; font-weight:700; letter-spacing:-0.03em; }
+    #stat { position:absolute; left:140px; top:470px; }
+    #cnt { font-size:170px; line-height:1; font-weight:800; color:var(--blue); letter-spacing:-0.04em; font-variant-numeric:tabular-nums; }
+    #cntl { margin-top:12px; font-size:48px; font-weight:600; color:var(--ink); display:flex; align-items:center; gap:18px; }
+    #cntl svg { width:54px; height:54px; }
+    .bw { position:absolute; background:#fff; border:3px solid var(--line); border-radius:24px; overflow:hidden; box-shadow:0 46px 100px -34px rgba(30,91,216,0.55); }
+    .bw .bb { height:48px; display:flex; align-items:center; gap:11px; padding:0 22px; background:#f8f9fc; border-bottom:2px solid #dfe4ee; }
+    .bw .bb i { width:15px; height:15px; border-radius:50%; background:var(--line); }
+    .bw .bb span { margin-left:14px; font:500 21px 'JetBrains Mono', monospace; color:var(--muted); }
+    .bw img { display:block; width:100%; }
+    .ph { position:absolute; background:#0d1424; border-radius:50px; padding:13px; box-shadow:0 46px 100px -30px rgba(13,20,36,0.7); }
+    .ph img { display:block; width:100%; border-radius:38px; }
+
+    /* scene 4 */
+    #h4 { position:absolute; left:140px; top:96px; margin:0; font-size:112px; line-height:1.05; font-weight:700; letter-spacing:-0.035em; }
+    #h4 b { color:var(--blue); font-weight:800; }
+    .brand { position:absolute; top:360px; width:392px; }
+    .brand .bw { position:relative; width:392px; }
+    .brand .nm { margin-top:26px; font-size:40px; font-weight:700; letter-spacing:-0.02em; }
+    .brand .hx { margin-top:6px; display:flex; align-items:center; gap:12px; font:500 24px 'JetBrains Mono', monospace; color:var(--muted); }
+    .brand .hx i { width:22px; height:22px; border-radius:50%; display:inline-block; border:2px solid rgba(13,20,36,0.18); }
+    #outro { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+    #omark { width:230px; height:230px; margin-bottom:20px; }
+    #owm { font-size:176px; line-height:1; font-weight:800; letter-spacing:-0.04em; }
+    #otag { margin-top:34px; font-size:50px; font-weight:500; color:var(--muted); letter-spacing:-0.01em; }
+    #ourl { margin-top:40px; font:500 40px 'JetBrains Mono', monospace; color:var(--blue); letter-spacing:0.01em; }
+  </style>
+</head>
+<body>
+  <div id="root" data-composition-id="main" data-start="0" data-width="1920" data-height="1080" data-duration="22.5">
+
+    <!-- persistent background: pale canvas, dotted field, two glows that breathe with the music, fine grain -->
+    <div class="layer" id="dots"></div>
+    <div class="layer"><div id="glowA" data-layout-allow-overflow></div><div id="glowB" data-layout-allow-overflow></div></div>
+    <div class="layer" id="grain"></div>
+
+    <!-- SCENE 1: hook (0.0-5.4) -->
+    <section id="s1" class="clip" data-start="0" data-duration="5.4">
+      <div class="scene" id="s1in">
+        <div id="ghost"><div id="ghostBreath" style="width:100%;height:100%"><svg viewBox="0 0 48 48" id="ghostMark"><path id="ghostHex" d="M24 5.5 L40 14.75 V33.25 L24 42.5 L8 33.25 V14.75 Z" pathLength="100" fill="none" stroke="#1e5bd8" stroke-opacity="0.2" stroke-width="2.2" stroke-linejoin="round"/><circle cx="24" cy="24" r="6.5" fill="#14a6cc" fill-opacity="0.22"/></svg></div></div>
+        <div class="brandrow">
+          <div class="wm"><svg viewBox="0 0 48 48"><path d="M24 5.5 L40 14.75 V33.25 L24 42.5 L8 33.25 V14.75 Z" fill="none" stroke="#1e5bd8" stroke-width="5" stroke-linejoin="round"/><circle cx="24" cy="24" r="6.5" fill="#14a6cc"/></svg>Sitewright</div>
+          <div class="tag">A Claude Code skill</div>
+        </div>
+        <h1 class="hook"><span class="line" id="l1"></span><span class="line blue" id="l2">Get a working website.</span></h1>
+        <div id="rule"></div>
+      </div>
+    </section>
+
+    <!-- SCENE 2: the request (4.7-11.6) -->
+    <section id="s2" class="clip" data-start="4.7" data-duration="6.9">
+      <div class="scene" id="s2in">
+        <div id="term">
+          <div class="bar"><i></i><i></i><i></i><span>claude - Sitewright</span></div>
+          <div class="body">
+            <p class="row"><span class="who you">you</span><span class="type" id="ul"></span></p>
+            <p class="row" id="cl"><span class="who cl">claude</span><span>Which modules do you want?</span></p>
+            <ul class="mods" id="mods">
+              <li class="mod" id="m1"><span class="bx"><span class="o">[ ]</span><span class="xx">[x]</span></span>Landing page</li>
+              <li class="mod" id="m2"><span class="bx"><span class="o">[ ]</span><span class="xx">[x]</span></span>Dashboard</li>
+              <li class="mod" id="m3"><span class="bx"><span class="o">[ ]</span><span class="xx">[x]</span></span>Connect to phone</li>
+              <li class="mod" id="m4"><span class="bx"><span class="o">[ ]</span><span class="xx">[x]</span></span>Sign in</li>
+              <li class="mod" id="m5"><span class="bx"><span class="o">[ ]</span><span class="xx">[x]</span></span>Publishing page</li>
+              <li class="mod" id="m6"><span class="bx"><span class="o">[ ]</span><span class="xx">[x]</span></span>MFA accounts</li>
+            </ul>
+          </div>
+        </div>
+        <div id="tagline2"><span class="a">Pick the pieces.</span><span class="b">Skip the rest.</span></div>
+        <div id="modlist">landing · signin · mfa<br/>dashboard · publishing · connect</div>
+      </div>
+    </section>
+
+    <!-- SCENE 3: the proof (10.9-17.0) -->
+    <section id="s3" class="clip" data-start="10.9" data-duration="6.1">
+      <div class="scene" id="s3in">
+        <h2 id="h3">Generated, built, and driven in a browser.</h2>
+        <div id="stat">
+          <div id="cnt">0 / 87</div>
+          <div id="cntl"><svg viewBox="0 0 24 24" fill="none" stroke="#12805c" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m7.5 12.5 3 3 6-7"/></svg>checks passed</div>
+        </div>
+        <div class="bw" id="p1" style="left:940px;top:220px;width:800px"><div class="bb"><i></i><i></i><i></i><span>beanandbarrel.example</span></div><img src="assets/shots/coffee-landing-hero.jpg" alt="Generated landing page for Bean &amp; Barrel" /></div>
+        <div class="bw" id="p2" style="left:900px;top:610px;width:600px"><div class="bb"><i></i><i></i><i></i><span>beanandbarrel.example/dashboard</span></div><img src="assets/shots/coffee-dashboard.jpg" alt="Generated orders dashboard" /></div>
+        <div class="ph" id="p3" style="left:1560px;top:430px;width:236px"><img src="assets/shots/coffee-landing-mobile.jpg" alt="The same site on a phone" /></div>
+      </div>
+    </section>
+
+    <!-- SCENE 4: the range, then the outro (16.3-22.5) -->
+    <section id="s4" class="clip" data-start="16.3" data-duration="6.2">
+      <div class="scene" id="s4in">
+        <div id="range">
+          <h2 id="h4">One kit.<br/><b>Any brand.</b></h2>
+          <div class="brand" id="b1" style="left:132px"><div class="bw"><div class="bb"><i></i><i></i><i></i><span>beanandbarrel</span></div><img src="assets/shots/brand-coffee.jpg" alt="Bean &amp; Barrel" /></div><div class="nm">Bean &amp; Barrel</div><div class="hx"><i style="background:#7a4a21"></i><i style="background:#e8a33d"></i>#7a4a21 · #e8a33d</div></div>
+          <div class="brand" id="b2" style="left:556px"><div class="bw"><div class="bb"><i></i><i></i><i></i><span>haldenlegal</span></div><img src="assets/shots/legal-landing-hero.jpg" alt="Halden Legal" /></div><div class="nm">Halden Legal</div><div class="hx"><i style="background:#1b2a4a"></i><i style="background:#c9a227"></i>#1b2a4a · #c9a227</div></div>
+          <div class="brand" id="b3" style="left:980px"><div class="bw"><div class="bb"><i></i><i></i><i></i><span>sunnysidebakery</span></div><img src="assets/shots/yellow-landing-hero.jpg" alt="Sunny Side Bakery" /></div><div class="nm">Sunny Side Bakery</div><div class="hx"><i style="background:#ffe600"></i><i style="background:#fff3a0"></i>#ffe600 · #fff3a0</div></div>
+          <div class="brand" id="b4" style="left:1404px"><div class="bw"><div class="bb"><i></i><i></i><i></i><span>pixelstudio</span></div><img src="assets/shots/studio-landing-hero.jpg" alt="Pixel Studio" /></div><div class="nm">Pixel Studio</div><div class="hx"><i style="background:#6d28d9"></i><i style="background:#22d3ee"></i>#6d28d9 · #22d3ee</div></div>
+        </div>
+        <div id="outro">
+          <div id="omarkBreath"><svg id="omark" viewBox="0 0 48 48"><path id="ohex" d="M24 5.5 L40 14.75 V33.25 L24 42.5 L8 33.25 V14.75 Z" pathLength="100" fill="none" stroke="#1e5bd8" stroke-width="4.2" stroke-linejoin="round" stroke-dasharray="100" stroke-dashoffset="100"/><circle id="olens" cx="24" cy="24" r="6.5" fill="#14a6cc"/></svg></div>
+          <div id="owm">Sitewright</div>
+          <div id="otag">A Claude Code skill that builds your website.</div>
+          <div id="ourl">sitewright-skill.vercel.app</div>
+        </div>
+      </div>
+    </section>
+
+    <audio id="music" src="assets/music/bed.mp3" data-start="0" data-duration="22.5" data-track-index="10" data-volume="1"
+    data-automation='{"version":1,"lanes":[{"target":"volume","points":[{"t":0,"v":0},{"t":0.9,"v":0.8},{"t":20.6,"v":0.8},{"t":22.4,"v":0.03}]}]}'></audio>
+    <audio id="sfx1" src="assets/sfx/key1.wav" data-start="0.38" data-duration="0.25" data-track-index="11" data-volume="0.42"></audio>
+    <audio id="sfx2" src="assets/sfx/key2.wav" data-start="0.51" data-duration="0.25" data-track-index="12" data-volume="0.42"></audio>
+    <audio id="sfx3" src="assets/sfx/key3.wav" data-start="0.63" data-duration="0.25" data-track-index="13" data-volume="0.42"></audio>
+    <audio id="sfx4" src="assets/sfx/key1.wav" data-start="0.76" data-duration="0.25" data-track-index="11" data-volume="0.42"></audio>
+    <audio id="sfx5" src="assets/sfx/key2.wav" data-start="0.88" data-duration="0.25" data-track-index="12" data-volume="0.42"></audio>
+    <audio id="sfx6" src="assets/sfx/key3.wav" data-start="1" data-duration="0.25" data-track-index="13" data-volume="0.42"></audio>
+    <audio id="sfx7" src="assets/sfx/key1.wav" data-start="1.13" data-duration="0.25" data-track-index="11" data-volume="0.42"></audio>
+    <audio id="sfx8" src="assets/sfx/key2.wav" data-start="1.25" data-duration="0.25" data-track-index="12" data-volume="0.42"></audio>
+    <audio id="sfx9" src="assets/sfx/key3.wav" data-start="1.38" data-duration="0.25" data-track-index="13" data-volume="0.42"></audio>
+    <audio id="sfx10" src="assets/sfx/soft.ogg" data-start="3.66" data-duration="0.18" data-track-index="14" data-volume="0.65"></audio>
+    <audio id="sfx11" src="assets/sfx/slide.ogg" data-start="5.24" data-duration="0.6" data-track-index="14" data-volume="0.36"></audio>
+    <audio id="sfx12" src="assets/sfx/key2.wav" data-start="5.62" data-duration="0.25" data-track-index="11" data-volume="0.39"></audio>
+    <audio id="sfx13" src="assets/sfx/key3.wav" data-start="5.78" data-duration="0.25" data-track-index="12" data-volume="0.39"></audio>
+    <audio id="sfx14" src="assets/sfx/key1.wav" data-start="5.94" data-duration="0.25" data-track-index="13" data-volume="0.39"></audio>
+    <audio id="sfx15" src="assets/sfx/key2.wav" data-start="6.1" data-duration="0.25" data-track-index="11" data-volume="0.39"></audio>
+    <audio id="sfx16" src="assets/sfx/key3.wav" data-start="6.26" data-duration="0.25" data-track-index="12" data-volume="0.39"></audio>
+    <audio id="sfx17" src="assets/sfx/key1.wav" data-start="6.42" data-duration="0.25" data-track-index="13" data-volume="0.39"></audio>
+    <audio id="sfx18" src="assets/sfx/key2.wav" data-start="6.58" data-duration="0.25" data-track-index="11" data-volume="0.39"></audio>
+    <audio id="sfx19" src="assets/sfx/key3.wav" data-start="6.74" data-duration="0.25" data-track-index="12" data-volume="0.39"></audio>
+    <audio id="sfx20" src="assets/sfx/key1.wav" data-start="6.9" data-duration="0.25" data-track-index="13" data-volume="0.39"></audio>
+    <audio id="sfx21" src="assets/sfx/key2.wav" data-start="7.06" data-duration="0.25" data-track-index="11" data-volume="0.39"></audio>
+    <audio id="sfx22" src="assets/sfx/tick.ogg" data-start="7.91" data-duration="0.06" data-track-index="14" data-volume="0.72"></audio>
+    <audio id="sfx23" src="assets/sfx/tick.ogg" data-start="8.44" data-duration="0.06" data-track-index="14" data-volume="0.72"></audio>
+    <audio id="sfx24" src="assets/sfx/tick.ogg" data-start="8.96" data-duration="0.06" data-track-index="14" data-volume="0.72"></audio>
+    <audio id="sfx25" src="assets/sfx/tick.ogg" data-start="9.5" data-duration="0.06" data-track-index="14" data-volume="0.72"></audio>
+    <audio id="sfx26" src="assets/sfx/tick.ogg" data-start="12.65" data-duration="0.06" data-track-index="14" data-volume="0.78"></audio>
+    <audio id="sfx27" src="assets/sfx/slide.ogg" data-start="13.18" data-duration="0.6" data-track-index="14" data-volume="0.39"></audio>
+    <audio id="sfx28" src="assets/sfx/slide.ogg" data-start="14.22" data-duration="0.6" data-track-index="14" data-volume="0.39"></audio>
+    <audio id="sfx29" src="assets/sfx/slide.ogg" data-start="15.28" data-duration="0.6" data-track-index="14" data-volume="0.39"></audio>
+    <audio id="sfx30" src="assets/sfx/slide.ogg" data-start="17.39" data-duration="0.6" data-track-index="14" data-volume="0.31"></audio>
+    <audio id="sfx31" src="assets/sfx/slide.ogg" data-start="17.91" data-duration="0.6" data-track-index="15" data-volume="0.31"></audio>
+    <audio id="sfx32" src="assets/sfx/slide.ogg" data-start="18.43" data-duration="0.6" data-track-index="14" data-volume="0.31"></audio>
+    <audio id="sfx33" src="assets/sfx/slide.ogg" data-start="18.96" data-duration="0.6" data-track-index="15" data-volume="0.31"></audio>
+    <audio id="sfx34" src="assets/sfx/bell.ogg" data-start="20.5" data-duration="1.48" data-track-index="14" data-volume="0.55"></audio>
+  </div>
+
+  <script>
+    var tl = gsap.timeline({ paused: true });
+
+    // ---- helpers (all deterministic: DOM is built once, timing comes from the timeline) -------------------------------------
+    function typeInto(sel, text, t0, per) {
+      var host = document.querySelector(sel), chars = [], carets = [];
+      for (var i = 0; i < text.length; i++) {
+        var c = document.createElement('span'); c.className = 'c'; c.textContent = text[i];
+        var k = document.createElement('span'); k.className = 'cr';
+        host.appendChild(c); host.appendChild(k); chars.push(c); carets.push(k);
+      }
+      for (var j = 0; j < chars.length; j++) {
+        var at = t0 + j * per;
+        tl.set(chars[j], { opacity: 1 }, at);
+        tl.set(carets[j], { opacity: 1 }, at);
+        tl.set(carets[j], { opacity: 0 }, j < chars.length - 1 ? at + per : at + 0.5);
+      }
+      return t0 + chars.length * per;
+    }
+    function crossIn(id, t) { tl.fromTo(id, { opacity: 0 }, { opacity: 1, duration: 0.7, ease: 'power1.inOut' }, t); }
+    function crossOut(id, t) { tl.to(id, { opacity: 0, duration: 0.7, ease: 'power1.inOut' }, t); }
+
+    // ---- SCENE 1: hook ------------------------------------------------------------------------------------------------------
+    typeInto('#l1', 'Tell Claude your brand.', 0.35, 0.047);
+    tl.fromTo('#ghostHex', { strokeDasharray: 100, strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: 2.6, ease: 'power2.out' }, 0.2);
+    tl.from('.brandrow', { opacity: 0, y: -18, duration: 0.8, ease: 'power2.out' }, 0.2);
+    // beat-locked: 3.70s - the second line of the headline lands on the strong cue
+    tl.fromTo('#l2', { y: 70, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out' }, 3.6);
+    tl.fromTo('#rule', { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: 'power3.out' }, 3.95);
+    crossOut('#s1in', 4.7);
+
+    // ---- SCENE 2: the request ------------------------------------------------------------------------------------------------
+    tl.fromTo('#term', { x: -140, clipPath: 'inset(0 100% 0 0 round 30px)' }, { x: 0, clipPath: 'inset(0 0% 0 0 round 30px)', duration: 0.9, ease: 'power3.out' }, 5.15);
+    // beat-locked: 5.80s strong cue - the request begins to type (5.6s start, first characters land on the beat)
+    typeInto('#ul', 'Use Sitewright to make a landing page, a dashboard and a connect page for Bean & Barrel.', 5.62, 0.018);
+    tl.fromTo('#tagline2 .a', { x: 60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, ease: 'power3.out' }, 6.34);
+    tl.fromTo('#tagline2 .b', { x: 60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, ease: 'power3.out' }, 6.64);
+    tl.fromTo('#modlist', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' }, 7.1);
+    tl.fromTo('#cl', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, 7.38);
+    // beat-grid: the six rows appear together, then four are ticked on consecutive beats 7.91 / 8.44 / 8.96 / 9.50
+    tl.to('.mod', { opacity: 1, duration: 0.45, stagger: 0.05, ease: 'power2.out' }, 7.6);
+    [7.91, 8.44, 8.96, 9.5].forEach(function (t, i) {
+      var id = '#m' + (i + 1);
+      // a pure timeline tween (seek-safe): the open box fades out, the green tick fades in, the row brightens
+      tl.set(id + ' .o', { opacity: 0 }, t);
+      tl.set(id + ' .xx', { opacity: 1 }, t);
+      tl.to(id, { color: '#ffffff', duration: 0.25 }, t);
+      tl.fromTo(id, { x: -14 }, { x: 0, duration: 0.35, ease: 'back.out(2)' }, t);
+    });
+    tl.to('#term', { x: -1350, duration: 0.7, ease: 'power2.in' }, 10.9);
+    tl.to(['#tagline2', '#modlist'], { opacity: 0, duration: 0.7, ease: 'power1.inOut' }, 10.9);
+
+    // ---- SCENE 3: the proof --------------------------------------------------------------------------------------------------
+    crossIn('#s3in', 10.9);
+    tl.fromTo('#h3', { y: 36, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }, 11.55);
+    tl.fromTo('#stat', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 11.75);
+    var counter = { v: 0 };
+    // beat-locked: 12.65s - the count lands on 87
+    tl.to(counter, { v: 87, duration: 0.85, ease: 'power2.out', onUpdate: function () { document.getElementById('cnt').textContent = Math.round(counter.v) + ' / 87'; } }, 11.8);
+    tl.fromTo('#cntl', { opacity: 0 }, { opacity: 1, duration: 0.5 }, 12.5);
+    // beat-grid: three screenshots on every other beat 13.18 / 14.22 / 15.28
+    tl.fromTo('#p1', { y: 90, opacity: 0, rotate: -1.2 }, { y: 0, opacity: 1, rotate: -1.2, duration: 0.8, ease: 'power3.out' }, 13.18);
+    tl.fromTo('#p2', { y: 90, opacity: 0, rotate: 1.4 }, { y: 0, opacity: 1, rotate: 1.4, duration: 0.8, ease: 'power3.out' }, 14.22);
+    tl.fromTo('#p3', { y: 90, opacity: 0, rotate: -2 }, { y: 0, opacity: 1, rotate: -2, duration: 0.8, ease: 'power3.out' }, 15.28);
+    crossOut('#s3in', 16.3);
+
+    // ---- SCENE 4: the range, then the outro ----------------------------------------------------------------------------------
+    crossIn('#s4in', 16.3);
+    tl.fromTo('#h4', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }, 16.86);
+    // beat-grid + beat-locked 17.91: four brands on consecutive beats 17.39 / 17.91 / 18.43 / 18.96
+    [['#b1', 17.39], ['#b2', 17.91], ['#b3', 18.43], ['#b4', 18.96]].forEach(function (p) {
+      tl.fromTo(p[0], { y: 110, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }, p[1]);
+    });
+    // the range clears, then the mark draws itself and the name lands
+    tl.to('#range', { opacity: 0, y: -30, duration: 0.7, ease: 'power2.inOut' }, 19.9);
+    tl.fromTo('#ohex', { strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: 0.9, ease: 'power2.inOut' }, 20.15);
+    tl.fromTo('#olens', { scale: 0, transformOrigin: '24px 24px' }, { scale: 1, duration: 0.5, ease: 'back.out(2.4)' }, 20.5);
+    tl.fromTo('#owm', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }, 20.45);
+    tl.fromTo('#otag', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power2.out' }, 21.05);
+    tl.fromTo('#ourl', { opacity: 0 }, { opacity: 1, duration: 0.7 }, 21.5);
+
+    // ---- audio-reactive (subtle): bass breathes the two background glows and the marks; no visualiser, text never moves ----------
+    for (var f = 0; f < AUDIO_DATA.totalFrames; f++) {
+      tl.call((function (fr) {
+        return function () {
+          var b = fr.bands, bass = (b[0] + b[1]) / 2, mid = (b[4] + b[5] + b[6]) / 3;
+          gsap.set('#glowA', { scale: 1 + 0.16 * bass, opacity: 0.8 + 0.2 * mid });
+          gsap.set('#glowB', { scale: 1 + 0.12 * mid, opacity: 0.75 + 0.25 * bass });
+          gsap.set('#ghostBreath', { scale: 1 + 0.05 * bass });
+          gsap.set('#omarkBreath', { scale: 1 + 0.04 * bass });
+        };
+      })(AUDIO_DATA.frames[f]), [], f / AUDIO_DATA.fps);
+    }
+
+    window.__timelines["main"] = tl;
+  </script>
+</body>
+</html>
