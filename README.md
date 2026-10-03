@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="site/assets/banner.png" alt="site-kit: your brand in, a working website out. A Claude Code skill." width="100%">
+  <img src="site/assets/banner.png" alt="Sitewright: your brand in, a working website out. A Claude Code skill." width="100%">
 </p>
 
-<h1 align="center">site-kit</h1>
+<h1 align="center">Sitewright</h1>
 
 <p align="center">
   <b>A Claude Code skill that builds your website.</b><br>
@@ -30,10 +30,10 @@
 
 ## What it does
 
-You tell Claude which pieces you want and describe your brand. site-kit writes a complete [Next.js 15](https://nextjs.org) project: pages, API routes, database schema, file storage, middleware and a README. Your colours, your words, your data. It then builds the project and drives it in Chromium at desktop and phone sizes, and tells you exactly what passed.
+You tell Claude which pieces you want and describe your brand. Sitewright writes a complete [Next.js 15](https://nextjs.org) project: pages, API routes, database schema, file storage, middleware and a README. Your colours, your words, your data. It then builds the project and drives it in Chromium at desktop and phone sizes, and tells you exactly what passed.
 
 ```text
-you     Use site-kit to make a landing page, a dashboard and a connect page
+you     Use Sitewright to make a landing page, a dashboard and a connect page
         for my coffee roastery, Bean & Barrel.
 
 claude  Which modules do you want?
@@ -144,7 +144,7 @@ Add motion without adding a library. Pick from a menu and the generated site get
 }
 ```
 
-All of it is original, dependency-free code (no GSAP or Three.js). It honours `prefers-reduced-motion`, skips pointer-follow effects on touch screens, pauses canvases that are off screen, and keeps the real headline text for screen readers. See [`reference/effects.md`](skill/site-kit/reference/effects.md) for the full catalogue.
+All of it is original, dependency-free code (no GSAP or Three.js). It honours `prefers-reduced-motion`, skips pointer-follow effects on touch screens, pauses canvases that are off screen, and keeps the real headline text for screen readers. See [`reference/effects.md`](skill/sitewright/reference/effects.md) for the full catalogue.
 
 > The idea comes from animated-component libraries such as [React Bits](https://reactbits.dev). Their licence (MIT with the Commons Clause) does not allow redistributing the components inside another package, so these effects are written from scratch for this kit.
 
@@ -184,10 +184,10 @@ C:\path\to\claude-site-kit\install.ps1 -Project         # Windows
 
 ```bash
 mkdir -p ~/.claude/skills
-cp -R claude-site-kit/skill/site-kit ~/.claude/skills/
+cp -R claude-site-kit/skill/sitewright ~/.claude/skills/
 ```
 
-On Windows the target is `%USERPROFILE%\.claude\skills\site-kit`.
+On Windows the target is `%USERPROFILE%\.claude\skills\sitewright`.
 
 ### Browser tests (once)
 
@@ -200,20 +200,20 @@ npx playwright install chromium
 
 ### Check that it worked
 
-- `~/.claude/skills/site-kit/SKILL.md` exists.
-- Start a **new** Claude Code session and type `/site-kit`. The skill should appear in the list.
+- `~/.claude/skills/sitewright/SKILL.md` exists.
+- Start a **new** Claude Code session and type `/sitewright`. The skill should appear in the list.
 
 ## Use it
 
 Ask in plain words:
 
-> Use site-kit to make a landing page and a dashboard for my business.
+> Use Sitewright to make a landing page and a dashboard for my business.
 
 > I need a publishing page where my team uploads releases, with MFA sign-in.
 
 > Give the landing page an aurora background and a split-words headline.
 
-> /site-kit
+> /sitewright
 
 Claude will ask which modules you want, then your brand name, two colours, logo style and what you call things (orders, cases, scans), and whether you want an animated style (a preset, piece by piece, or a look at the live gallery first). It writes a `site.json`, runs the generator, installs, builds, and runs the verifier. It reports what passed and what it could not check.
 
@@ -223,7 +223,7 @@ The generator is plain Node. Even a brand name is enough:
 
 ```bash
 echo '{"brand":{"name":"Acme Co"}}' > site.json
-node ~/.claude/skills/site-kit/scripts/scaffold.mjs --config site.json --out ./my-site
+node ~/.claude/skills/sitewright/scripts/scaffold.mjs --config site.json --out ./my-site
 cd my-site && npm install && npx next build && npm start
 ```
 
@@ -232,24 +232,24 @@ The generator prints the development password and ingest key it created (they ar
 Then verify it:
 
 ```bash
-node ~/.claude/skills/site-kit/scripts/verify.mjs --site ./my-site --port 4010 --out ./verify-shots
+node ~/.claude/skills/sitewright/scripts/verify.mjs --site ./my-site --port 4010 --out ./verify-shots
 ```
 
 ## Examples
 
-Seven complete configs ship in [`skill/site-kit/examples`](skill/site-kit/examples):
+Seven complete configs ship in [`skill/sitewright/examples`](skill/sitewright/examples):
 
 | Config | Brand | Modules | Shows |
 | --- | --- | --- | --- |
-| [`coffee.json`](skill/site-kit/examples/coffee.json) | Bean & Barrel | all six | PDF/ZIP publishing, testers, every landing section |
-| [`fitness.json`](skill/site-kit/examples/fitness.json) | PulseFit | all six | Android APK publishing with real manifest parsing |
-| [`legal.json`](skill/site-kit/examples/legal.json) | Halden Legal | landing, sign-in, dashboard, connect | monogram logo, navy and gold, "matters" vocabulary |
-| [`studio.json`](skill/site-kit/examples/studio.json) | Pixel Studio | landing, MFA | square logo, purple and cyan |
-| [`minimal.json`](skill/site-kit/examples/minimal.json) | Acme Co | defaults | a brand name and nothing else |
-| [`coffee-effects.json`](skill/site-kit/examples/coffee-effects.json) | Bean & Barrel | all six | `coffee.json` plus an `effects` block (aurora-glass preset, beams on the sign-in page) |
-| [`gallery.json`](skill/site-kit/examples/gallery.json) | Effect Lab | `fxgallery` | just the live effects gallery |
+| [`coffee.json`](skill/sitewright/examples/coffee.json) | Bean & Barrel | all six | PDF/ZIP publishing, testers, every landing section |
+| [`fitness.json`](skill/sitewright/examples/fitness.json) | PulseFit | all six | Android APK publishing with real manifest parsing |
+| [`legal.json`](skill/sitewright/examples/legal.json) | Halden Legal | landing, sign-in, dashboard, connect | monogram logo, navy and gold, "matters" vocabulary |
+| [`studio.json`](skill/sitewright/examples/studio.json) | Pixel Studio | landing, MFA | square logo, purple and cyan |
+| [`minimal.json`](skill/sitewright/examples/minimal.json) | Acme Co | defaults | a brand name and nothing else |
+| [`coffee-effects.json`](skill/sitewright/examples/coffee-effects.json) | Bean & Barrel | all six | `coffee.json` plus an `effects` block (aurora-glass preset, beams on the sign-in page) |
+| [`gallery.json`](skill/sitewright/examples/gallery.json) | Effect Lab | `fxgallery` | just the live effects gallery |
 
-The full list of config keys is in [`reference/config.md`](skill/site-kit/reference/config.md).
+The full list of config keys is in [`reference/config.md`](skill/sitewright/reference/config.md).
 
 ## What you get under the hood
 
@@ -285,7 +285,7 @@ Each example was scaffolded from its config, type-checked, built for production 
 
 Fifteen sites, 797 checks, all passing on the final templates.
 
-Details of every check are in [`reference/testing.md`](skill/site-kit/reference/testing.md).
+Details of every check are in [`reference/testing.md`](skill/sitewright/reference/testing.md).
 
 ### Not covered
 
@@ -298,11 +298,11 @@ Details of every check are in [`reference/testing.md`](skill/site-kit/reference/
 ## Repository layout
 
 ```text
-skill/site-kit/        the skill: SKILL.md, scripts, templates, examples, reference docs
-  scripts/             scaffold.mjs (generator), verify.mjs (browser verifier), modules.mjs, defaults.mjs
+skill/sitewright/      the skill: SKILL.md, scripts, templates, examples, reference docs
+  scripts/             scaffold.mjs (generator), verify.mjs (browser verifier), effects.mjs, modules.mjs, defaults.mjs
   templates/           base + one folder per module, mirroring the generated project
   templates/fx/        the effects: backgrounds, headline animations, micro-interactions, css
-  examples/            five complete configs
+  examples/            seven complete configs
   reference/           config keys, modules, design system, effects, testing, gotchas
 site/                  the website (static HTML/CSS/JS) plus demo/, the exported live effects gallery; deployed on Vercel
 tools/                 how the screenshots, banner and social image were made
@@ -313,7 +313,7 @@ To regenerate the screenshots: build the example sites, then run `tools/showcase
 
 ## Contributing
 
-Issues and pull requests are welcome. A new module is a folder under `skill/site-kit/templates/modules/<id>/` that mirrors the output tree, plus an entry in `scripts/modules.mjs`. Please run the verifier on at least one generated site before opening a pull request, and say which sites you ran.
+Issues and pull requests are welcome. A new module is a folder under `skill/sitewright/templates/modules/<id>/` that mirrors the output tree, plus an entry in `scripts/modules.mjs`. Please run the verifier on at least one generated site before opening a pull request, and say which sites you ran.
 
 ## Licence
 

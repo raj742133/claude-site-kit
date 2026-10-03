@@ -1,4 +1,4 @@
-/* site-kit website. Same design language as the sites it generates: pale surface, white cards, soft shadow, pill buttons. */
+/* Sitewright website. Same design language as the sites it generates: pale surface, white cards, soft shadow, pill buttons. */
 :root {
   --surface: #f3f5fa; --raised: #ffffff; --raised-2: #f8f9fc; --ink: #0d1424; --muted: #55607a; --line: #dfe4ee; --line-strong: #c9d1e0;
   --primary: #1e5bd8; --primary-ink: #ffffff; --primary-wash: #e6eefc; --signal: #14a6cc; --signal-wash: #e0f4fa; --ok: #12805c;
@@ -243,14 +243,18 @@ footer { border-top: 1px solid var(--line); padding: 38px 0 54px; color: var(--m
   .phones figure:nth-child(even) { margin-top: 0; }
   .tested { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
-@media (max-width: 760px) {
-  section { padding: 60px 0; }
+/* the full nav needs about 900px; below 980px it collapses into the menu button */
+@media (max-width: 980px) {
   .top nav { position: fixed; inset: 68px 0 auto 0; flex-direction: column; align-items: stretch; background: var(--surface); border-bottom: 1px solid var(--line); padding: 10px 20px 18px; gap: 2px; display: none; box-shadow: var(--shadow); }
   .top nav.open { display: flex; }
   .top nav a { padding: 13px 14px; font-size: 16px; }
   .menu-btn { display: inline-grid; margin-left: auto; }
   .gh-top { display: none; }
+}
+@media (max-width: 760px) {
+  section { padding: 60px 0; }
   .hero { padding-top: 40px; }
+  .foot nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 4px; }
   .cards, .feat, .two, .duo { grid-template-columns: minmax(0, 1fr); }
   .facts { grid-template-columns: repeat(2, auto); }
   .gal { grid-template-columns: minmax(0, 1fr); }
@@ -291,3 +295,21 @@ footer { border-top: 1px solid var(--line); padding: 38px 0 54px; color: var(--m
 .fx-frame { display: block; width: 100%; height: 780px; border: 0; background: var(--surface); }
 @media (max-width: 1020px) { .fx-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); } .fx-cols { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 640px) { .fx-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .fx-tile span { display: none; } .fx-frame { height: 640px; } .fx-live-head .btn { flex: 1 1 100%; } }
+
+/* inline code (paths, file names) may break anywhere instead of pushing a phone-width page sideways */
+:not(pre) > code { overflow-wrap: anywhere; }
+.req li { grid-template-columns: 22px minmax(0, 1fr); }
+.req li > span { min-width: 0; }
+
+/* phones: the results table becomes a list (site and result on one line, description under it), commands wrap instead of hiding */
+@media (max-width: 640px) {
+  .table-wrap table { min-width: 0; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .table-wrap tr:last-child { border-bottom: 0; }
+  .table-wrap td { padding: 0; border: 0; }
+  .table-wrap td:nth-child(1) { font-weight: 600; }
+  .table-wrap td:nth-child(2) { grid-column: 1 / -1; grid-row: 2; color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .table-wrap td:nth-child(3) { grid-column: 2; grid-row: 1; white-space: nowrap; }
+  .code pre, .copyline code { white-space: pre-wrap; overflow-wrap: anywhere; }
+}
