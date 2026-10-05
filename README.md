@@ -116,7 +116,7 @@ Internally there are two more: `base` (design system, database, storage) and `ap
 
 ## Effects (optional)
 
-Add motion without adding a library. Pick from a menu and the generated site gets only what you chose: **10 animated hero backgrounds**, **8 headline text animations**, **4 button** and **4 card** micro-interactions, **5 scroll-reveal styles** and **4 extras** (cursor glow, scroll progress, click sparks, count-up numbers). Seven presets bundle sensible combinations: `calm`, `aurora-glass`, `tech-grid`, `playful`, `cosmic`, `editorial`, `minimal`.
+Add motion without adding a library. You choose the effects yourself when you start a site (Claude asks in the first question, next to the modules; `scaffold.mjs --list-effects` prints the whole menu), and the generated site gets only what you chose: **10 animated hero backgrounds**, **8 headline text animations**, **4 button** and **4 card** micro-interactions, **5 scroll-reveal styles** and **4 extras** (cursor glow, scroll progress, click sparks, count-up numbers). Seven presets bundle sensible combinations: `calm`, `aurora-glass`, `tech-grid`, `playful`, `cosmic`, `editorial`, `minimal`.
 
 <table>
   <tr>

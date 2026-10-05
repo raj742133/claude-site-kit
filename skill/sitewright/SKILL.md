@@ -27,7 +27,10 @@ Dependencies are resolved automatically - choosing `publishing` brings `mfa`; `d
 
 ## Workflow
 
-1. **Ask which modules.** Use AskUserQuestion with a multi-select over: Landing page, Publishing page, Dashboard, Connect to phone, Sign in (shared password), MFA accounts. Say what each adds in one line. If the user already named them, skip the question.
+1. **Ask what to build, effects included, in the first question round.** Effects are part of the kit from the first step, and **the user chooses them, not you**. Use one AskUserQuestion call with:
+   - a multi-select over the modules: Landing page, Publishing page, Dashboard, Connect to phone, Sign in (shared password), MFA accounts (one line each on what it adds; skip if the user already named them);
+   - a single-select on the visual style, with these options: **Keep the default look** / **Pick a preset** / **Choose piece by piece** / **Show me the full menu**.
+   If the user already named effects (a preset, or ids like `aurora`, `split-words`), take them as given and ask nothing about style.
 2. **Gather the brand** (ask only what is missing; everything has a default - see `reference/config.md`):
    - name, one-line tagline, what the product does in a sentence;
    - two brand colours (primary + accent/signal) - the whole light and dark palette, with contrast-checked text colours, is derived from them;
@@ -37,17 +40,19 @@ Dependencies are resolved automatically - choosing `publishing` brings `mfa`; `d
    - for `dashboard`: statuses, field labels, any numeric metric to total up;
    - for `landing`: headline + accent word, 3-4 story steps, optional proof/features/FAQ.
    **Never invent facts** (customer counts, benchmarks, testimonials). Leave `proof`, `features`, `compat` out unless the user supplies the content. Mark placeholder copy as such.
-3. **Offer the visual style (effects).** The default look is clean and already animated a little (dotted hero, scroll story, reveals). Ask once with AskUserQuestion, single-select: **Keep the default look** (recommended if they did not ask for animation) / **Pick a preset** / **Choose piece by piece** / **Show me everything first**.
-   - *Preset*: offer `calm`, `aurora-glass`, `tech-grid`, `playful` (and mention `cosmic`, `editorial`, `minimal`); set `effects.preset`.
-   - *Piece by piece*: ask background, headline animation, button style, card style (one question each, with a short description from `reference/effects.md`); write them as `heroBackground`, `headline`, `buttons`, `cards` (+ `reveal`, `extras`). `rotate` needs `rotateWords`.
-   - *Show me everything first*: also add `fxgallery` to the modules, build, run it, and tell them to open `/effects`, try things, press Copy, and paste the config back. Then regenerate with their choice.
-   Match the effect to the brand (calm/serious brands: `calm` or `editorial`; playful consumer brands: `playful`; technical: `tech-grid`). Do not stack heavy choices on a page full of dense content.
+3. **Apply the effects the user picked** (the style answer from step 1). The default look is clean and already animated a little (dotted hero, scroll story, reveals); never switch effects on that the user did not choose.
+   - *Keep the default look*: write no `effects` block.
+   - *Pick a preset*: offer `calm`, `aurora-glass`, `tech-grid`, `playful` (and mention `cosmic`, `editorial`, `minimal`) with the one-line table from `reference/effects.md`; set `effects.preset`. Let them adjust any single slot afterwards.
+   - *Choose piece by piece*: ask background, headline animation, button style, card style, then reveal and extras (one question each, options and descriptions straight from `node scripts/scaffold.mjs --list-effects`); write them as `heroBackground`, `headline`, `buttons`, `cards`, `reveal`, `extras`. `rotate` needs `rotateWords`; if they want the sign-in page animated too, set `loginBackground`.
+   - *Show me the full menu*: print the output of `node ~/.claude/skills/sitewright/scripts/scaffold.mjs --list-effects` and let them answer in their own words (ids or descriptions). Their pick goes straight into the build. Only if they want to see motion first, add `fxgallery` to the modules, build, and point them at `/effects` (Copy, then paste the config back).
+   You may say which choice you think suits the brand (calm/serious: `calm` or `editorial`; playful: `playful`; technical: `tech-grid`) and warn that heavy choices clash with dense pages, but the decision stays with the user.
 4. **Write the config** to `site.json` (see `reference/config.md`; `examples/*.json` are complete worked configs - `examples/minimal.json` is just a brand name).
 5. **Scaffold:**
    ```bash
    node ~/.claude/skills/sitewright/scripts/scaffold.mjs --config site.json --out ./my-site --modules landing,signin,dashboard,connect,mfa,publishing
    ```
-   `--modules` may be omitted if the config has a `modules` array. Other flags: `--force` (write into a non-empty folder), `--password <p>` (dev password), `--check` (validate and list what would be written, writes nothing), `--list`.
+   `--modules` may be omitted if the config has a `modules` array. Other flags: `--force` (write into a non-empty folder), `--password <p>` (dev password), `--check` (validate and list the modules and resolved effects, writes nothing), `--list`, `--list-effects`.
+   The user's effect choices can also be passed directly, overriding the config file: `--preset <id> --hero-bg <id> --login-bg <id> --headline <id> --rotate-words "a,b" --buttons <id> --cards <id> --reveal <id> --extras id,id`.
    Quote Windows paths with forward slashes in Bash.
 6. **Install and build** in the new folder. If the system drive is short on space (the install is ~700 MB with PGlite and Tiptap), put the project, `TEMP`/`TMP` and the npm cache on a roomy drive.
    ```bash
