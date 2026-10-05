@@ -1,10 +1,8 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
 import { THEME_SCRIPT } from '@/lib/theme';
-//#if fx
 import '@/components/fx/fx.css';
 import { FxMicro } from '@/components/fx/micro';
-//#endif
 
 export const metadata: Metadata = {
   title: __TITLE_JSON__,
@@ -37,9 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         {children}
-        {/*#if fx*/}
         <FxMicro />
-        {/*#endif*/}
       </body>
     </html>
   );

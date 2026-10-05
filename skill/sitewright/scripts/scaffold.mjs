@@ -6,6 +6,9 @@
 //   node scaffold.mjs --list-effects                       the effects menu (ids and what each does)
 //   ... --preset calm --hero-bg aurora --headline split-words --buttons shine --cards lift --reveal blur --extras cursor-glow,count-up
 //                                                          effect choices passed directly; they override the config file
+//   ... --figures auto | hero=terrain,signin=padlock   --figure-intensity 0.7     interactive line figures in named places
+//   node scaffold.mjs --apply-effects ./my-site --hero-bg stars --headline typewriter
+//                                                          change the effects of an existing project in place (nothing else is touched)
 //
 // Nothing here is clever on purpose: copy the module folders, fill __TOKENS__, strip //#if blocks, assemble the few files that
 // depend on the whole module set (package.json, middleware, schema, env, navigation, palette). Then npm install && npm run dev.
@@ -19,7 +22,7 @@ import { DEFAULTS, deepMerge, interpolate } from './defaults.mjs';
 import { buildPalette, paletteCss, onColour } from './lib/color.mjs';
 import { logoComponent, faviconSvg, LOGO_STYLES } from './lib/logo.mjs';
 import { resolveEffects, effectsMenu, BUTTON_SELECTOR, CARD_SELECTOR } from './effects.mjs';
-import { generateFx } from './lib/fxgen.mjs';
+import { generateFx, fxHtmlAttrs, FX_GENERATED } from './lib/fxgen.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const TEMPLATES = path.join(HERE, '..', 'templates');
@@ -96,12 +99,6 @@ if (a.list) {
 
 if (a['list-effects']) { console.log(effectsMenu()); process.exit(0); }
 
-if (!a.config) fail('--config <site.json> is required (see reference/config.md). Use --list to see the modules.');
-if (!a.out && !a.check) fail('--out <directory> is required.');
-
-let userCfg;
-try { userCfg = JSON.parse(fs.readFileSync(a.config, 'utf8')); } catch (e) { fail(`cannot read ${a.config}: ${e.message}`); }
-
 // The user's effect choices can be passed straight on the command line; they win over the config file and the preset.
 // (--preset calm --hero-bg aurora --headline rotate --rotate-words "roasted,fresh" --buttons shine --cards lift --reveal blur --extras cursor-glow,count-up)
 const csv = (s) => String(s).split(',').map((x) => x.trim()).filter(Boolean);
@@ -109,7 +106,67 @@ const FX_FLAGS = { preset: 'preset', 'hero-bg': 'heroBackground', 'login-bg': 'l
 const picked = {};
 for (const [flag, key] of Object.entries(FX_FLAGS)) if (a[flag] !== undefined) picked[key] = a[flag];
 if (a.extras !== undefined) picked.extras = csv(a.extras);
+// --figures auto | none | hero=terrain,signin=padlock      --figure-intensity 0..1
+if (a.figures !== undefined) {
+  const v = String(a.figures).trim();
+  picked.figures = v === 'auto' || v === 'none' ? v : Object.fromEntries(csv(v).map((kv) => { const [k, id] = kv.split('='); if (!k || !id) fail(`--figures: "${kv}" should look like hero=terrain (places and figures: --list-effects)`); return [k.trim(), id.trim()]; }));
+}
+if (a['figure-intensity'] !== undefined) picked.figureIntensity = Number(a['figure-intensity']);
 if (a['rotate-words'] !== undefined) picked.rotateWords = csv(a['rotate-words']);
+
+
+// ---- --apply-effects <project>: change the effects of an existing project in place -------------------------------------------
+// Rewrites only the generated effects layer (src/components/fx/), the data-fx-* attributes on <html> in the root layout and the
+// `effects` entry of src/content/site.json. Pages, styles and anything else you edited are never touched.
+if (a['apply-effects']) {
+  const dir = path.resolve(a['apply-effects']);
+  const siteFile = path.join(dir, 'src/content/site.json');
+  const layoutFile = path.join(dir, 'src/app/layout.tsx');
+  if (!fs.existsSync(siteFile) || !fs.existsSync(layoutFile)) fail(`${dir} does not look like a Sitewright project (no src/content/site.json or src/app/layout.tsx).`);
+  const site = JSON.parse(fs.readFileSync(siteFile, 'utf8'));
+  const layout = fs.readFileSync(layoutFile, 'utf8');
+  if (!fs.existsSync(path.join(dir, 'src/components/fx/index.tsx')) || !layout.includes('FxMicro')) fail('this project was generated before effects could be changed in place. Regenerate it once with the current Sitewright, then --apply-effects works.');
+  if ((site.modules ?? []).includes('fxgallery')) fail('this project contains the fxgallery module, which previews every effect at /effects; choose effects there, or in a separate project.');
+  if (!Object.keys(picked).length) fail('nothing to apply: pass at least one of --preset --hero-bg --login-bg --headline --rotate-words --buttons --cards --reveal --extras (see --list-effects).');
+
+  // A preset starts from scratch; individual picks change only their own slot of what the project has now.
+  const { active, ...current } = site.effects ?? {};
+  let fx;
+  // --figures hero=bars changes that place only; "none" for a place removes it; "auto" / "none" on their own replace the lot.
+  const figures = typeof picked.figures === 'object' && current.figures && !picked.preset
+    ? Object.fromEntries(Object.entries({ ...current.figures, ...picked.figures }).filter(([, id]) => id !== 'none')) : picked.figures;
+  const next = picked.preset ? picked : { ...current, ...picked };
+  if (figures !== undefined) next.figures = figures;
+  try { fx = resolveEffects(next, { modules: site.modules }); } catch (e) { fail(e.message); }
+
+  const files = new Map();
+  const tokens = { FX_BTN: BUTTON_SELECTOR, FX_CARD: CARD_SELECTOR };
+  generateFx({ fx, landing: (site.modules ?? []).includes('landing'), all: false, templates: TEMPLATES, tokens, put: (rel, content) => files.set(rel, content), fill });
+
+  const fxDir = path.join(dir, 'src/components/fx');
+  for (const name of FX_GENERATED) fs.rmSync(path.join(fxDir, name), { recursive: true, force: true });
+  for (const [rel, content] of files) { const dest = path.join(dir, rel); fs.mkdirSync(path.dirname(dest), { recursive: true }); fs.writeFileSync(dest, content); }
+
+  const attrs = fxHtmlAttrs(fx);
+  const html = /(<html\b[^>]*?\bsuppressHydrationWarning)((?:\s+data-fx-[a-z]+="[^"]*")*)/;
+  if (html.test(layout)) fs.writeFileSync(layoutFile, layout.replace(html, (_, head) => head + attrs));
+  else console.warn(`sitewright: could not find the <html> tag in ${layoutFile}; add this to it by hand:${attrs || ' (no data-fx-* attributes needed)'}`);
+
+  site.effects = fx;
+  fs.writeFileSync(siteFile, JSON.stringify(site, null, 2) + '\n');
+  console.log(`sitewright: effects updated in ${dir}  (${files.size} files)`);
+  console.log(`  hero ${fx.heroBackground}, login ${fx.loginBackground}, headline ${fx.headline}, buttons ${fx.buttons}, cards ${fx.cards}, reveal ${fx.reveal}, extras ${fx.extras.join('+') || 'none'}`);
+  console.log(`  figures ${Object.entries(fx.figures).map(([p, id]) => `${p}=${id}`).join(', ') || 'none'}${fx.figuresIgnored ? `   (no such place in this site: ${fx.figuresIgnored.join(', ')})` : ''}`);
+  console.log('  run:  npm run dev   (or npm run build)');
+  process.exit(0);
+}
+
+if (!a.config) fail('--config <site.json> is required (see reference/config.md). Use --list to see the modules, --apply-effects <project> to change effects.');
+if (!a.out && !a.check) fail('--out <directory> is required.');
+
+let userCfg;
+try { userCfg = JSON.parse(fs.readFileSync(a.config, 'utf8')); } catch (e) { fail(`cannot read ${a.config}: ${e.message}`); }
+
 if (Object.keys(picked).length) userCfg.effects = { ...(userCfg.effects ?? {}), ...picked };
 
 const merged = deepMerge(DEFAULTS, userCfg);
@@ -142,7 +199,7 @@ const has = (id) => modules.includes(id);
 const added = modules.filter((m) => !wanted.includes(m) && m !== 'base');
 
 if (a.check) {
-  let effects; try { effects = resolveEffects(cfg.effects ?? {}); } catch (e) { fail(e.message); }
+  let effects; try { effects = resolveEffects(cfg.effects ?? {}, { modules }); } catch (e) { fail(e.message); }
   console.log(JSON.stringify({ brand: brandName, slug, modules, addedAsDependencies: added, effects }, null, 2)); process.exit(0);
 }
 
@@ -164,15 +221,12 @@ if (cfg.storage?.provider === 'azure') flags.add('azure');
 
 // effects (animated backgrounds, headline animations, button and card micro-interactions): see effects.mjs
 let fx;
-try { fx = resolveEffects(cfg.effects ?? {}); } catch (e) { fail(e.message); }
+try { fx = resolveEffects(cfg.effects ?? {}, { modules }); } catch (e) { fail(e.message); }
 const fxGallery = has('fxgallery');
 if (fxGallery && modules.every((m) => m === 'base' || m === 'fxgallery')) flags.add('fx_home');
-if (fx.active || fxGallery) flags.add('fx');
-if (has('landing') && fx.heroBackground !== 'territory' && fx.heroBackground !== 'none') flags.add('fx_bg');
-if (has('landing') && fx.heroBackground === 'none') flags.add('fx_nobg');
-if (has('landing') && fx.headline !== 'none') flags.add('fx_headline');
-if ((has('signin') || has('mfa')) && fx.loginBackground !== 'none') flags.add('fx_login_bg');
-if (has('dashboard') && fx.extras.includes('count-up')) flags.add('fx_countup');
+// The effects layer is always generated, even with nothing chosen: the pages import its slots (a "none" slot renders nothing), which is
+// what lets `--apply-effects` swap effects later by rewriting src/components/fx/ alone.
+flags.add('fx');
 
 // palette
 const palette = buildPalette({ primary: cfg.brand.colors.primary, signal: cfg.brand.colors.signal, neutral: cfg.brand.colors.neutralHue });
@@ -209,8 +263,7 @@ const tokens = {
 };
 const PLAIN = ['BRAND', 'ISSUER', 'AREA', 'AREA_LOWER', 'ARTIFACT', 'DEVICE', 'RECORD', 'RECORDS', 'RECORD_CAP', 'RECORDS_CAP', 'AREA_LOWER_NAV', 'PACKAGE_NAME', 'NAV_CONNECT'];
 for (const k of PLAIN) tokens[k] = safe(tokens[k]);
-const fxAttrs = [['buttons', fx.buttons, 'none'], ['cards', fx.cards, 'none'], ['reveal', fx.reveal, 'rise']].filter(([, v, d]) => v !== d).map(([k, v]) => ` data-fx-${k}="${v}"`).join('');
-tokens.FX_HTML_ATTRS = fxGallery ? '' : fxAttrs;
+tokens.FX_HTML_ATTRS = fxGallery ? '' : fxHtmlAttrs(fx);
 tokens.FX_BTN = BUTTON_SELECTOR;
 tokens.FX_CARD = CARD_SELECTOR;
 
@@ -238,7 +291,7 @@ put('src/components/brand/Logo.tsx', logoComponent({ style: cfg.brand.logo.style
 put('src/app/icon.svg', faviconSvg({ style: cfg.brand.logo.style, letter }, palette.light.primary, palette.light.signal, palette.light['on-primary']));
 
 // ---- effects layer ---------------------------------------------------------------------------------------------------------
-if (flags.has('fx')) generateFx({ fx, flags, all: fxGallery, templates: TEMPLATES, tokens, put, fill });
+generateFx({ fx, landing: has('landing'), all: fxGallery, templates: TEMPLATES, tokens, put, fill });
 
 const nav = [];
 if (has('dashboard')) nav.push({ id: 'dashboard', label: cfg.nav.dashboard, href: '/dashboard' });
@@ -320,7 +373,7 @@ if (!a.quiet) {
   console.log(`\nsitewright: wrote ${n} files to ${out}`);
   console.log(`  brand    ${brandName} (${slug}), logo ${cfg.brand.logo.style}, primary ${cfg.brand.colors.primary}, signal ${cfg.brand.colors.signal}`);
   console.log(`  modules  ${modules.filter((m) => m !== 'base').join(', ')}${added.length ? `   (added as dependencies: ${added.join(', ')})` : ''}`);
-  if (fx.active) console.log(`  effects  hero ${fx.heroBackground}, login ${fx.loginBackground}, headline ${fx.headline}, buttons ${fx.buttons}, cards ${fx.cards}, reveal ${fx.reveal}${fx.extras.length ? `, extras ${fx.extras.join('+')}` : ''}`);
+  if (fx.active) console.log(`  effects  hero ${fx.heroBackground}, login ${fx.loginBackground}, headline ${fx.headline}, buttons ${fx.buttons}, cards ${fx.cards}, reveal ${fx.reveal}${fx.extras.length ? `, extras ${fx.extras.join('+')}` : ''}${Object.keys(fx.figures).length ? `, figures ${Object.entries(fx.figures).map(([p, id]) => `${p}=${id}`).join(' ')}` : ''}`);
   if (has('signin')) console.log(`  sign-in  password ${secrets['@password']}   (development only; stored in .env.local)`);
   if (has('mfa')) console.log(`  admin    setup code ${secrets['@setup']}   (first account at /admin/setup)`);
   if (has('api')) console.log(`  api key  ${secrets['@token']}   (Bearer token for /api/ingest)`);

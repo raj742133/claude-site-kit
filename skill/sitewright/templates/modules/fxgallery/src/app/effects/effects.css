@@ -23,6 +23,17 @@
 .fxg-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .fxg-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .fxg-below > .btn { justify-self: start; }
+/* figures */
+.fxg-figures { display: grid; gap: 10px; }
+.fxg-fig { display: grid; justify-items: center; }
+.fxg-fig-box { width: min(100%, 440px); aspect-ratio: 5 / 4; }
+.fxg-fig-read { min-height: 1.4em; margin: 0; }
+.fxg-range { display: inline-flex; align-items: center; gap: 12px; font-size: 13.5px; }
+.fxg-range input { width: min(260px, 60vw); min-height: 44px; accent-color: var(--primary); }
+.fxg-places { display: grid; gap: 10px; }
+.fxg-place { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 13.5px; }
+.fxg-place small { display: block; font-size: 12px; line-height: 1.35; }
+.fxg-place select { min-height: 44px; border-radius: 12px; border: 1px solid var(--line-strong); background: var(--raised); color: var(--ink); padding: 0 10px; font: 13.5px var(--font-body); max-width: 150px; }
 /* the landing page defines .rv; the gallery needs its own copy of the hidden/shown pair */
 .fxg .rv { opacity: 0; transform: translateY(24px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
 .fxg .rv.in { opacity: 1; transform: none; }

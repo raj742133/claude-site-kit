@@ -403,6 +403,14 @@
       "cursor-glow",
       "scroll-progress",
       "count-up"
-    ]
+    ],
+    "figures": {
+      "hero": "terrain",
+      "signin": "padlock",
+      "mfa": "vault",
+      "connect": "scanner",
+      "empty": "bars",
+      "notfound": "dish"
+    }
   }
 }

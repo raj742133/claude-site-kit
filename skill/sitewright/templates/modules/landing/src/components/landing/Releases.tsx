@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { DownloadLink } from './Download';
+import { Figure } from '@/components/fx';
 
 export interface ReleaseCard {
   code: number;
@@ -33,6 +34,7 @@ export function Releases({ list, locked, title }: { list: ReleaseCard[]; locked:
             <button key={k} type="button" className={`chip${kind === k ? ' on' : ''}`} aria-pressed={kind === k} onClick={() => setKind(k)}>{t}</button>
           ))}
         </div>
+        <Figure place="releases" />
       </div>
       <div className="rel-list">
         {shown.length === 0 ? <div className="rel-empty">{list.length === 0 ? 'No versions are on the home page yet.' : 'No versions of this kind yet.'}</div> : null}

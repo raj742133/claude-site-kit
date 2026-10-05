@@ -1,0 +1,21 @@
+1:"$Sreact.fragment"
+2:I[9766,[],""]
+3:I[8924,[],""]
+4:I[7003,["345","static/chunks/app/not-found-1c6bd4f7dac13257.js"],"Figure"]
+5:I[2619,["345","static/chunks/app/not-found-1c6bd4f7dac13257.js"],""]
+6:I[3524,["177","static/chunks/app/layout-c02874da1875d36a.js"],"FxMicro"]
+7:I[6808,["340","static/chunks/340-4cef05cfd7413235.js","974","static/chunks/app/page-58739d86ac42a02e.js"],"Playground"]
+8:I[4431,[],"OutletBoundary"]
+a:I[5278,[],"AsyncMetadataOutlet"]
+c:I[4431,[],"ViewportBoundary"]
+e:I[4431,[],"MetadataBoundary"]
+f:"$Sreact.suspense"
+11:I[7150,[],""]
+:HL["/demo/_next/static/css/97c1f6bc6886919a.css","style"]
+:HL["/demo/_next/static/css/906520fa4f4f6095.css","style"]
+0:{"P":null,"b":"JKmft6vA44E-JzpxahQ8Q","p":"/demo","c":["",""],"i":false,"f":[[["",{"children":["__PAGE__",{}]},"$undefined","$undefined",true],["",["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/demo/_next/static/css/97c1f6bc6886919a.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]],["$","html",null,{"lang":"en","suppressHydrationWarning":true,"children":[["$","head",null,{"children":[["$","script",null,{"dangerouslySetInnerHTML":{"__html":"try{var t=localStorage.getItem('sitewr-theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t}catch(e){}"}}],["$","link",null,{"rel":"preconnect","href":"https://fonts.googleapis.com"}],["$","link",null,{"rel":"preconnect","href":"https://fonts.gstatic.com","crossOrigin":""}],["$","link",null,{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"}]]}],["$","body",null,{"children":[["$","$L2",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","main",null,{"className":"login-wrap","children":["$","div",null,{"className":"login-card","style":{"textAlign":"center"},"children":[["$","$L4",null,{"place":"notfound"}],["$","p",null,{"className":"eyebrow","children":"404"}],["$","h1",null,{"className":"login-title","children":"That page is not here."}],["$","p",null,{"className":"muted small","children":"The address may be mistyped, or the page may have moved."}],["$","$L5",null,{"className":"btn primary","href":"/","style":{"marginTop":14},"children":"Back to the start"}]]}]}],[]],"forbidden":"$undefined","unauthorized":"$undefined"}],["$","$L6",null,{}]]}]]}]]}],{"children":["__PAGE__",["$","$1","c",{"children":[["$","$L7",null,{}],[["$","link","0",{"rel":"stylesheet","href":"/demo/_next/static/css/906520fa4f4f6095.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]],["$","$L8",null,{"children":["$L9",["$","$La",null,{"promise":"$@b"}]]}]]}],{},null,false]},null,false],["$","$1","h",{"children":[null,[["$","$Lc",null,{"children":"$Ld"}],null],["$","$Le",null,{"children":["$","div",null,{"hidden":true,"children":["$","$f",null,{"fallback":null,"children":"$L10"}]}]}]]}],false]],"m":"$undefined","G":["$11",[]],"s":false,"S":true}
+d:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","2",{"name":"theme-color","media":"(prefers-color-scheme: light)","content":"#f0f2f6"}],["$","meta","3",{"name":"theme-color","media":"(prefers-color-scheme: dark)","content":"#0c0e12"}]]
+9:null
+12:I[622,[],"IconMark"]
+b:{"metadata":[["$","title","0",{"children":"Sitewright · Every effect, live."}],["$","meta","1",{"name":"description","content":"Every animated background, headline, button and card effect, live, with the config to copy."}],["$","link","2",{"rel":"icon","href":"/demo/icon.svg?be2bd9292e625add","type":"image/svg+xml","sizes":"any"}],["$","$L12","3",{}]],"error":null,"digest":"$undefined"}
+10:"$b:metadata"

@@ -1,6 +1,7 @@
 import { query, migrate } from '@/lib/db';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Stat } from '@/components/Stat';
+import { Figure } from '@/components/fx';
 import { RecordBrowser, type RecordCard } from '@/components/RecordBrowser';
 import site from '@/content/site.json';
 
@@ -98,6 +99,7 @@ export default async function Dashboard() {
           </div>
         ) : cards.length === 0 ? (
           <div className="card empty">
+            <Figure place="empty" />
             <p className="strong">{D.empty}</p>
             {/*#if connect*/}
             <p>See <a className="link" href="/connect">__NAV_CONNECT__</a> for the link that lets a client send them.</p>

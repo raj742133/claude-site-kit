@@ -116,7 +116,7 @@ Internally there are two more: `base` (design system, database, storage) and `ap
 
 ## Effects (optional)
 
-Add motion without adding a library. Ask for one in plain words ("use aurora behind the hero") and Claude builds it into the site; or let Claude pick a fitting preset. `scaffold.mjs --list-effects` prints the whole menu, and the generated site gets only what was chosen: **10 animated hero backgrounds**, **8 headline text animations**, **4 button** and **4 card** micro-interactions, **5 scroll-reveal styles** and **4 extras** (cursor glow, scroll progress, click sparks, count-up numbers). Seven presets bundle sensible combinations: `calm`, `aurora-glass`, `tech-grid`, `playful`, `cosmic`, `editorial`, `minimal`.
+Add motion without adding a library. Ask for one in plain words ("use aurora behind the hero") and Claude builds it into the site; or let Claude pick a fitting preset. `scaffold.mjs --list-effects` prints the whole menu, and the generated site gets only what was chosen. Change your mind later and it takes a second, without touching anything you edited: `scaffold.mjs --apply-effects ./my-site --hero-bg stars`. **10 animated hero backgrounds**, **8 headline text animations**, **4 button** and **4 card** micro-interactions, **5 scroll-reveal styles** and **4 extras** (cursor glow, scroll progress, click sparks, count-up numbers). Seven presets bundle sensible combinations: `calm`, `aurora-glass`, `tech-grid`, `playful`, `cosmic`, `editorial`, `minimal`.
 
 <table>
   <tr>
@@ -149,7 +149,41 @@ Add motion without adding a library. Ask for one in plain words ("use aurora beh
 }
 ```
 
-All of it is original, dependency-free code (no GSAP or Three.js). It honours `prefers-reduced-motion`, skips pointer-follow effects on touch screens, pauses canvases that are off screen, and keeps the real headline text for screen readers. See [`reference/effects.md`](skill/sitewright/reference/effects.md) for the full catalogue.
+The backgrounds, headline animations and micro-interactions are original, dependency-free code (no GSAP or Three.js). It honours `prefers-reduced-motion`, skips pointer-follow effects on touch screens, pauses canvases that are off screen, and keeps the real headline text for screen readers. See [`reference/effects.md`](skill/sitewright/reference/effects.md) for the full catalogue.
+
+### Figures: little drawings that answer the pointer
+
+22 small isometric line figures, placed where they mean something. Say `figures: "auto"` and every place the site has gets its fitting figure, or choose them one by one:
+
+<table>
+  <tr>
+    <td width="33%"><img src="site/assets/fx/fig-padlock.jpg" alt="Padlock figure"><br><sub><b>Padlock</b> · the sign-in card. The shackle lifts as you reach</sub></td>
+    <td width="33%"><img src="site/assets/fx/fig-vault.jpg" alt="Vault figure"><br><sub><b>Vault</b> · account sign-in. Turn the dial, the bolts draw back</sub></td>
+    <td width="33%"><img src="site/assets/fx/fig-bars.jpg" alt="Bars figure"><br><sub><b>Bars</b> (new) · an empty dashboard. The bar under you climbs</sub></td>
+  </tr>
+  <tr>
+    <td><img src="site/assets/fx/fig-scanner.jpg" alt="Scanner figure"><br><sub><b>Scanner</b> (new) · the connect page. A scan line follows you</sub></td>
+    <td><img src="site/assets/fx/fig-parcel.jpg" alt="Parcel figure"><br><sub><b>Parcel</b> (new) · beside the releases. Move up and it opens</sub></td>
+    <td><img src="site/assets/fx/fig-dish.jpg" alt="Dish figure"><br><sub><b>Dish</b> · the 404 page. It looks for a signal</sub></td>
+  </tr>
+</table>
+
+| Place | Where | `auto` puts |
+| --- | --- | --- |
+| `hero` | beside the landing headline | `exploded` |
+| `releases` | beside the "what's new" list | `parcel` |
+| `signin` | the shared-password card | `padlock` |
+| `mfa` | every account sign-in step | `vault` |
+| `connect` | the "connect a phone" page | `scanner` |
+| `empty` | an empty list, or a search that finds nothing | `bars` |
+| `notfound` | the 404 page | `dish` |
+
+```bash
+node scaffold.mjs --config site.json --out ./my-site --figures auto
+node scaffold.mjs --apply-effects ./my-site --figures hero=bars        # change one place later, in a second
+```
+
+They wear your brand colours and follow light and dark mode, answer touch as well as a mouse, hold still under reduced motion, and ship only the figures you chose. **Nineteen are [Hairline](https://github.com/lucasmarkes/hairline) by Lucas Marques (MIT, its licence travels with the files); `bars`, `scanner` and `parcel` are new here**, drawn on the same engine to Hairline's ten rules. Which figure fits where, and how to add your own: [`reference/figures.md`](skill/sitewright/reference/figures.md).
 
 > The idea comes from animated-component libraries such as [React Bits](https://reactbits.dev). Their licence (MIT with the Commons Clause) does not allow redistributing the components inside another package, so these effects are written from scratch for this kit.
 
@@ -251,7 +285,7 @@ Seven complete configs ship in [`skill/sitewright/examples`](skill/sitewright/ex
 | [`legal.json`](skill/sitewright/examples/legal.json) | Halden Legal | landing, sign-in, dashboard, connect | monogram logo, navy and gold, "matters" vocabulary |
 | [`studio.json`](skill/sitewright/examples/studio.json) | Pixel Studio | landing, MFA | square logo, purple and cyan |
 | [`minimal.json`](skill/sitewright/examples/minimal.json) | Acme Co | defaults | a brand name and nothing else |
-| [`coffee-effects.json`](skill/sitewright/examples/coffee-effects.json) | Bean & Barrel | all six | `coffee.json` plus an `effects` block (aurora-glass preset, beams on the sign-in page) |
+| [`coffee-effects.json`](skill/sitewright/examples/coffee-effects.json) | Bean & Barrel | all six | `coffee.json` plus an `effects` block (aurora-glass preset, beams on the sign-in page, line figures in six places) |
 | [`gallery.json`](skill/sitewright/examples/gallery.json) | Effect Lab | `fxgallery` | just the live effects gallery |
 
 The full list of config keys is in [`reference/config.md`](skill/sitewright/reference/config.md).
