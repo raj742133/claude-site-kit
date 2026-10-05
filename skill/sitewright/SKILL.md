@@ -27,10 +27,7 @@ Dependencies are resolved automatically - choosing `publishing` brings `mfa`; `d
 
 ## Workflow
 
-1. **Ask what to build, effects included, in the first question round.** Effects are part of the kit from the first step, and **the user chooses them, not you**. Use one AskUserQuestion call with:
-   - a multi-select over the modules: Landing page, Publishing page, Dashboard, Connect to phone, Sign in (shared password), MFA accounts (one line each on what it adds; skip if the user already named them);
-   - a single-select on the visual style, with these options: **Keep the default look** / **Pick a preset** / **Choose piece by piece** / **Show me the full menu**.
-   If the user already named effects (a preset, or ids like `aurora`, `split-words`), take them as given and ask nothing about style.
+1. **Ask which modules.** Use AskUserQuestion with a multi-select over: Landing page, Publishing page, Dashboard, Connect to phone, Sign in (shared password), MFA accounts. Say what each adds in one line. If the user already named them, skip the question.
 2. **Gather the brand** (ask only what is missing; everything has a default - see `reference/config.md`):
    - name, one-line tagline, what the product does in a sentence;
    - two brand colours (primary + accent/signal) - the whole light and dark palette, with contrast-checked text colours, is derived from them;
@@ -40,12 +37,11 @@ Dependencies are resolved automatically - choosing `publishing` brings `mfa`; `d
    - for `dashboard`: statuses, field labels, any numeric metric to total up;
    - for `landing`: headline + accent word, 3-4 story steps, optional proof/features/FAQ.
    **Never invent facts** (customer counts, benchmarks, testimonials). Leave `proof`, `features`, `compat` out unless the user supplies the content. Mark placeholder copy as such.
-3. **Apply the effects the user picked** (the style answer from step 1). The default look is clean and already animated a little (dotted hero, scroll story, reveals); never switch effects on that the user did not choose.
-   - *Keep the default look*: write no `effects` block.
-   - *Pick a preset*: offer `calm`, `aurora-glass`, `tech-grid`, `playful` (and mention `cosmic`, `editorial`, `minimal`) with the one-line table from `reference/effects.md`; set `effects.preset`. Let them adjust any single slot afterwards.
-   - *Choose piece by piece*: ask background, headline animation, button style, card style, then reveal and extras (one question each, options and descriptions straight from `node scripts/scaffold.mjs --list-effects`); write them as `heroBackground`, `headline`, `buttons`, `cards`, `reveal`, `extras`. `rotate` needs `rotateWords`; if they want the sign-in page animated too, set `loginBackground`.
-   - *Show me the full menu*: print the output of `node ~/.claude/skills/sitewright/scripts/scaffold.mjs --list-effects` and let them answer in their own words (ids or descriptions). Their pick goes straight into the build. Only if they want to see motion first, add `fxgallery` to the modules, build, and point them at `/effects` (Copy, then paste the config back).
-   You may say which choice you think suits the brand (calm/serious: `calm` or `editorial`; playful: `playful`; technical: `tech-grid`) and warn that heavy choices clash with dense pages, but the decision stays with the user.
+3. **Bake in the effects.** Effects are part of the kit from the start; Claude chooses and wires them, the user steers.
+   - **The user named an effect** ("use aurora", "typewriter headline", "the playful preset"): apply exactly that, without asking. Map it to the ids in `node scripts/scaffold.mjs --list-effects` and write it to `effects` (or pass `--hero-bg aurora` etc.). Anything else they did not mention stays as the preset or default gives it.
+   - **The user did not mention effects**: pick one fitting preset yourself (calm/serious brands: `calm` or `editorial`; playful: `playful`; technical: `tech-grid`; plain data tools: keep the default look), say which in one line, and offer to change it. Do not stack heavy choices on a page full of dense content.
+   - **The user asks to see the options**: print `--list-effects`, or add `fxgallery`, build, and point them at `/effects` (Copy, then paste the config back).
+   `rotate` needs `rotateWords`; set `loginBackground` if the sign-in page should be animated too. Changing the effect later means re-running the scaffold with the new choice (into a fresh folder, or `--force` over an unedited one), since a hand-edited project would be overwritten.
 4. **Write the config** to `site.json` (see `reference/config.md`; `examples/*.json` are complete worked configs - `examples/minimal.json` is just a brand name).
 5. **Scaffold:**
    ```bash
