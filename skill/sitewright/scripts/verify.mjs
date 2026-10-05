@@ -1024,6 +1024,78 @@ async function checkFigures(browser) {
   });
 }
 
+// ---- icons -----------------------------------------------------------------------------------------------------------------------
+const hasIcons = () => Boolean(Object.keys(site.nav?.icons ?? {}).length || (site.dashboard?.stats ?? []).some((x) => x.icon) || (site.dashboard?.statuses ?? []).some((x) => x.icon)
+  || (site.landing?.features?.ready ?? []).some((t) => t[2]) || (site.landing?.story?.steps ?? []).some((x) => x.icon));
+async function checkIcons(browser) {
+  if (!hasIcons()) return;
+  section = 'icons';
+  const ALLOWED = new Set(['g', 'path', 'circle', 'ellipse', 'rect', 'line', 'polyline', 'polygon', 'defs', 'clippath', 'mask', 'lineargradient', 'radialgradient', 'stop']);
+  /** Every inline icon on the page: drawn, a sensible size, in the colour of its text, hidden from screen readers, and made of plain shapes only. */
+  const iconsOk = (page, where) => page.evaluate((allowed) => {
+    const bad = [];
+    for (const svg of document.querySelectorAll('svg.ic')) {
+      const r = svg.getBoundingClientRect(), id = svg.dataset.icon;
+      if (r.width < 8 || r.height < 8 || r.width > 40) bad.push(`${id}: ${Math.round(r.width)}px`);
+      if (svg.getAttribute('aria-hidden') !== 'true') bad.push(`${id}: not hidden from screen readers`);
+      if (!svg.querySelector('path, circle, rect, line, polyline, polygon, ellipse')) bad.push(`${id}: nothing drawn`);
+      for (const el of svg.querySelectorAll('*')) {
+        if (!allowed.includes(el.tagName.toLowerCase())) bad.push(`${id}: <${el.tagName}> inside an icon`);
+        for (const a of el.attributes) if (/^on/i.test(a.name) || /^(href|xlink:href|style)$/i.test(a.name)) bad.push(`${id}: attribute ${a.name}`);
+      }
+    }
+    return bad;
+  }, [...ALLOWED]).then((bad) => { if (bad.length) throw new Error(`${where}: ${bad.slice(0, 4).join('; ')}`); });
+  const pageWith = async (vp, name) => {
+    const { ctx, page } = await newPage(browser, vp, name);
+    if (has('signin')) {
+      await page.goto(`${BASE}/login`); await page.locator('input[name=password]').fill(env.DASHBOARD_PASSWORD); await page.getByRole('button', { name: 'Sign in' }).click();
+      await page.waitForURL((u) => !u.pathname.startsWith('/login'));
+    }
+    return { ctx, page };
+  };
+
+  if (has('dashboard')) await check('dashboard: navigation, stat cards and status chips carry their icons, in the text colour, without crowding it', async () => {
+    for (const vp of ['desktop', 'narrow']) {
+      const { ctx, page } = await pageWith(vp, `icons-dash-${vp}`);
+      await page.goto(`${BASE}/dashboard`, { waitUntil: 'networkidle' }); await page.waitForTimeout(500);
+      for (const [id, icon] of Object.entries(site.nav?.icons ?? {})) {
+        const sel = `header.site nav svg[data-icon="${icon}"]`;
+        if (await page.locator(`header.site nav a[href="${{ dashboard: '/dashboard', connect: '/connect', publishing: '/admin', team: '/admin', home: '/' }[id]}"]`).count()) eq(await page.locator(sel).count() >= 1, true, `nav icon ${id} (${icon})`);
+      }
+      const stats = (site.dashboard.stats ?? []).filter((x) => x.icon);
+      if (stats.length && await page.locator('.stat-card').count()) {
+        for (const st of stats) eq(await page.locator(`.stat-card svg.stat-ic[data-icon="${st.icon}"]`).count() >= 1, true, `stat icon ${st.icon}`);
+        // the icon sits in a corner and never on top of the number
+        const clash = await page.evaluate(() => [...document.querySelectorAll('.stat-card')].filter((c) => { const i = c.querySelector('.stat-ic'); if (!i) return false; const a = i.getBoundingClientRect(), g = document.createRange(); g.selectNodeContents(c.querySelector('.stat-n')); const b = g.getBoundingClientRect(); return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top; }).length);
+        eq(clash, 0, 'stat icons overlapping their number');
+      }
+      for (const stt of (site.dashboard.statuses ?? []).filter((x) => x.icon)) if (await page.locator('.chip').count()) eq(await page.locator(`.chip svg[data-icon="${stt.icon}"]`).count() >= 1, true, `status chip icon ${stt.icon}`);
+      const same = await page.evaluate(() => { const a = document.querySelector('header.site nav a.on'), i = a?.querySelector('svg.ic'); return a && i ? getComputedStyle(a).color === getComputedStyle(i).color : true; });
+      truthy(same, 'a nav icon is not the colour of its label');
+      await iconsOk(page, `dashboard at ${VIEWPORTS[vp].width}px`);
+      await noOverflow(page, `dashboard with icons at ${VIEWPORTS[vp].width}px`);
+      if (vp === 'desktop') await shot(page, 'icons-dashboard');
+      await ctx.close();
+    }
+  });
+
+  if (has('landing') && ((site.landing?.features?.ready ?? []).some((t) => t[2]) || (site.landing?.story?.steps ?? []).some((x) => x.icon))) await check('landing: feature and story icons appear where they were given, and only there', async () => {
+    const { ctx, page } = await newPage(browser, 'desktop', 'icons-landing');
+    await page.goto(`${BASE}/`, { waitUntil: 'networkidle' }); await scrollThrough(page);
+    const f = site.landing?.features;
+    if (f) {
+      const given = [...(f.ready ?? []).map((t) => t[2]), ...(f.next ?? []).map((t) => t[3])].filter(Boolean).length;
+      eq(await page.locator('.mod-ic.has svg.ic').count(), given, 'feature icons vs config');
+    }
+    const steps = (site.landing?.story?.steps ?? []).filter((x) => x.icon).length;
+    eq(await page.locator('.st-ic').count(), steps, 'story icons vs config');
+    await iconsOk(page, 'landing');
+    await noOverflow(page, 'landing with icons');
+    await ctx.close();
+  });
+}
+
 async function checkHydration(browser) {
   section = 'hydration';
   // Real browsers hit pages with a WARM cache (scripts already downloaded for the page before). That is when a server-rendered page
@@ -1060,6 +1132,7 @@ try {
   await checkConnect(browser);
   await checkEffects(browser);
   await checkFigures(browser);
+  await checkIcons(browser);
   await checkAdmin(browser);
   await checkHydration(browser);
   section = 'console';

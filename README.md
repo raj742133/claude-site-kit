@@ -151,6 +151,18 @@ Add motion without adding a library. Ask for one in plain words ("use aurora beh
 
 The backgrounds, headline animations and micro-interactions are original, dependency-free code (no GSAP or Three.js). It honours `prefers-reduced-motion`, skips pointer-follow effects on touch screens, pauses canvases that are off screen, and keeps the real headline text for screen readers. See [`reference/effects.md`](skill/sitewright/reference/effects.md) for the full catalogue.
 
+### Icons
+
+Say `icons: "auto"` and the navigation, stat cards, status chips, features list and story steps get icons where a title clearly names one (an order is a box, a delivery a truck, a warning a triangle); or name them yourself. They are inline SVG from the open sets behind [Iconify](https://iconify.design) (200,000+ icons in 150+ sets; [better-icons](https://github.com/better-auth/better-icons) is the tool that finds them), in the colour of the text around them, and a site carries only the ones it uses: no icon font, no library, no request at run time.
+
+```bash
+node scaffold.mjs --config site.json --out ./my-site --icons auto
+node scaffold.mjs --list-icons coffee                                  # find names
+node scaffold.mjs --apply-icons ./my-site --icon stats.0=package       # change one later, in a second
+```
+
+Each set keeps its licence (written into the site's `icons/NOTICE.md`; a CC BY set also gets a ready-made credit line, and a licence that is not for products is refused). Every icon is rebuilt from an allow-list of drawing elements before it is written, so icon data from the network cannot add a script to your pages. Details, places and licences: [`reference/icons.md`](skill/sitewright/reference/icons.md).
+
 ### Figures: little drawings that answer the pointer
 
 22 small isometric line figures, placed where they mean something. Say `figures: "auto"` and every place the site has gets its fitting figure, or choose them one by one:

@@ -22,8 +22,8 @@ interface Row {
   files: string;
 }
 
-interface StatDef { label: string; kind: 'count' | 'sum' | 'distinct' | 'status'; metric?: string; field?: string; status?: string; tone?: string; prefix?: string; suffix?: string; hint?: string }
-interface StatusDef { id: string; label: string; tone: string }
+interface StatDef { label: string; kind: 'count' | 'sum' | 'distinct' | 'status'; metric?: string; field?: string; status?: string; tone?: string; prefix?: string; suffix?: string; hint?: string; icon?: string }
+interface StatusDef { id: string; label: string; tone: string; icon?: string }
 
 const D = site.dashboard as unknown as {
   eyebrow: string; title: string; sub: string; empty: string; search: string;
@@ -71,6 +71,7 @@ export default async function Dashboard() {
     status: r.status,
     statusLabel: byStatus.get(r.status)?.label ?? r.status,
     statusTone: byStatus.get(r.status)?.tone ?? 'muted',
+    statusIcon: byStatus.get(r.status)?.icon,
     category: r.category,
     owner: r.owner,
     source: r.source,
@@ -109,7 +110,7 @@ export default async function Dashboard() {
           <>
             <div className="stat-grid">
               {D.stats.map((s) => (
-                <Stat key={s.label} n={stat(cards, s)} label={s.label} tone={s.tone as never} suffix={s.suffix} prefix={s.prefix} hint={s.hint} />
+                <Stat key={s.label} n={stat(cards, s)} label={s.label} tone={s.tone as never} suffix={s.suffix} prefix={s.prefix} hint={s.hint} icon={s.icon} />
               ))}
             </div>
             <RecordBrowser

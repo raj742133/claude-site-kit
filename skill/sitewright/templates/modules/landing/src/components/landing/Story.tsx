@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import site from '@/content/site.json';
+import { Icon } from '@/components/icons/Icon';
 
 interface Card { title: string; sub?: string; pill?: string; tone?: string }
 interface Screen {
@@ -9,7 +10,7 @@ interface Screen {
   title: string; sub?: string; cards?: Card[]; cta?: string; guide?: string; bar?: number;
   gates?: string[]; big?: { label: string; value: string };
 }
-interface Step { time: string; title: string; text: string; tags?: string[]; screen: Screen }
+interface Step { time: string; title: string; text: string; tags?: string[]; icon?: string; screen: Screen }
 
 const S = site.landing.story as unknown as { kicker: string; title: string; lead: string; steps: Step[]; end: string };
 const STEPS = S.steps;
@@ -43,7 +44,7 @@ export function Story() {
           {STEPS.map((s, i) => (
             <li key={s.title} className="st-step">
               <div className="st-rule" data-route-stop>
-                <span className="t">{s.time}</span><span className="l" /><span className="n">{String(i + 1).padStart(2, '0')} / {String(STEPS.length).padStart(2, '0')}</span>
+                <span className="t"><Icon name={s.icon} className="st-ic" />{s.time}</span><span className="l" /><span className="n">{String(i + 1).padStart(2, '0')} / {String(STEPS.length).padStart(2, '0')}</span>
               </div>
               <h3>{s.title}</h3>
               <p>{s.text}</p>

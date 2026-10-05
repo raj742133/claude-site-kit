@@ -411,3 +411,10 @@ html.lenis, html.lenis body { height: auto; }
   .lp-h1 { font-size: clamp(34px, 10.5vw, 40px); }
   .why-bar { grid-template-columns: 80px 1fr 52px; }
 }
+
+/* icons in the features list and the story */
+.mod-ic.has { width: 20px; height: 20px; margin-top: 3px; border-radius: 0; background: none; box-shadow: none; outline: none; display: grid; place-items: center; color: var(--signal-ink, var(--signal)); }
+.mod-ic.has .ic { width: 20px; height: 20px; }
+.mod-col.next .mod-ic.has { background: none; outline: none; color: var(--muted); }
+.mod-col.next .mod-item.now .mod-ic.has { background: none; outline: none; color: var(--signal-ink, var(--signal)); }
+.st-ic { width: 16px; height: 16px; margin-right: 8px; vertical-align: -0.2em; }

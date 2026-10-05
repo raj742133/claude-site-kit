@@ -391,3 +391,17 @@ th .hint-bubble { font-weight: 400; }
   .theme-toggle { min-width: 44px; }
   .btn.sm, .facet select { min-height: 44px; }
 }
+
+/* icons: inline SVG drawn in the colour of the text around them. A place with no icon draws nothing, so nothing here shifts without one. */
+.ic { width: 1.1em; height: 1.1em; flex: none; vertical-align: -0.2em; }
+header.site nav a:has(.nav-ic) { display: inline-flex; align-items: center; gap: 7px; }
+.nav-ic { width: 16px; height: 16px; }
+.stat-card:has(> .stat-ic) { position: relative; }
+.stat-ic { position: absolute; top: 16px; right: 16px; width: 20px; height: 20px; color: var(--muted); }
+.tone-accent .stat-ic { color: var(--signal-ink); }
+.tone-warn .stat-ic { color: var(--critical); }
+.tone-unsure .stat-ic { color: var(--unsure); }
+.tone-corrected .stat-ic { color: var(--corrected); }
+.tone-added .stat-ic { color: var(--added); }
+.chip-ic { width: 15px; height: 15px; margin-right: 6px; vertical-align: -0.22em; }
+.mode-ic { width: 12px; height: 12px; margin-right: 5px; vertical-align: -0.18em; }
