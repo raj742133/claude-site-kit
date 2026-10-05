@@ -3,6 +3,9 @@
 //
 //   node scaffold.mjs --config site.json --out ./my-site [--modules landing,signin,dashboard] [--force] [--password secret]
 //   node scaffold.mjs --list
+//   node scaffold.mjs --list-effects                       the effects menu (ids and what each does)
+//   ... --preset calm --hero-bg aurora --headline split-words --buttons shine --cards lift --reveal blur --extras cursor-glow,count-up
+//                                                          effect choices passed directly; they override the config file
 //
 // Nothing here is clever on purpose: copy the module folders, fill __TOKENS__, strip //#if blocks, assemble the few files that
 // depend on the whole module set (package.json, middleware, schema, env, navigation, palette). Then npm install && npm run dev.
@@ -15,7 +18,7 @@ import { MODULES, resolveModules } from './modules.mjs';
 import { DEFAULTS, deepMerge, interpolate } from './defaults.mjs';
 import { buildPalette, paletteCss, onColour } from './lib/color.mjs';
 import { logoComponent, faviconSvg, LOGO_STYLES } from './lib/logo.mjs';
-import { resolveEffects, BUTTON_SELECTOR, CARD_SELECTOR } from './effects.mjs';
+import { resolveEffects, effectsMenu, BUTTON_SELECTOR, CARD_SELECTOR } from './effects.mjs';
 import { generateFx } from './lib/fxgen.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -28,7 +31,7 @@ function args(argv) {
     const a = argv[i];
     if (a.startsWith('--')) {
       const k = a.slice(2);
-      if (['force', 'list', 'check', 'quiet'].includes(k)) out[k] = true;
+      if (['force', 'list', 'list-effects', 'check', 'quiet'].includes(k)) out[k] = true;
       else out[k] = argv[++i];
     } else out._.push(a);
   }
@@ -91,11 +94,23 @@ if (a.list) {
   process.exit(0);
 }
 
+if (a['list-effects']) { console.log(effectsMenu()); process.exit(0); }
+
 if (!a.config) fail('--config <site.json> is required (see reference/config.md). Use --list to see the modules.');
 if (!a.out && !a.check) fail('--out <directory> is required.');
 
 let userCfg;
 try { userCfg = JSON.parse(fs.readFileSync(a.config, 'utf8')); } catch (e) { fail(`cannot read ${a.config}: ${e.message}`); }
+
+// The user's effect choices can be passed straight on the command line; they win over the config file and the preset.
+// (--preset calm --hero-bg aurora --headline rotate --rotate-words "roasted,fresh" --buttons shine --cards lift --reveal blur --extras cursor-glow,count-up)
+const csv = (s) => String(s).split(',').map((x) => x.trim()).filter(Boolean);
+const FX_FLAGS = { preset: 'preset', 'hero-bg': 'heroBackground', 'login-bg': 'loginBackground', headline: 'headline', buttons: 'buttons', cards: 'cards', reveal: 'reveal' };
+const picked = {};
+for (const [flag, key] of Object.entries(FX_FLAGS)) if (a[flag] !== undefined) picked[key] = a[flag];
+if (a.extras !== undefined) picked.extras = csv(a.extras);
+if (a['rotate-words'] !== undefined) picked.rotateWords = csv(a['rotate-words']);
+if (Object.keys(picked).length) userCfg.effects = { ...(userCfg.effects ?? {}), ...picked };
 
 const merged = deepMerge(DEFAULTS, userCfg);
 const brandName = String(merged.brand?.name ?? '').trim();
@@ -126,7 +141,10 @@ try { modules = resolveModules(wanted); } catch (e) { fail(e.message); }
 const has = (id) => modules.includes(id);
 const added = modules.filter((m) => !wanted.includes(m) && m !== 'base');
 
-if (a.check) { console.log(JSON.stringify({ brand: brandName, slug, modules, addedAsDependencies: added }, null, 2)); process.exit(0); }
+if (a.check) {
+  let effects; try { effects = resolveEffects(cfg.effects ?? {}); } catch (e) { fail(e.message); }
+  console.log(JSON.stringify({ brand: brandName, slug, modules, addedAsDependencies: added, effects }, null, 2)); process.exit(0);
+}
 
 // output dir
 const out = path.resolve(a.out);
@@ -302,6 +320,7 @@ if (!a.quiet) {
   console.log(`\nsitewright: wrote ${n} files to ${out}`);
   console.log(`  brand    ${brandName} (${slug}), logo ${cfg.brand.logo.style}, primary ${cfg.brand.colors.primary}, signal ${cfg.brand.colors.signal}`);
   console.log(`  modules  ${modules.filter((m) => m !== 'base').join(', ')}${added.length ? `   (added as dependencies: ${added.join(', ')})` : ''}`);
+  if (fx.active) console.log(`  effects  hero ${fx.heroBackground}, login ${fx.loginBackground}, headline ${fx.headline}, buttons ${fx.buttons}, cards ${fx.cards}, reveal ${fx.reveal}${fx.extras.length ? `, extras ${fx.extras.join('+')}` : ''}`);
   if (has('signin')) console.log(`  sign-in  password ${secrets['@password']}   (development only; stored in .env.local)`);
   if (has('mfa')) console.log(`  admin    setup code ${secrets['@setup']}   (first account at /admin/setup)`);
   if (has('api')) console.log(`  api key  ${secrets['@token']}   (Bearer token for /api/ingest)`);

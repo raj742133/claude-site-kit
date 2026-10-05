@@ -1,12 +1,18 @@
 # Effects: animated backgrounds, headline animations, micro-interactions
 
-An optional layer on top of any site. It is **off by default** (a site without an `effects` block is byte-for-byte what it was). When on, the generated project carries only the effects that were picked, as plain React + CSS + canvas: no GSAP, Three.js or other animation library.
+An optional layer on top of any site. It is **off until the user picks something** (a site without an `effects` block is byte-for-byte what it was); effects are only added when the user asks for one or Claude picks a preset and says so. When on, the generated project carries only the effects that were picked, as plain React + CSS + canvas: no GSAP, Three.js or other animation library.
 
 The idea is the same as component libraries such as React Bits (animated text, backgrounds, small interactive pieces you copy into your own code). Everything here is **original code written for this kit**, not copied from any library, so the kit stays MIT.
 
 ## Choosing
 
-Ask which of these the user wants; offer the live gallery if they cannot decide (`"modules": ["fxgallery"]` generates a `/effects` page that runs every effect on a sample hero, has a brand-colour picker and prints the exact config to paste).
+When the user names an effect, Claude applies exactly that; otherwise Claude picks a fitting preset and says so. List the menu with `node scripts/scaffold.mjs --list-effects`, then either write the `effects` block below or pass the picks straight to the generator:
+
+```bash
+node scripts/scaffold.mjs --config site.json --out ./my-site --preset aurora-glass --headline split-words --cards lift --extras cursor-glow,count-up
+```
+
+Flags: `--preset`, `--hero-bg`, `--login-bg`, `--headline`, `--rotate-words`, `--buttons`, `--cards`, `--reveal`, `--extras`. They override the same keys in `site.json`. Offer the live gallery if the user cannot decide (`"modules": ["fxgallery"]` generates a `/effects` page that runs every effect on a sample hero, has a brand-colour picker and prints the exact config to paste).
 
 ```jsonc
 "effects": {

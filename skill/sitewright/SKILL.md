@@ -37,17 +37,18 @@ Dependencies are resolved automatically - choosing `publishing` brings `mfa`; `d
    - for `dashboard`: statuses, field labels, any numeric metric to total up;
    - for `landing`: headline + accent word, 3-4 story steps, optional proof/features/FAQ.
    **Never invent facts** (customer counts, benchmarks, testimonials). Leave `proof`, `features`, `compat` out unless the user supplies the content. Mark placeholder copy as such.
-3. **Offer the visual style (effects).** The default look is clean and already animated a little (dotted hero, scroll story, reveals). Ask once with AskUserQuestion, single-select: **Keep the default look** (recommended if they did not ask for animation) / **Pick a preset** / **Choose piece by piece** / **Show me everything first**.
-   - *Preset*: offer `calm`, `aurora-glass`, `tech-grid`, `playful` (and mention `cosmic`, `editorial`, `minimal`); set `effects.preset`.
-   - *Piece by piece*: ask background, headline animation, button style, card style (one question each, with a short description from `reference/effects.md`); write them as `heroBackground`, `headline`, `buttons`, `cards` (+ `reveal`, `extras`). `rotate` needs `rotateWords`.
-   - *Show me everything first*: also add `fxgallery` to the modules, build, run it, and tell them to open `/effects`, try things, press Copy, and paste the config back. Then regenerate with their choice.
-   Match the effect to the brand (calm/serious brands: `calm` or `editorial`; playful consumer brands: `playful`; technical: `tech-grid`). Do not stack heavy choices on a page full of dense content.
+3. **Bake in the effects.** Effects are part of the kit from the start; Claude chooses and wires them, the user steers.
+   - **The user named an effect** ("use aurora", "typewriter headline", "the playful preset"): apply exactly that, without asking. Map it to the ids in `node scripts/scaffold.mjs --list-effects` and write it to `effects` (or pass `--hero-bg aurora` etc.). Anything else they did not mention stays as the preset or default gives it.
+   - **The user did not mention effects**: pick one fitting preset yourself (calm/serious brands: `calm` or `editorial`; playful: `playful`; technical: `tech-grid`; plain data tools: keep the default look), say which in one line, and offer to change it. Do not stack heavy choices on a page full of dense content.
+   - **The user asks to see the options**: print `--list-effects`, or add `fxgallery`, build, and point them at `/effects` (Copy, then paste the config back).
+   `rotate` needs `rotateWords`; set `loginBackground` if the sign-in page should be animated too. Changing the effect later means re-running the scaffold with the new choice (into a fresh folder, or `--force` over an unedited one), since a hand-edited project would be overwritten.
 4. **Write the config** to `site.json` (see `reference/config.md`; `examples/*.json` are complete worked configs - `examples/minimal.json` is just a brand name).
 5. **Scaffold:**
    ```bash
    node ~/.claude/skills/sitewright/scripts/scaffold.mjs --config site.json --out ./my-site --modules landing,signin,dashboard,connect,mfa,publishing
    ```
-   `--modules` may be omitted if the config has a `modules` array. Other flags: `--force` (write into a non-empty folder), `--password <p>` (dev password), `--check` (validate and list what would be written, writes nothing), `--list`.
+   `--modules` may be omitted if the config has a `modules` array. Other flags: `--force` (write into a non-empty folder), `--password <p>` (dev password), `--check` (validate and list the modules and resolved effects, writes nothing), `--list`, `--list-effects`.
+   The user's effect choices can also be passed directly, overriding the config file: `--preset <id> --hero-bg <id> --login-bg <id> --headline <id> --rotate-words "a,b" --buttons <id> --cards <id> --reveal <id> --extras id,id`.
    Quote Windows paths with forward slashes in Bash.
 6. **Install and build** in the new folder. If the system drive is short on space (the install is ~700 MB with PGlite and Tiptap), put the project, `TEMP`/`TMP` and the npm cache on a roomy drive.
    ```bash

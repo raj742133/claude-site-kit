@@ -83,4 +83,4 @@ backticks, backslashes, braces, `<`, `>` and `$` are removed) so user copy can n
 - Statuses: the first is what a new record gets; `tone` picks a colour token.
 - `story.steps[].screen.kind` picks the phone mock-up layout. 3-4 steps look best.
 - Copy in `examples/*.json` is fictional demo content, as the files say.
-- `effects` keys override the preset; an unknown id stops the generator with the list of valid ones. `headline: "rotate"` needs `rotateWords`. `examples/coffee-effects.json` is `coffee.json` plus an effects block.
+- `effects` keys override the preset, and the generator flags (`--preset`, `--hero-bg`, `--headline`, ... see `reference/effects.md`) override the file; an unknown id stops the generator with the list of valid ones. `headline: "rotate"` needs `rotateWords`. `examples/coffee-effects.json` is `coffee.json` plus an effects block.

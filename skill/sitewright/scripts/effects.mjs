@@ -130,6 +130,25 @@ export function effectPlan(r, { all = false } = {}) {
   return { files: [...files], css: [...css], micro: [...micro] };
 }
 
+/** The whole menu as plain text, so a user can read it and choose before anything is built (`scaffold.mjs --list-effects`). */
+export function effectsMenu() {
+  const rows = (title, table, flag) => [`${title}   ${flag}`, ...Object.entries(table).map(([id, e]) => `  ${id.padEnd(13)} ${e.desc}`), ''];
+  return [
+    'Effects you can choose from. All are optional; anything you leave out stays at the default look.',
+    '',
+    ...rows('Hero backgrounds', { territory: { desc: 'The default dotted hero.' }, none: { desc: 'A plain hero.' }, ...BACKGROUNDS }, '--hero-bg <id>'),
+    ...rows('Sign-in backgrounds', BACKGROUNDS, '--login-bg <id>'),
+    ...rows('Headline animations', HEADLINES, '--headline <id>   (rotate also needs --rotate-words "a,b")'),
+    ...rows('Buttons', BUTTONS, '--buttons <id>'),
+    ...rows('Cards', CARDS, '--cards <id>'),
+    ...rows('Scroll reveal', REVEALS, '--reveal <id>'),
+    ...rows('Extras (any number)', EXTRAS, '--extras <id,id,...>'),
+    'Presets (a ready-made bundle of the above; your own picks override it)   --preset <id>',
+    ...Object.entries(PRESETS).map(([id, p]) => `  ${id.padEnd(13)} ${p.heroBackground} / ${p.headline} / ${p.buttons} / ${p.cards} / ${p.reveal}${p.extras.length ? ` + ${p.extras.join(', ')}` : ''}`),
+    '',
+  ].join('\n');
+}
+
 /** The class lists the micro-interactions act on - one place; scaffold writes them into the css and js (__FX_BTN__ / __FX_CARD__). */
 export const BUTTON_SELECTOR = '.btn.primary';
 export const CARD_SELECTOR = '.rec-card, .stat-card, .card, .why-card, .cta';
