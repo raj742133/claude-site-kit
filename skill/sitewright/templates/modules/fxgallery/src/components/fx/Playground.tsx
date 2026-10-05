@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import site from '@/content/site.json';
 import { LogoMark } from '@/components/brand/Logo';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { BACKGROUND_COMPONENTS, CountUp, EXTRA_ATTACH, HEADLINE_COMPONENTS, INFO } from './catalog';
+import { BACKGROUND_COMPONENTS, CountUp, EXTRA_ATTACH, FIGURE_FACTORIES, HEADLINE_COMPONENTS, INFO } from './catalog';
 
 type Choice = { background: string; headline: string; buttons: string; cards: string; reveal: string; extras: string[] };
 const NONE = 'none';
@@ -32,6 +32,29 @@ function Group({ title, items, value, onPick, none = true }: { title: string; it
   );
 }
 
+/** One figure, live. Remounts when the figure changes; the intensity reaches the running figure. */
+function FigureStage({ id, intensity }: { id: string; intensity: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const fig = useRef<{ update(o: { intensity: number }): void; destroy(): void } | null>(null);
+  const [read, setRead] = useState('');
+  useEffect(() => {
+    const make = FIGURE_FACTORIES[id];
+    if (!make || !ref.current) return;
+    const f = make(ref.current, { intensity, onRead: setRead });
+    fig.current = f;
+    return () => { f.destroy(); fig.current = null; };
+    // intensity is applied by the effect below, so a slider move does not remount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+  useEffect(() => { fig.current?.update({ intensity }); }, [intensity]);
+  return (
+    <div className="fxg-fig">
+      <div ref={ref} className="fxg-fig-box" />
+      <p className="fxg-fig-read mono small muted" aria-hidden="true">{read}</p>
+    </div>
+  );
+}
+
 export function Playground() {
   const [c, setC] = useState<Choice>(START);
   const [primary, setPrimary] = useState<string>(site.brand.colors.primary);
@@ -39,6 +62,9 @@ export function Playground() {
   const [run, setRun] = useState(0);
   const [shown, setShown] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [figure, setFigure] = useState('terrain');
+  const [figIntensity, setFigIntensity] = useState(0.5);
+  const [places, setPlaces] = useState<Record<string, string>>({});
 
   const set = <K extends keyof Choice>(k: K, v: Choice[K]) => { setC((o) => ({ ...o, [k]: v })); setRun((n) => n + 1); };
   const toggleExtra = (id: string) => setC((o) => ({ ...o, extras: o.extras.includes(id) ? o.extras.filter((x) => x !== id) : [...o.extras, id] }));
@@ -70,8 +96,9 @@ export function Playground() {
       ...(c.headline === 'rotate' ? { rotateWords: ROTATE } : {}),
       buttons: c.buttons, cards: c.cards, reveal: c.reveal,
       ...(c.extras.length ? { extras: c.extras } : {}),
+      ...(Object.keys(places).length ? { figures: places, ...(figIntensity !== 0.5 ? { figureIntensity: figIntensity } : {}) } : {}),
     },
-  }, null, 2), [c]);
+  }, null, 2), [c, places, figIntensity]);
 
   const attrs: Record<string, string> = {};
   if (c.buttons !== NONE) attrs['data-fx-buttons'] = c.buttons;
@@ -132,6 +159,20 @@ export function Playground() {
               </div>
               <button type="button" className="btn" onClick={() => setRun((n) => n + 1)}>Replay entrance</button>
             </div>
+
+            <section className="fxg-figures card pad" aria-label="Figures" style={css({ '--primary': primary, '--signal': signal })}>
+              <p className="eyebrow">Figures</p>
+              <h2 className="card-h">Line figures that answer the pointer</h2>
+              <p className="muted small">Move over the drawing. Pick one below, then give it a place on the right (or let the suggestions fill them all).</p>
+              <FigureStage id={figure} intensity={figIntensity} />
+              <label className="fxg-range">Intensity <input type="range" min={0} max={1} step={0.05} value={figIntensity} onChange={(e) => setFigIntensity(Number(e.target.value))} aria-label="Figure intensity" /></label>
+              <div className="fxg-chips" role="radiogroup" aria-label="Figure">
+                {INFO.figures.map((f) => (
+                  <button key={f.id} type="button" role="radio" aria-checked={figure === f.id} className={`fxg-chip${figure === f.id ? ' on' : ''}`} onClick={() => setFigure(f.id)} title={f.desc}>{f.label}</button>
+                ))}
+              </div>
+              <p className="fxg-note">{INFO.figures.find((f) => f.id === figure)?.desc}</p>
+            </section>
           </section>
 
           <aside className="fxg-controls" aria-label="Choose effects">
@@ -155,6 +196,24 @@ export function Playground() {
                 ))}
               </div>
               <p className="fxg-note">Cursor glow and sparks need a mouse; scroll progress shows at the top of this page.</p>
+            </fieldset>
+            <fieldset className="fxg-group">
+              <legend>Figures in your site</legend>
+              <div className="fxg-places">
+                {INFO.places.map((p) => (
+                  <label key={p.id} className="fxg-place">
+                    <span><b>{p.label}</b><small className="muted">{p.desc}</small></span>
+                    <select value={places[p.id] ?? NONE} onChange={(e) => setPlaces((o) => { const n = { ...o }; if (e.target.value === NONE) delete n[p.id]; else n[p.id] = e.target.value; return n; })} aria-label={`${p.label} figure`}>
+                      <option value={NONE}>None</option>
+                      {INFO.figures.map((f) => <option key={f.id} value={f.id}>{f.label}</option>)}
+                    </select>
+                  </label>
+                ))}
+              </div>
+              <div className="fxg-presets">
+                <button type="button" className="btn sm" onClick={() => setPlaces(Object.fromEntries(INFO.places.map((p) => [p.id, p.suggest])))}>Use the suggestions</button>
+                <button type="button" className="btn sm" onClick={() => setPlaces({})}>Clear</button>
+              </div>
             </fieldset>
           </aside>
         </div>

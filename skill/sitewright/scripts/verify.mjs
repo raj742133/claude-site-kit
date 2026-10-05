@@ -856,6 +856,23 @@ async function checkEffects(browser) {
       await page.getByLabel('Primary').fill('#ff0066'); await page.waitForTimeout(200);
       eq(await page.locator('.fxg-hero').evaluate((e) => getComputedStyle(e).getPropertyValue('--primary').trim()), '#ff0066', 'primary');
     });
+    await check(`figures: all ${Object.keys(fxmod.FIGURES).length} draw in the gallery, answer the pointer, and can be given a place`, async () => {
+      for (const [id, f] of Object.entries(fxmod.FIGURES)) {
+        await page.locator('.fxg-figures').getByRole('radio', { name: f.label, exact: true }).click();
+        await page.waitForSelector(`.fxg-fig-box[data-hairline="${id}"]`);
+        const parts = await page.locator('.fxg-fig-box svg path, .fxg-fig-box svg ellipse, .fxg-fig-box svg circle').count();
+        truthy(parts >= 3, `${id}: ${parts} drawn parts`);
+      }
+      await page.locator('.fxg-fig-box').scrollIntoViewIfNeeded(); await page.waitForTimeout(300);
+      const box = await page.locator('.fxg-fig-box').boundingBox();
+      const before = await page.locator('.fxg-fig-box svg').innerHTML();
+      await page.mouse.move(box.x + box.width * 0.4, box.y + box.height * 0.35, { steps: 5 }); await page.waitForTimeout(700);
+      truthy((await page.locator('.fxg-fig-box svg').innerHTML()) !== before, 'the last figure did not answer the pointer');
+      await page.getByRole('button', { name: 'Use the suggestions' }).click();
+      const snippet = await page.locator('.fxg-code pre code').innerText();
+      for (const [place, pl] of Object.entries(fxmod.PLACES)) truthy(snippet.includes(`"${place}": "${pl.suggest}"`), `snippet names ${place}: ${pl.suggest}`);
+      await page.getByRole('button', { name: 'Clear' }).click();
+    });
     await shot(page, 'fx-gallery');
     const m = await newPage(browser, 'mobile', 'fx-gallery-mobile');
     await m.page.goto(`${BASE}/effects`, { waitUntil: 'networkidle' }); await m.page.waitForTimeout(800);
@@ -865,6 +882,146 @@ async function checkEffects(browser) {
     await shot(m.page, 'fx-gallery-mobile');
     await ctx.close(); await m.ctx.close();
   }
+}
+
+// ---- figures (interactive line drawings in named places) -----------------------------------------------------------------------
+async function checkFigures(browser) {
+  const F = FX.figures ?? {};
+  const places = Object.keys(F);
+  if (!places.length) return;
+  section = 'figures';
+  const sel = (p) => `.fx-fig-${p}[data-hairline]`;
+  const svgOf = (page, p) => page.evaluate((s) => document.querySelector(s)?.querySelector('svg')?.innerHTML ?? '', sel(p));
+  const rect = (page, s) => page.evaluate((q) => { const r = document.querySelector(q)?.getBoundingClientRect(); return r ? { x: r.x, y: r.y, w: r.width, h: r.height } : null; }, s);
+  /** The box of the text itself (a heading's own box spans the whole column). */
+  const textRect = (page, q) => page.evaluate((s) => { const el = document.querySelector(s); if (!el) return null; const g = document.createRange(); g.selectNodeContents(el); const r = g.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height }; }, q);
+  const overlap = (a, b) => { const w = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x), h = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y); return w > 0 && h > 0 ? (w * h) / Math.min(a.w * a.h, b.w * b.h) : 0; };
+
+  /** The figure is there, drawn, named, sized, and answers a sweep of the pointer. */
+  async function figureWorks(page, p, { minWidth = 120, answer = true } = {}) {
+    await page.locator(sel(p)).first().waitFor({ state: 'attached' });
+    await page.locator(sel(p)).first().scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+    eq(await page.locator(sel(p)).count(), 1, `${p}: figures in the place`);
+    const el = page.locator(sel(p));
+    eq(await el.getAttribute('data-hairline'), F[p], `${p}: which figure`);
+    truthy((await el.getAttribute('aria-label') ?? '').length > 10, `${p}: accessible name`);
+    truthy(['img', 'group'].includes(await el.getAttribute('role')), `${p}: role`);
+    const parts = await el.locator('svg path, svg ellipse, svg circle').count();
+    truthy(parts >= 3, `${p}: ${parts} drawn parts`);
+    const r = await rect(page, sel(p));
+    truthy(r && r.w >= minWidth && r.h >= minWidth * 0.7, `${p}: figure is ${r ? Math.round(r.w) : 0}px wide`);
+    if (answer) {
+      const before = await svgOf(page, p);
+      let changed = false;
+      for (const [fx, fy] of [[0.3, 0.4], [0.5, 0.55], [0.7, 0.35], [0.5, 0.2]]) {
+        await page.mouse.move(r.x + r.w * fx, r.y + r.h * fy, { steps: 5 });
+        await page.waitForTimeout(450);
+        if ((await svgOf(page, p)) !== before) changed = true;
+      }
+      truthy(changed, `${p}: the figure did not answer the pointer`);
+      await page.mouse.move(2, 2);
+    }
+  }
+
+  const desk = async (name) => (await newPage(browser, 'desktop', name));
+
+  if (F.hero && has('landing')) await check(`hero: ${F.hero} sits beside the headline and does not cover the mark`, async () => {
+    const { ctx, page } = await desk('fig-hero');
+    await page.goto(`${BASE}/`, { waitUntil: 'networkidle' });
+    await figureWorks(page, 'hero', { minWidth: 250 });
+    const fig = await rect(page, sel('hero')), logo = await rect(page, '[data-route-logo]'), h1 = await textRect(page, '.lp-h1');
+    truthy(logo && logo.w >= 80 && logo.h >= 80, `the mark's box is ${logo ? Math.round(logo.w) : 0}px`);
+    truthy(overlap(fig, logo) < 0.12, `figure covers the mark (${Math.round(overlap(fig, logo) * 100)}%)`);
+    truthy(overlap(fig, h1) < 0.02, 'figure covers the headline');
+    await noOverflow(page, 'landing with a hero figure'); await shot(page, 'fig-hero');
+    await ctx.close();
+  });
+  if (F.hero && has('landing')) await check('hero: on a phone the page still fits and has no sideways scroll', async () => {
+    const { ctx, page } = await newPage(browser, 'narrow', 'fig-hero-narrow');
+    await page.goto(`${BASE}/`, { waitUntil: 'networkidle' }); await scrollThrough(page);
+    await noOverflow(page, 'landing at 360px with a hero figure'); await ctx.close();
+  });
+
+  if (F.releases && has('landing')) await check('releases: the figure sits with the list when there are releases', async () => {
+    const { ctx, page } = await desk('fig-releases');
+    await page.goto(`${BASE}/`, { waitUntil: 'networkidle' });
+    if (await page.locator('.side-head').count()) { await figureWorks(page, 'releases'); await shot(page, 'fig-releases'); }
+    else eq(await page.locator(sel('releases')).count(), 0, 'no releases, no figure');
+    await ctx.close();
+  });
+
+  for (const [place, path, title] of [['signin', '/login', 'sign-in card'], ['mfa', '/admin/login', 'account sign-in card']]) {
+    if (!F[place] || !has(place === 'signin' ? 'signin' : 'mfa')) continue;
+    await check(`${place}: ${F[place]} is on the ${title}, inside it, on desktop and a phone`, async () => {
+      for (const vp of ['desktop', 'narrow']) {
+        const { ctx, page } = await newPage(browser, vp, `fig-${place}-${vp}`);
+        await page.goto(`${BASE}${path}`, { waitUntil: 'networkidle' });
+        await figureWorks(page, place, { minWidth: 100, answer: vp === 'desktop' });
+        const card = await rect(page, '.login-card'), fig = await rect(page, sel(place));
+        truthy(fig.x >= card.x - 1 && fig.x + fig.w <= card.x + card.w + 1, 'figure is inside the card');
+        await noOverflow(page, `${path} at ${VIEWPORTS[vp].width}px`);
+        if (vp === 'desktop') await shot(page, `fig-${place}`);
+        await ctx.close();
+      }
+    });
+  }
+
+  // pages behind the shared-password sign-in
+  const signedIn = async (name) => {
+    const { ctx, page } = await desk(name);
+    if (has('signin')) {
+      await page.goto(`${BASE}/login`); await page.locator('input[name=password]').fill(env.DASHBOARD_PASSWORD); await page.getByRole('button', { name: 'Sign in' }).click();
+      await page.waitForURL((u) => !u.pathname.startsWith('/login'));
+    }
+    return { ctx, page };
+  };
+
+  if (F.connect && has('connect')) await check(`connect: ${F.connect} sits by the title and never covers it`, async () => {
+    const { ctx, page } = await signedIn('fig-connect');
+    await page.goto(`${BASE}/connect`, { waitUntil: 'networkidle' });
+    await figureWorks(page, 'connect');
+    truthy(overlap(await rect(page, sel('connect')), await textRect(page, '.hero-title')) < 0.02, 'figure covers the title');
+    await noOverflow(page, 'connect page'); await shot(page, 'fig-connect'); await ctx.close();
+    const n = await newPage(browser, 'narrow', 'fig-connect-narrow');
+    await n.page.goto(`${BASE}/login`); await n.page.locator('input[name=password]').fill(env.DASHBOARD_PASSWORD); await n.page.getByRole('button', { name: 'Sign in' }).click();
+    await n.page.waitForURL((u) => !u.pathname.startsWith('/login')); await n.page.goto(`${BASE}/connect`, { waitUntil: 'networkidle' });
+    await noOverflow(n.page, 'connect page at 360px'); await n.ctx.close();
+  });
+
+  if (F.empty && has('dashboard')) await check('empty: the figure shows when a search finds nothing', async () => {
+    const { ctx, page } = await signedIn('fig-empty');
+    await page.goto(`${BASE}/dashboard`, { waitUntil: 'networkidle' });
+    if (!(await page.locator(sel('empty')).count())) { await page.locator('.search input').fill('zzzqqq-no-such-thing'); await page.waitForTimeout(400); }
+    await figureWorks(page, 'empty', { minWidth: 120 });
+    await noOverflow(page, 'dashboard empty state'); await shot(page, 'fig-empty'); await ctx.close();
+  });
+
+  if (F.notfound) await check('notfound: a missing page answers 404 and carries the figure', async () => {
+    const ctx = await browser.newContext({ viewport: VIEWPORTS.desktop });
+    const page = await ctx.newPage();
+    if (has('signin')) {
+      await page.goto(`${BASE}/login`); await page.locator('input[name=password]').fill(env.DASHBOARD_PASSWORD); await page.getByRole('button', { name: 'Sign in' }).click();
+      await page.waitForURL((u) => !u.pathname.startsWith('/login'));
+    }
+    const res = await page.goto(`${BASE}/this-page-does-not-exist`, { waitUntil: 'networkidle' });
+    eq(res.status(), 404, 'status');
+    await figureWorks(page, 'notfound', { minWidth: 150 });
+    await shot(page, 'fig-notfound'); await ctx.close();
+  });
+
+  await check('reduced motion: the figures hold still (the frame loop sleeps) and are still drawn', async () => {
+    const public_ = has('landing') && F.hero ? '/' : has('signin') && F.signin ? '/login' : has('mfa') && F.mfa ? '/admin/login' : null;
+    if (!public_) return;
+    const place = public_ === '/' ? 'hero' : public_ === '/login' ? 'signin' : 'mfa';
+    const { ctx, page } = await newPage(browser, 'desktop', 'fig-reduced', { reducedMotion: 'reduce' });
+    await page.addInitScript('(() => { window.__raf = 0; const r = window.requestAnimationFrame; window.requestAnimationFrame = (f) => { window.__raf++; return r(f); }; })();');
+    await page.goto(`${BASE}${public_}`, { waitUntil: 'networkidle' }); await page.waitForTimeout(1500);
+    truthy((await page.locator(`${sel(place)} svg path, ${sel(place)} svg ellipse`).count()) >= 3, 'drawn under reduced motion');
+    const frames = await page.evaluate(() => { window.__raf = 0; return new Promise((r) => setTimeout(() => r(window.__raf), 800)); });
+    truthy(frames <= 3, `${frames} animation frames in 800ms under reduced motion`);
+    await ctx.close();
+  });
 }
 
 async function checkHydration(browser) {
@@ -902,6 +1059,7 @@ try {
   await checkApiAndDashboard(browser);
   await checkConnect(browser);
   await checkEffects(browser);
+  await checkFigures(browser);
   await checkAdmin(browser);
   await checkHydration(browser);
   section = 'console';

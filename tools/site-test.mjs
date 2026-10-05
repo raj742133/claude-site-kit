@@ -185,6 +185,11 @@ if (FX) await check('effect counts and names on the page match the skill registr
   const listed = { ...FX.REVEALS }; delete listed.rise; // "rise" is the default, so it has no chip
   for (const t of [FX.HEADLINES, FX.BUTTONS, FX.CARDS, listed, FX.EXTRAS]) for (const e of Object.values(t)) truthy(chipText.some((c) => c.toLowerCase().replace(/ numbers$/, '') === e.label.toLowerCase().replace(/ numbers$/, '') || c.toLowerCase().startsWith(e.label.toLowerCase().split(' ')[0])), `effect "${e.label}" is listed`);
   eq(Number((html.match(/<h3>(\d+) headline animations<\/h3>/) ?? [])[1]), Object.keys(FX.HEADLINES).length, 'headline count');
+  if (FX.FIGURES) {
+    eq(Number((html.match(/<h3>(\d+) figures, placed/) ?? [])[1]), Object.keys(FX.FIGURES).length, 'figure count');
+    for (const m of html.matchAll(/assets\/fx\/fig-([a-z]+)\.jpg/g)) { truthy(FX.FIGURES[m[1]], `figure tile ${m[1]} is in the registry`); truthy(fs.existsSync(path.join(REPO, 'site/assets/fx', `fig-${m[1]}.jpg`)), `image for figure ${m[1]}`); }
+    truthy((html.match(/class="fig-tile reveal"/g) ?? []).length >= 3, 'figure tiles');
+  }
   eq(Object.keys(FX.PRESETS).length, 7, 'preset count claimed in README/SKILL');
 });
 

@@ -69,7 +69,9 @@ backticks, backslashes, braces, `<`, `>` and `$` are removed) so user copy can n
     "buttons": "glow-border",            // none | magnetic | shine | ripple | glow-border
     "cards": "spotlight",                // none | tilt | spotlight | glow-border | lift
     "reveal": "blur",                    // rise (default) | fade | scale | blur | slide
-    "extras": ["cursor-glow"]            // cursor-glow | scroll-progress | click-spark | count-up
+    "extras": ["cursor-glow"],           // cursor-glow | scroll-progress | click-spark | count-up
+    "figures": "auto",                   // "auto", or { "hero": "terrain", "signin": "padlock", ... }: line figures in named places (reference/figures.md)
+    "figureIntensity": 0.5               // 0 subtle ... 1 strong, for every figure
   }
 }
 ```

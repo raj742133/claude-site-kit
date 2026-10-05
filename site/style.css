@@ -278,12 +278,13 @@ footer { border-top: 1px solid var(--line); padding: 38px 0 54px; color: var(--m
 
 /* effects section */
 .fx-tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
-.fx-tile { margin: 0; background: var(--raised); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); transition: transform .25s var(--ease), box-shadow .25s var(--ease); }
-.fx-tile:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); }
-.fx-tile img { width: 100%; aspect-ratio: 700 / 380; object-fit: cover; display: block; border-bottom: 1px solid var(--line); background: var(--raised-2); }
-.fx-tile figcaption { padding: 10px 12px 12px; display: grid; gap: 2px; }
-.fx-tile b { font-size: 14px; }
-.fx-tile span { font-size: 12px; color: var(--muted); line-height: 1.45; }
+.fx-tile, .fig-tile { margin: 0; background: var(--raised); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); transition: transform .25s var(--ease), box-shadow .25s var(--ease); }
+.fx-tile:hover, .fig-tile:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); }
+.fx-tile img, .fig-tile img { width: 100%; aspect-ratio: 700 / 380; object-fit: cover; display: block; border-bottom: 1px solid var(--line); background: var(--raised-2); }
+.fx-tile figcaption, .fig-tile figcaption { padding: 10px 12px 12px; display: grid; gap: 2px; }
+.fx-tile b, .fig-tile b { font-size: 14px; }
+.fx-tile span, .fig-tile span { font-size: 12px; color: var(--muted); line-height: 1.45; }
+.fx-tiles.three { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 22px; }
 .fx-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 22px; }
 .fx-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .fx-chips span { font: 500 12px var(--mono); padding: 5px 11px; border-radius: 999px; background: var(--primary-wash); color: var(--primary); }
@@ -294,7 +295,7 @@ footer { border-top: 1px solid var(--line); padding: 38px 0 54px; color: var(--m
 .fx-live-head code { background: var(--primary-wash); color: var(--primary); padding: 2px 7px; border-radius: 6px; font-size: .88em; }
 .fx-frame { display: block; width: 100%; height: 780px; border: 0; background: var(--surface); }
 @media (max-width: 1020px) { .fx-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); } .fx-cols { grid-template-columns: minmax(0, 1fr); } }
-@media (max-width: 640px) { .fx-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .fx-tile span { display: none; } .fx-frame { height: 640px; } .fx-live-head .btn { flex: 1 1 100%; } }
+@media (max-width: 640px) { .fx-tiles, .fx-tiles.three { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .fx-tile span, .fig-tile span { display: none; } .fx-frame { height: 640px; } .fx-live-head .btn { flex: 1 1 100%; } }
 
 /* inline code (paths, file names) may break anywhere instead of pushing a phone-width page sideways */
 :not(pre) > code { overflow-wrap: anywhere; }

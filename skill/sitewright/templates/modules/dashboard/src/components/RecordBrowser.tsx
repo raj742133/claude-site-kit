@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
+import { Figure } from '@/components/fx';
 
 export interface RecordCard {
   id: string;
@@ -111,7 +112,7 @@ export function RecordBrowser({ records, statuses, facets, metrics, searchPlaceh
       ) : null}
 
       {shown.length === 0 ? (
-        <div className="card empty" role="status">Nothing matches.</div>
+        <div className="card empty" role="status"><Figure place="empty" />Nothing matches.</div>
       ) : (
         <div className="rec-grid">
           {shown.map((c) => (

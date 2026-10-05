@@ -3,6 +3,8 @@
 // generated site only carries the effects it picked.
 //
 // Slots (one choice each):  heroBackground, loginBackground, headline, buttons, cards, reveal.   extras: any number.
+// Figures: interactive isometric line drawings (Hairline, MIT, vendored in templates/fx/figures, plus three of our own) placed in named
+// PLACES of the generated site: the landing hero, the sign-in cards, the connect page, empty states, the releases list, the 404 page.
 // `files` are copied from templates/fx/ to src/components/fx/; `css` snippets are concatenated into src/components/fx/fx.css.
 
 export const BACKGROUNDS = {
@@ -58,6 +60,51 @@ export const EXTRAS = {
   'count-up':        { label: 'Count-up numbers', desc: 'Dashboard stat numbers count up when they appear.',                    micro: [],                 css: ['extras'], files: ['CountUp.tsx'] },
 };
 
+
+// ---- figures ---------------------------------------------------------------------------------------------------------------
+// Isometric line figures that answer the pointer. The engine and 19 figures are Hairline (github.com/lucasmarkes/hairline, MIT,
+// (c) 2026 Lucas Marques; the licence travels with the files); bars, scanner and parcel are written for this kit on the same engine.
+const fig = (label, desc, extra = []) => ({ label, desc, files: [], extra });
+export const FIGURES = {
+  terrain:   fig('Terrain',   'Eighty-one pillars on a plinth that rise around the pointer.'),
+  riffle:    fig('Riffle',    'A tray of eight cards; the card under the pointer stands up. Keyboard operable.', ['riffle-geometry']),
+  exploded:  fig('Exploded',  'An app window in four layers; moving across opens the gap.'),
+  phosphor:  fig('Phosphor',  'A dot matrix that plays a loop and fades like phosphor where the pointer paints it.'),
+  slow:      fig('Slow',      'Crates riding a belt through a gate; hovering slows the clock.'),
+  turntable: fig('Turntable', 'Blocks on a turntable; a flick spins it and it settles on a quarter turn.', ['turntable-geometry']),
+  keyboard:  fig('Keyboard',  'A sixty-key board; the key under the pointer sinks and its neighbours follow.'),
+  elevator:  fig('Elevator',  'Four floors beside an open shaft; the pointer picks the floor the car travels to.'),
+  phone:     fig('Phone',     'A phone in layers: glass, board, battery, shell.'),
+  laptop:    fig('Laptop',    'A thin laptop; the pointer\'s height sets the lid.'),
+  terminal:  fig('Terminal',  'A terminal window with its history in rows; the line under the pointer lifts.'),
+  cabinet:   fig('Cabinet',   'A rack of twelve blades; the pointer pulls the nearest ones out.'),
+  branches:  fig('Branches',  'A commit graph with a branch forking off and merging back.'),
+  vault:     fig('Vault',     'A vault door with a dial and three bolts; the pointer turns the dial.'),
+  lockers:   fig('Lockers',   'A bank of twelve lockers; the one under the pointer opens.'),
+  padlock:   fig('Padlock',   'A padlock whose shackle lifts and swings open as the pointer comes near.'),
+  patch:     fig('Patch panel', 'Twenty-four ports with cables; the cable under the pointer lifts.'),
+  dish:      fig('Dish',      'A parabolic dish on a gimbal that follows the pointer.'),
+  router:    fig('Router',    'A router whose antennas lean toward the pointer.'),
+  bars:      fig('Bars',      'A bar chart on a plinth; the bar under the pointer climbs and its neighbours follow. (New in Sitewright.)'),
+  scanner:   fig('Scanner',   'A code on a plinth; the pointer sets a scan line and that row stands up. (New in Sitewright.)'),
+  parcel:    fig('Parcel',    'A shipping box; the pointer\'s height opens the lid and lifts what is inside. (New in Sitewright.)'),
+};
+for (const [id, f] of Object.entries(FIGURES)) f.files = [`figures/factories/${id}.ts`, `figures/engines/${id}.ts`, ...f.extra.map((e) => `figures/engines/${e}.ts`)];
+
+/** What every figure shares: the core, the mount and the licence. */
+export const FIGURE_COMMON = ['figures/core/iso.ts', 'figures/core/motion.ts', 'figures/core/stage.ts', 'figures/core/styles.ts', 'figures/mount.ts', 'figures/intensity.ts', 'figures/LICENSE-hairline.txt'];
+
+/** Where a figure can go. `needs` are the modules the place lives in; `suggest` is what `figures: "auto"` puts there. */
+export const PLACES = {
+  hero:     { label: 'Landing hero',      needs: ['landing'],              suggest: 'exploded', desc: 'Beside the headline, above the mark the page scrolls out of.' },
+  releases: { label: 'Releases list',     needs: ['landing', 'publishing'], suggest: 'parcel',   desc: 'Next to the "what\'s new" list on the home page.' },
+  signin:   { label: 'Sign-in card',      needs: ['signin'],               suggest: 'padlock',  desc: 'On top of the shared-password sign-in card.' },
+  mfa:      { label: 'Account sign-in',   needs: ['mfa'],                  suggest: 'vault',    desc: 'On every account step: password, code, set-up, invite.' },
+  connect:  { label: 'Connect page',      needs: ['connect'],              suggest: 'scanner',  desc: 'In the header of the "connect a phone" page.' },
+  empty:    { label: 'Empty states',      needs: ['dashboard'],            suggest: 'bars',     desc: 'Where the records list is empty, or a search finds nothing.' },
+  notfound: { label: 'Page not found',    needs: [],                       suggest: 'dish',     desc: 'On the 404 page.' },
+};
+
 export const PRESETS = {
   minimal:        { heroBackground: 'territory', headline: 'none',         buttons: 'none',        cards: 'none',      reveal: 'rise',  extras: [] },
   calm:           { heroBackground: 'mesh',      headline: 'blur-in',      buttons: 'shine',       cards: 'lift',      reveal: 'fade',  extras: [] },
@@ -70,8 +117,9 @@ export const PRESETS = {
 
 const none = (v) => v === undefined || v === null || v === '' || v === 'none' || v === false;
 
-/** Turns the `effects` block of site.json into one validated, fully-resolved choice per slot. Throws on an unknown id. */
-export function resolveEffects(input = {}) {
+/** Turns the `effects` block of site.json into one validated, fully-resolved choice per slot. Throws on an unknown id.
+ *  `modules` (optional) drops figure places whose module is not in the build, and lists them in `figuresIgnored`. */
+export function resolveEffects(input = {}, { modules } = {}) {
   const fail = (what, id, table) => { throw new Error(`effects.${what}: "${id}" is not one of ${['none', ...Object.keys(table)].join(', ')}`); };
   let base = {};
   if (input.preset && !none(input.preset)) {
@@ -97,15 +145,32 @@ export function resolveEffects(input = {}) {
   const rotateWords = (input.rotateWords ?? []).map((w) => String(w).trim()).filter(Boolean).slice(0, 8);
   if (headline === 'rotate' && rotateWords.length < 2) throw new Error('effects.headline "rotate" needs effects.rotateWords with at least two words.');
 
+  // figures: "auto" (the suggested figure in every place) or { place: figureId | "none" }
+  const figIn = input.figures;
+  let figures = {};
+  if (figIn === 'auto') for (const [place, p] of Object.entries(PLACES)) figures[place] = p.suggest;
+  else if (figIn && typeof figIn === 'object') {
+    for (const [place, id] of Object.entries(figIn)) {
+      if (!PLACES[place]) throw new Error(`effects.figures: "${place}" is not a place. Places: ${Object.keys(PLACES).join(', ')}`);
+      if (!none(id) && !FIGURES[id]) fail(`figures.${place}`, id, FIGURES);
+      if (!none(id)) figures[place] = id;
+    }
+  } else if (!none(figIn)) throw new Error('effects.figures must be "auto" or an object like { "hero": "terrain" }.');
+  const figuresIgnored = [];
+  if (modules) for (const place of Object.keys(figures)) if (!PLACES[place].needs.every((m) => modules.includes(m))) { figuresIgnored.push(place); delete figures[place]; }
+  const figureIntensity = input.figureIntensity === undefined ? 0.5 : Math.min(1, Math.max(0, Number(input.figureIntensity)));
+  if (!Number.isFinite(figureIntensity)) throw new Error('effects.figureIntensity must be a number from 0 to 1.');
+
   const r = {
     heroBackground: none(heroBackground) ? 'none' : heroBackground,
     loginBackground: none(loginBackground) ? 'none' : loginBackground,
     headline: none(headline) ? 'none' : headline,
     buttons: none(buttons) ? 'none' : buttons,
     cards: none(cards) ? 'none' : cards,
-    reveal, extras, rotateWords,
+    reveal, extras, rotateWords, figures, figureIntensity,
   };
-  r.active = r.heroBackground !== 'territory' || r.loginBackground !== 'none' || r.headline !== 'none' || r.buttons !== 'none' || r.cards !== 'none' || r.reveal !== 'rise' || extras.length > 0;
+  if (figuresIgnored.length) r.figuresIgnored = figuresIgnored;
+  r.active = r.heroBackground !== 'territory' || r.loginBackground !== 'none' || r.headline !== 'none' || r.buttons !== 'none' || r.cards !== 'none' || r.reveal !== 'rise' || extras.length > 0 || Object.keys(figures).length > 0;
   return r;
 }
 
@@ -117,7 +182,8 @@ export function effectPlan(r, { all = false } = {}) {
   const micro = new Set();
   const use = (table, id) => { const e = table[id]; if (!e) return; (e.files ?? []).forEach((f) => files.add(f)); (e.css ?? []).forEach((c) => css.add(c)); (e.micro ?? []).forEach((m) => { micro.add(m); files.add(`micro/${m}.ts`); files.add('micro/selectors.ts'); }); };
   if (all) {
-    for (const t of [BACKGROUNDS, HEADLINES, BUTTONS, CARDS, REVEALS, EXTRAS]) for (const id of Object.keys(t)) use(t, id);
+    for (const t of [BACKGROUNDS, HEADLINES, BUTTONS, CARDS, REVEALS, EXTRAS, FIGURES]) for (const id of Object.keys(t)) use(t, id);
+    css.add('figures');
   } else {
     if (r.heroBackground !== 'territory' && r.heroBackground !== 'none') use(BACKGROUNDS, r.heroBackground);
     if (r.loginBackground !== 'none') use(BACKGROUNDS, r.loginBackground);
@@ -126,6 +192,13 @@ export function effectPlan(r, { all = false } = {}) {
     if (r.cards !== 'none') use(CARDS, r.cards);
     use(REVEALS, r.reveal);
     r.extras.forEach((x) => use(EXTRAS, x));
+    for (const id of new Set(Object.values(r.figures))) use(FIGURES, id);
+    if (Object.keys(r.figures).length) css.add('figures');
+  }
+  // the figures' shared engine and its licence travel with whichever figures were chosen
+  if ([...files].some((f) => f.startsWith('figures/factories/'))) {
+    for (const f of FIGURE_COMMON) files.add(f);
+    css.add('figures');
   }
   return { files: [...files], css: [...css], micro: [...micro] };
 }
@@ -143,6 +216,12 @@ export function effectsMenu() {
     ...rows('Cards', CARDS, '--cards <id>'),
     ...rows('Scroll reveal', REVEALS, '--reveal <id>'),
     ...rows('Extras (any number)', EXTRAS, '--extras <id,id,...>'),
+    'Figures: interactive isometric line drawings that answer the pointer (Hairline, MIT, plus three of our own).   --figures auto | place=figure,place=figure   --figure-intensity 0..1',
+    '  Figures',
+    ...Object.entries(FIGURES).map(([id, e]) => `    ${id.padEnd(11)} ${e.desc}`),
+    '  Places (what `auto` puts there)',
+    ...Object.entries(PLACES).map(([id, p]) => `    ${id.padEnd(9)} ${p.suggest.padEnd(9)} ${p.desc}${p.needs.length ? ` Needs: ${p.needs.join(' + ')}.` : ''}`),
+    '',
     'Presets (a ready-made bundle of the above; your own picks override it)   --preset <id>',
     ...Object.entries(PRESETS).map(([id, p]) => `  ${id.padEnd(13)} ${p.heroBackground} / ${p.headline} / ${p.buttons} / ${p.cards} / ${p.reveal}${p.extras.length ? ` + ${p.extras.join(', ')}` : ''}`),
     '',

@@ -1,6 +1,7 @@
 import { headers } from 'next/headers';
 import { CopyButton } from './CopyButton';
 import { SiteHeader } from '@/components/SiteHeader';
+import { Figure } from '@/components/fx';
 import site from '@/content/site.json';
 //#if publishing
 import { migrate } from '@/lib/db';
@@ -44,6 +45,7 @@ export default async function Connect() {
       <SiteHeader active="connect" />
       <main className="wrap">
         <section className="hero">
+          <Figure place="connect" />
           <h1 className="hero-title">{C.title}</h1>
           <p className="hero-sub">{C.sub}</p>
         </section>

@@ -1,6 +1,6 @@
 import { LogoMark } from '@/components/brand/Logo';
 import site from '@/content/site.json';
-import { LoginBackground } from '@/components/fx';
+import { Figure, LoginBackground } from '@/components/fx';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,6 +14,7 @@ export default async function Login({
     <main className="login-wrap">
       <LoginBackground />
       <div className="login-card">
+        <Figure place="signin" />
         <span className="brand-mark big"><LogoMark size={44} /></span>
         <p className="eyebrow">{site.signin.eyebrow}</p>
         <h1 className="login-title">{site.signin.title}</h1>

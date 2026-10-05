@@ -1,6 +1,6 @@
 # Effects: animated backgrounds, headline animations, micro-interactions
 
-An optional layer on top of any site. With nothing chosen the site keeps its default look (the dotted hero, a plain headline, a plain number); effects are only switched on when the user asks for one or Claude picks a preset and says so. When on, the generated project carries only the effects that were picked, as plain React + CSS + canvas: no GSAP, Three.js or other animation library.
+An optional layer on top of any site (animated backgrounds, headline animations, micro-interactions and [line figures](figures.md)). With nothing chosen the site keeps its default look (the dotted hero, a plain headline, a plain number); effects are only switched on when the user asks for one or Claude picks a preset and says so. When on, the generated project carries only the effects that were picked, as plain React + CSS + canvas: no GSAP, Three.js or other animation library.
 
 The idea is the same as component libraries such as React Bits (animated text, backgrounds, small interactive pieces you copy into your own code). Everything here is **original code written for this kit**, not copied from any library, so the kit stays MIT.
 
@@ -94,6 +94,10 @@ Flags: `--preset`, `--hero-bg`, `--login-bg`, `--headline`, `--rotate-words`, `-
 - Pages import the slots unconditionally, so a different effect only changes `src/components/fx/`.
 - Button and card effects are **attribute-scoped** (`<html data-fx-cards="tilt">`) and act through event delegation on the classes in `CARD_SELECTOR` / `BUTTON_SELECTOR`, so every existing card and primary button gets them without editing each component. Add a class to those lists if you add a new card type.
 - Backgrounds sit in `.fx-bg` (absolute, behind content, `aria-hidden`). Headline effects keep the real text: split/typewriter/scramble output a visually-hidden copy for screen readers and hide the animated copy from them.
+
+## Figures
+
+Interactive line drawings in named places of the site (a padlock on the sign-in card, a scanner on the connect page, a bar chart in an empty dashboard...): 22 of them, chosen per place or with `figures: "auto"`. Their own page: [`figures.md`](figures.md).
 
 ## Rules every effect follows (and the verifier checks)
 

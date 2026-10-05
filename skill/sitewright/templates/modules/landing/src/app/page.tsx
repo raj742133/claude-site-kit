@@ -12,7 +12,7 @@ import { LandingHeader } from '@/components/landing/LandingHeader';
 import { RevealOnScroll } from '@/components/landing/Reveal';
 import { Story } from '@/components/landing/Story';
 import { DownloadBar, DownloadCard, HowToInstall, type DownloadInfo } from '@/components/landing/Download';
-import { HeroBackground, Headline } from '@/components/fx';
+import { Figure, HeroBackground, Headline } from '@/components/fx';
 import { SmoothScroll } from '@/components/landing/SmoothScroll';
 import { Route } from '@/components/landing/Route';
 //#if proof
@@ -121,8 +121,9 @@ export default async function Home() {
                 <DownloadCard info={info} locked={locked} autoAsk label={L.downloadLabel} action={L.primaryAction} />
                 {info ? <HowToInstall steps={L.howToInstall} /> : null}
               </div>
-              <div className="lp-art" aria-hidden="true">
-                <div className="lp-mark-box" data-route-logo />
+              <div className="lp-art">
+                <Figure place="hero" />
+                <div className="lp-mark-box" data-route-logo aria-hidden="true" />
               </div>
             </div>
           </section>

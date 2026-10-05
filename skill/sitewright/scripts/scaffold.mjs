@@ -6,6 +6,7 @@
 //   node scaffold.mjs --list-effects                       the effects menu (ids and what each does)
 //   ... --preset calm --hero-bg aurora --headline split-words --buttons shine --cards lift --reveal blur --extras cursor-glow,count-up
 //                                                          effect choices passed directly; they override the config file
+//   ... --figures auto | hero=terrain,signin=padlock   --figure-intensity 0.7     interactive line figures in named places
 //   node scaffold.mjs --apply-effects ./my-site --hero-bg stars --headline typewriter
 //                                                          change the effects of an existing project in place (nothing else is touched)
 //
@@ -105,6 +106,12 @@ const FX_FLAGS = { preset: 'preset', 'hero-bg': 'heroBackground', 'login-bg': 'l
 const picked = {};
 for (const [flag, key] of Object.entries(FX_FLAGS)) if (a[flag] !== undefined) picked[key] = a[flag];
 if (a.extras !== undefined) picked.extras = csv(a.extras);
+// --figures auto | none | hero=terrain,signin=padlock      --figure-intensity 0..1
+if (a.figures !== undefined) {
+  const v = String(a.figures).trim();
+  picked.figures = v === 'auto' || v === 'none' ? v : Object.fromEntries(csv(v).map((kv) => { const [k, id] = kv.split('='); if (!k || !id) fail(`--figures: "${kv}" should look like hero=terrain (places and figures: --list-effects)`); return [k.trim(), id.trim()]; }));
+}
+if (a['figure-intensity'] !== undefined) picked.figureIntensity = Number(a['figure-intensity']);
 if (a['rotate-words'] !== undefined) picked.rotateWords = csv(a['rotate-words']);
 
 
@@ -125,7 +132,12 @@ if (a['apply-effects']) {
   // A preset starts from scratch; individual picks change only their own slot of what the project has now.
   const { active, ...current } = site.effects ?? {};
   let fx;
-  try { fx = resolveEffects(picked.preset ? picked : { ...current, ...picked }); } catch (e) { fail(e.message); }
+  // --figures hero=bars changes that place only; "none" for a place removes it; "auto" / "none" on their own replace the lot.
+  const figures = typeof picked.figures === 'object' && current.figures && !picked.preset
+    ? Object.fromEntries(Object.entries({ ...current.figures, ...picked.figures }).filter(([, id]) => id !== 'none')) : picked.figures;
+  const next = picked.preset ? picked : { ...current, ...picked };
+  if (figures !== undefined) next.figures = figures;
+  try { fx = resolveEffects(next, { modules: site.modules }); } catch (e) { fail(e.message); }
 
   const files = new Map();
   const tokens = { FX_BTN: BUTTON_SELECTOR, FX_CARD: CARD_SELECTOR };
@@ -144,6 +156,7 @@ if (a['apply-effects']) {
   fs.writeFileSync(siteFile, JSON.stringify(site, null, 2) + '\n');
   console.log(`sitewright: effects updated in ${dir}  (${files.size} files)`);
   console.log(`  hero ${fx.heroBackground}, login ${fx.loginBackground}, headline ${fx.headline}, buttons ${fx.buttons}, cards ${fx.cards}, reveal ${fx.reveal}, extras ${fx.extras.join('+') || 'none'}`);
+  console.log(`  figures ${Object.entries(fx.figures).map(([p, id]) => `${p}=${id}`).join(', ') || 'none'}${fx.figuresIgnored ? `   (no such place in this site: ${fx.figuresIgnored.join(', ')})` : ''}`);
   console.log('  run:  npm run dev   (or npm run build)');
   process.exit(0);
 }
@@ -186,7 +199,7 @@ const has = (id) => modules.includes(id);
 const added = modules.filter((m) => !wanted.includes(m) && m !== 'base');
 
 if (a.check) {
-  let effects; try { effects = resolveEffects(cfg.effects ?? {}); } catch (e) { fail(e.message); }
+  let effects; try { effects = resolveEffects(cfg.effects ?? {}, { modules }); } catch (e) { fail(e.message); }
   console.log(JSON.stringify({ brand: brandName, slug, modules, addedAsDependencies: added, effects }, null, 2)); process.exit(0);
 }
 
@@ -208,7 +221,7 @@ if (cfg.storage?.provider === 'azure') flags.add('azure');
 
 // effects (animated backgrounds, headline animations, button and card micro-interactions): see effects.mjs
 let fx;
-try { fx = resolveEffects(cfg.effects ?? {}); } catch (e) { fail(e.message); }
+try { fx = resolveEffects(cfg.effects ?? {}, { modules }); } catch (e) { fail(e.message); }
 const fxGallery = has('fxgallery');
 if (fxGallery && modules.every((m) => m === 'base' || m === 'fxgallery')) flags.add('fx_home');
 // The effects layer is always generated, even with nothing chosen: the pages import its slots (a "none" slot renders nothing), which is
@@ -360,7 +373,7 @@ if (!a.quiet) {
   console.log(`\nsitewright: wrote ${n} files to ${out}`);
   console.log(`  brand    ${brandName} (${slug}), logo ${cfg.brand.logo.style}, primary ${cfg.brand.colors.primary}, signal ${cfg.brand.colors.signal}`);
   console.log(`  modules  ${modules.filter((m) => m !== 'base').join(', ')}${added.length ? `   (added as dependencies: ${added.join(', ')})` : ''}`);
-  if (fx.active) console.log(`  effects  hero ${fx.heroBackground}, login ${fx.loginBackground}, headline ${fx.headline}, buttons ${fx.buttons}, cards ${fx.cards}, reveal ${fx.reveal}${fx.extras.length ? `, extras ${fx.extras.join('+')}` : ''}`);
+  if (fx.active) console.log(`  effects  hero ${fx.heroBackground}, login ${fx.loginBackground}, headline ${fx.headline}, buttons ${fx.buttons}, cards ${fx.cards}, reveal ${fx.reveal}${fx.extras.length ? `, extras ${fx.extras.join('+')}` : ''}${Object.keys(fx.figures).length ? `, figures ${Object.entries(fx.figures).map(([p, id]) => `${p}=${id}`).join(' ')}` : ''}`);
   if (has('signin')) console.log(`  sign-in  password ${secrets['@password']}   (development only; stored in .env.local)`);
   if (has('mfa')) console.log(`  admin    setup code ${secrets['@setup']}   (first account at /admin/setup)`);
   if (has('api')) console.log(`  api key  ${secrets['@token']}   (Bearer token for /api/ingest)`);

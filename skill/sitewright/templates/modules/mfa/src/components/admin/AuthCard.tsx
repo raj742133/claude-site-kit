@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { LogoMark } from '@/components/brand/Logo';
-import { LoginBackground } from '@/components/fx';
+import { Figure, LoginBackground } from '@/components/fx';
 
 /**
  * The card every __AREA__ sign-in step is drawn in: sign in, code, setup, invite, authenticator.
@@ -14,6 +14,7 @@ export function AuthCard({ step, title, children, error }: { step: string; title
     <main className="login-wrap">
       <LoginBackground />
       <div className="login-card admin-auth">
+        <Figure place="mfa" />
         <span className="brand-mark big"><LogoMark size={44} /></span>
         <p className="eyebrow">__ISSUER__ · __AREA__ · {step}</p>
         <h1 className="login-title">{title}</h1>
