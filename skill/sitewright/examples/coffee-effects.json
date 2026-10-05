@@ -396,6 +396,7 @@
     "sub": "Point the packing-room tablet at this back office with one link.",
     "where": "Settings → Back office"
   },
+  "icons": "auto",
   "effects": {
     "preset": "aurora-glass",
     "loginBackground": "beams",

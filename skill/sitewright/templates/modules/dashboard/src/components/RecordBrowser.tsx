@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { Figure } from '@/components/fx';
+import { Icon } from '@/components/icons/Icon';
 
 export interface RecordCard {
   id: string;
@@ -11,6 +12,7 @@ export interface RecordCard {
   status: string;
   statusLabel: string;
   statusTone: string;
+  statusIcon?: string;
   category: string | null;
   owner: string | null;
   source: string | null;
@@ -31,7 +33,7 @@ const facetValue = (c: RecordCard, f: Facet): string =>
 /** The list: search and filter as you type. Everything is filtered in the browser - the page sends at most 300 records. */
 export function RecordBrowser({ records, statuses, facets, metrics, searchPlaceholder }: {
   records: RecordCard[];
-  statuses: { id: string; label: string; tone: string }[];
+  statuses: { id: string; label: string; tone: string; icon?: string }[];
   facets: [string, string][];
   metrics: { key: string; label: string; unit?: string }[];
   searchPlaceholder: string;
@@ -74,7 +76,7 @@ export function RecordBrowser({ records, statuses, facets, metrics, searchPlaceh
     <div className="browser">
       <div className="browser-bar">
         <div className="chips" role="tablist" aria-label="Filter by status">
-          {[{ id: 'all', label: 'All' }, ...statuses].map((s) => (
+          {[{ id: 'all', label: 'All', icon: undefined as string | undefined }, ...statuses].map((s) => (
             <button
               key={s.id}
               type="button"
@@ -83,7 +85,7 @@ export function RecordBrowser({ records, statuses, facets, metrics, searchPlaceh
               className={`chip${status === s.id ? ' on' : ''}`}
               onClick={() => setStatus(s.id)}
             >
-              <span className="chip-t">{s.label} · {count(s.id)}</span>
+              <span className="chip-t"><Icon name={s.icon} className="chip-ic" />{s.label} · {count(s.id)}</span>
             </button>
           ))}
         </div>
@@ -120,7 +122,7 @@ export function RecordBrowser({ records, statuses, facets, metrics, searchPlaceh
               <Link href={`/records/${c.id}`} className="rec-card">
                 <div className="rec-thumb">
                   {c.thumbUrl ? <img src={c.thumbUrl} alt="" loading="lazy" /> : <div className="nothumb" />}
-                  <span className={`mode t tone-${c.statusTone}`}>{c.statusLabel}</span>
+                  <span className={`mode t tone-${c.statusTone}`}><Icon name={c.statusIcon} className="mode-ic" />{c.statusLabel}</span>
                 </div>
                 <div className="rec-body">
                   <div className="rec-store">{c.title ?? <span className="muted">Untitled</span>}</div>

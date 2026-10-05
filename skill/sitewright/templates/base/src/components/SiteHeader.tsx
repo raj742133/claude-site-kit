@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { LogoMark } from './brand/Logo';
 import { ThemeToggle } from './ThemeToggle';
+import { Icon } from './icons/Icon';
 import nav from '@/content/nav.json';
 
 /**
@@ -21,8 +22,8 @@ export function SiteHeader({ active, signOut = '__SIGN_OUT__', sub = '__AREA_LOW
           <span className="brand-t">__BRAND__ <span>{sub}</span></span>
         </Link>
         <nav aria-label="Main">
-          {(nav.items as { id: string; href: string; label: string }[]).map((i) => (
-            <Link key={i.id} href={i.href} className={active === i.id ? 'on' : ''}>{i.label}</Link>
+          {(nav.items as { id: string; href: string; label: string; icon?: string }[]).map((i) => (
+            <Link key={i.id} href={i.href} className={active === i.id ? 'on' : ''}><Icon name={i.icon} className="nav-ic" />{i.label}</Link>
           ))}
         </nav>
         <div className="head-actions">

@@ -72,7 +72,12 @@ backticks, backslashes, braces, `<`, `>` and `$` are removed) so user copy can n
     "extras": ["cursor-glow"],           // cursor-glow | scroll-progress | click-spark | count-up
     "figures": "auto",                   // "auto", or { "hero": "terrain", "signin": "padlock", ... }: line figures in named places (reference/figures.md)
     "figureIntensity": 0.5               // 0 subtle ... 1 strong, for every figure
-  }
+  },
+
+  // optional icons (reference/icons.md): "auto", or an object. Icon ids are "lucide:coffee" or just "coffee" (the default set).
+  "icons": { "auto": true, "set": "lucide", "custom": {}, "extra": [] }
+  // also: nav.icons { dashboard, connect, publishing, home }, dashboard.stats[].icon, dashboard.statuses[].icon,
+  //       landing.features.ready[n][2] / next[n][3], landing.story.steps[].icon
 }
 ```
 

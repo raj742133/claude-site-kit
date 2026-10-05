@@ -33,3 +33,19 @@ SOFTWARE.
 ```
 
 Every generated project that uses a figure carries this notice in `src/components/fx/figures/LICENSE-hairline.txt`.
+
+## Better Icons and Iconify
+
+Sitewright's icon support (`skill/sitewright/scripts/lib/icons.mjs`) follows the approach of
+[Better Icons](https://github.com/better-auth/better-icons) by Better Auth Inc. (MIT, Copyright (c) 2026 Better Auth Inc.): icons
+are looked up by `prefix:name` in the [Iconify](https://iconify.design) data (the API at `api.iconify.design`, and the
+`@iconify-json/<set>` packages), aliases are followed to the real icon, and the answer is turned into an inline SVG. The code is
+written for Sitewright rather than copied; the idea, the id format and the way aliases are resolved are theirs. Better Icons is also what the skill
+suggests an agent use to search for icons.
+
+## Lucide
+
+The icons the kit ships so a site has icons with no network (`skill/sitewright/templates/icons/lucide.json`, about 200 of them) are from
+[Lucide](https://lucide.dev), ISC licensed, with some derived from Feather (MIT, Copyright (c) 2013-present Cole Bemis). The full licence text is
+inside the pack and is written to `src/components/icons/NOTICE.md` of every generated project that uses one of its icons. Icons from other sets
+keep their own licences, which the same file records.

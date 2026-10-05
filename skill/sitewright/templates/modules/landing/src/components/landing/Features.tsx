@@ -1,11 +1,13 @@
 import site from '@/content/site.json';
+import { Icon } from '@/components/icons/Icon';
 
 interface FeaturesCfg {
   kicker: string; title: string;
   readyTitle?: string; nextTitle?: string; countLabel?: string;
-  ready: [string, string][];
-  /** [name, description, beingBuiltNow] */
-  next?: [string, string, boolean?][];
+  /** [name, description, icon] - the icon is optional */
+  ready: [string, string, string?][];
+  /** [name, description, beingBuiltNow, icon] */
+  next?: [string, string, boolean?, string?][];
 }
 
 const F = site.landing.features as unknown as FeaturesCfg;
@@ -33,15 +35,15 @@ export function Features() {
       <div className="mod-grid">
         <div className="mod-col rv">
           <h3>{F.readyTitle ?? 'Ready now'} <span>{ready.length}</span></h3>
-          {ready.map(([t, d]) => (
-            <div key={t} className="mod-item"><span className="mod-ic" /><div><b>{t}</b><small>{d}</small></div></div>
+          {ready.map(([t, d, ic]) => (
+            <div key={t} className="mod-item"><span className={`mod-ic${ic ? ' has' : ''}`}><Icon name={ic} /></span><div><b>{t}</b><small>{d}</small></div></div>
           ))}
         </div>
         {next.length ? (
           <div className="mod-col next rv">
             <h3>{F.nextTitle ?? 'On the way'} <span>{next.length}</span></h3>
-            {next.map(([t, d, now]) => (
-              <div key={t} className={`mod-item${now ? ' now' : ''}`}><span className="mod-ic" /><div><b>{t}{now ? <span className="mod-now">Being built</span> : null}</b><small>{d}</small></div></div>
+            {next.map(([t, d, now, ic]) => (
+              <div key={t} className={`mod-item${now ? ' now' : ''}`}><span className={`mod-ic${ic ? ' has' : ''}`}><Icon name={ic} /></span><div><b>{t}{now ? <span className="mod-now">Being built</span> : null}</b><small>{d}</small></div></div>
             ))}
           </div>
         ) : null}

@@ -7,6 +7,9 @@
 //   ... --preset calm --hero-bg aurora --headline split-words --buttons shine --cards lift --reveal blur --extras cursor-glow,count-up
 //                                                          effect choices passed directly; they override the config file
 //   ... --figures auto | hero=terrain,signin=padlock   --figure-intensity 0.7     interactive line figures in named places
+//   ... --icons auto | none   --icon nav.dashboard=layout-dashboard,stats.0=package   --icon-set lucide   --offline-icons
+//   node scaffold.mjs --list-icons <word> [--icon-prefix lucide]        find icons by name (the kit's pack, installed sets, Iconify)
+//   node scaffold.mjs --apply-icons ./my-site --icons auto              change the icons of an existing project in place
 //   node scaffold.mjs --apply-effects ./my-site --hero-bg stars --headline typewriter
 //                                                          change the effects of an existing project in place (nothing else is touched)
 //
@@ -23,6 +26,7 @@ import { buildPalette, paletteCss, onColour } from './lib/color.mjs';
 import { logoComponent, faviconSvg, LOGO_STYLES } from './lib/logo.mjs';
 import { resolveEffects, effectsMenu, BUTTON_SELECTOR, CARD_SELECTOR } from './effects.mjs';
 import { generateFx, fxHtmlAttrs, FX_GENERATED } from './lib/fxgen.mjs';
+import { iconSlots, planIcons, resolveIcons, customIcons, iconFiles, normalizeId, searchIcons, searchLocal, DEFAULT_SET } from './lib/icons.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const TEMPLATES = path.join(HERE, '..', 'templates');
@@ -34,7 +38,7 @@ function args(argv) {
     const a = argv[i];
     if (a.startsWith('--')) {
       const k = a.slice(2);
-      if (['force', 'list', 'list-effects', 'check', 'quiet'].includes(k)) out[k] = true;
+      if (['force', 'list', 'list-effects', 'check', 'quiet', 'offline-icons'].includes(k)) out[k] = true;
       else out[k] = argv[++i];
     } else out._.push(a);
   }
@@ -114,6 +118,79 @@ if (a.figures !== undefined) {
 if (a['figure-intensity'] !== undefined) picked.figureIntensity = Number(a['figure-intensity']);
 if (a['rotate-words'] !== undefined) picked.rotateWords = csv(a['rotate-words']);
 
+
+// ---- icons ---------------------------------------------------------------------------------------------------------------------
+// Icons are named in site.json ("lucide:coffee", or just "coffee" in the default set), resolved to SVG once here, checked, and written
+// into the project as data (src/components/icons/icons.ts). See lib/icons.mjs and reference/icons.md.
+const iconOpts = () => ({
+  auto: a.icons === 'auto' ? true : a.icons === 'none' ? false : undefined,
+  none: a.icons === 'none',
+  set: a['icon-set'],
+  offline: !!a['offline-icons'],
+  allow: a['allow-icon-license'] ? csv(a['allow-icon-license']) : [],
+  assign: a.icon ? Object.fromEntries(csv(a.icon).map((kv) => { const i = kv.indexOf('='); if (i < 1) fail(`--icon: "${kv}" should look like nav.dashboard=layout-dashboard (places: reference/icons.md)`); return [kv.slice(0, i).trim(), kv.slice(i + 1).trim()]; })) : {},
+});
+
+/** Applies the person's icon choices to the config, then resolves every icon in use. Mutates cfg (icons become full ids). */
+async function iconStep(cfg, modules, o) {
+  const block = typeof cfg.icons === 'string' ? { auto: cfg.icons === 'auto' } : (cfg.icons ??= {});
+  if (o.set) block.set = o.set;
+  if (o.auto !== undefined) block.auto = o.auto;
+  const set = block.set || DEFAULT_SET;
+  const slots = iconSlots(cfg, modules);
+  if (o.none) for (const sl of slots) sl.set(null);
+  for (const [key, val] of Object.entries(o.assign)) {
+    const sl = slots.find((x) => x.key === key);
+    if (!sl) fail(`--icon: there is no place "${key}" in this site. Places here: ${slots.map((x) => x.key).join(', ')}`);
+    sl.set(val === '' || val === 'none' ? null : val);
+  }
+  const custom = customIcons(block.custom);
+  const plan = planIcons(cfg, modules, { auto: !!block.auto, set });
+  const extra = (block.extra ?? []).map((x) => normalizeId(x, set) ?? fail(`icons.extra: "${x}" is not an icon id.`));
+  const ids = [...plan.used, ...extra];
+  const wantCustom = ids.filter((i) => i.startsWith('custom:'));
+  const missingCustom = wantCustom.filter((i) => !custom.icons[i]);
+  const remote = ids.filter((i) => !i.startsWith('custom:'));
+  const res = await resolveIcons(remote, { offline: o.offline, allowLicenses: o.allow });
+  const problems = [...plan.problems, ...custom.problems, ...res.problems, ...missingCustom.map((i) => `${i}: no such custom icon (define it in icons.custom).`)];
+  if (res.missing.length) problems.push(`not found: ${res.missing.join(', ')}. Find the right name with:  node scaffold.mjs --list-icons <word>   (or better-icons: npx better-icons search <word> --prefix ${set})`);
+  if (problems.length) fail(`icons:\n  - ${problems.join('\n  - ')}${res.notes.length ? `\n  (${res.notes.join('; ')})` : ''}`);
+  // anything that could not be resolved was reported above; what is here is safe to write
+  return { ...iconFiles({ icons: res.icons, sets: res.sets, custom: custom.icons }), notes: res.notes, count: Object.keys(res.icons).length + Object.keys(custom.icons).length, set };
+}
+
+/** `--list-icons <word>`: icons by name, from what works offline and, when the network allows, from Iconify (what better-icons searches). */
+if (a['list-icons'] !== undefined) {
+  const q = String(a['list-icons']), prefix = a['icon-prefix'] || DEFAULT_SET;
+  const local = searchLocal(q, prefix);
+  console.log(`In the kit's pack / installed sets (${prefix}), usable with no network:\n  ${local.slice(0, 40).join('\n  ') || '(none)'}${local.length > 40 ? `\n  ... ${local.length - 40} more` : ''}`);
+  if (!a['offline-icons']) {
+    try { const r = await searchIcons(q, { prefix: a['icon-prefix'], limit: 30 }); console.log(`\nIconify${a['icon-prefix'] ? ` (${prefix})` : ''}:\n  ${r.join('\n  ') || '(none)'}`); }
+    catch (e) { console.log(`\nIconify could not be reached (${e.message}). Use --offline-icons to skip this.`); }
+  }
+  process.exit(0);
+}
+
+/** `--apply-icons <project>`: change the icons of an existing project in place. Pages are not touched: only icons.ts, NOTICE.md, nav.json and site.json. */
+if (a['apply-icons']) {
+  const dir = path.resolve(a['apply-icons']);
+  const siteFile = path.join(dir, 'src/content/site.json'), navFile = path.join(dir, 'src/content/nav.json'), icFile = path.join(dir, 'src/components/icons/icons.ts');
+  if (!fs.existsSync(siteFile) || !fs.existsSync(navFile)) fail(`${dir} does not look like a Sitewright project.`);
+  if (!fs.existsSync(icFile) || !fs.readFileSync(path.join(dir, 'src/components/SiteHeader.tsx'), 'utf8').includes('Icon')) fail('this project was generated before icons existed. Regenerate it once with the current Sitewright, then --apply-icons works.');
+  const o = iconOpts();
+  if (o.auto === undefined && !o.none && !Object.keys(o.assign).length && !o.set) fail('nothing to apply: pass --icons auto|none, --icon place=icon,... or --icon-set (see reference/icons.md).');
+  const site = JSON.parse(fs.readFileSync(siteFile, 'utf8'));
+  const out = await iconStep(site, site.modules ?? [], o);
+  fs.writeFileSync(icFile, out.data);
+  fs.writeFileSync(path.join(dir, 'src/components/icons/NOTICE.md'), out.notice);
+  const nav = JSON.parse(fs.readFileSync(navFile, 'utf8'));
+  for (const it of nav.items) { const ic = site.nav?.icons?.[it.id]; if (ic) it.icon = ic; else delete it.icon; }
+  fs.writeFileSync(navFile, JSON.stringify(nav, null, 2) + '\n');
+  fs.writeFileSync(siteFile, JSON.stringify(site, null, 2) + '\n');
+  console.log(`sitewright: icons updated in ${dir}\n  ${out.count} icons: ${[...out.data.matchAll(/^  "([^"]+)":/gm)].map((m) => m[1]).join(', ') || 'none'}`);
+  for (const n of out.notes) console.log(`  note: ${n}`);
+  process.exit(0);
+}
 
 // ---- --apply-effects <project>: change the effects of an existing project in place -------------------------------------------
 // Rewrites only the generated effects layer (src/components/fx/), the data-fx-* attributes on <html> in the root layout and the
@@ -228,6 +305,9 @@ if (fxGallery && modules.every((m) => m === 'base' || m === 'fxgallery')) flags.
 // what lets `--apply-effects` swap effects later by rewriting src/components/fx/ alone.
 flags.add('fx');
 
+// icons
+const iconResult = await iconStep(cfg, modules, iconOpts());
+
 // palette
 const palette = buildPalette({ primary: cfg.brand.colors.primary, signal: cfg.brand.colors.signal, neutral: cfg.brand.colors.neutralHue });
 
@@ -299,7 +379,10 @@ if (has('connect')) nav.push({ id: 'connect', label: cfg.nav.connect, href: '/co
 if (has('publishing')) nav.push({ id: 'publishing', label: cfg.nav.publishing, href: '/admin' });
 else if (has('mfa')) nav.push({ id: 'team', label: cfg.nav.team, href: '/admin' });
 if (has('landing')) nav.push({ id: 'home', label: cfg.nav.home, href: '/' });
+for (const it of nav) { const ic = cfg.nav.icons?.[it.id]; if (ic) it.icon = ic; }
 put('src/content/nav.json', JSON.stringify({ items: nav, homeAfterLogin: loginRedirect }, null, 2) + '\n');
+put('src/components/icons/icons.ts', iconResult.data);
+put('src/components/icons/NOTICE.md', iconResult.notice);
 
 // the content file the components read: exactly the resolved config, minus build-only keys
 const site = { ...cfg, modules, flags: [...flags], effects: fx };
@@ -374,6 +457,8 @@ if (!a.quiet) {
   console.log(`  brand    ${brandName} (${slug}), logo ${cfg.brand.logo.style}, primary ${cfg.brand.colors.primary}, signal ${cfg.brand.colors.signal}`);
   console.log(`  modules  ${modules.filter((m) => m !== 'base').join(', ')}${added.length ? `   (added as dependencies: ${added.join(', ')})` : ''}`);
   if (fx.active) console.log(`  effects  hero ${fx.heroBackground}, login ${fx.loginBackground}, headline ${fx.headline}, buttons ${fx.buttons}, cards ${fx.cards}, reveal ${fx.reveal}${fx.extras.length ? `, extras ${fx.extras.join('+')}` : ''}${Object.keys(fx.figures).length ? `, figures ${Object.entries(fx.figures).map(([p, id]) => `${p}=${id}`).join(' ')}` : ''}`);
+  if (iconResult.count) console.log(`  icons    ${iconResult.count} (${iconResult.set}${cfg.icons?.auto ? ', auto' : ''})`);
+  for (const n of iconResult.notes) console.log(`  note     ${n}`);
   if (has('signin')) console.log(`  sign-in  password ${secrets['@password']}   (development only; stored in .env.local)`);
   if (has('mfa')) console.log(`  admin    setup code ${secrets['@setup']}   (first account at /admin/setup)`);
   if (has('api')) console.log(`  api key  ${secrets['@token']}   (Bearer token for /api/ingest)`);
