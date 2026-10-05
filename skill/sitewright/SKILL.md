@@ -23,7 +23,7 @@ The output is a normal Next.js 15 / React 19 / TypeScript project the user owns 
 `base` (design system, database, storage) and `api` (ingest, signed uploads, health) are internal; they are added when needed.
 Dependencies are resolved automatically - choosing `publishing` brings `mfa`; `dashboard`/`connect` bring `signin` + `api`.
 
-**Effects** are not a module but an optional style layer on top of any of them (`effects` block in `site.json`): 10 hero backgrounds, 8 headline animations, 4 button and 4 card effects, 5 scroll-reveal styles and 4 extras, all original dependency-free code. They are off unless chosen. Catalogue, presets and rules: `reference/effects.md`.
+**Effects** are not a module but a style layer on top of any of them (`effects` block in `site.json`): 10 hero backgrounds, 8 headline animations, 4 button and 4 card effects, 5 scroll-reveal styles and 4 extras, all original dependency-free code. Every site has the effect slots wired in; with nothing chosen they show the default look, and `--apply-effects` changes them later in place. Catalogue, presets and rules: `reference/effects.md`.
 
 ## Workflow
 
@@ -41,7 +41,7 @@ Dependencies are resolved automatically - choosing `publishing` brings `mfa`; `d
    - **The user named an effect** ("use aurora", "typewriter headline", "the playful preset"): apply exactly that, without asking. Map it to the ids in `node scripts/scaffold.mjs --list-effects` and write it to `effects` (or pass `--hero-bg aurora` etc.). Anything else they did not mention stays as the preset or default gives it.
    - **The user did not mention effects**: pick one fitting preset yourself (calm/serious brands: `calm` or `editorial`; playful: `playful`; technical: `tech-grid`; plain data tools: keep the default look), say which in one line, and offer to change it. Do not stack heavy choices on a page full of dense content.
    - **The user asks to see the options**: print `--list-effects`, or add `fxgallery`, build, and point them at `/effects` (Copy, then paste the config back).
-   `rotate` needs `rotateWords`; set `loginBackground` if the sign-in page should be animated too. Changing the effect later means re-running the scaffold with the new choice (into a fresh folder, or `--force` over an unedited one), since a hand-edited project would be overwritten.
+   `rotate` needs `rotateWords`; set `loginBackground` if the sign-in page should be animated too. **Changing effects later takes a second and never touches the user's edits:** `node ~/.claude/skills/sitewright/scripts/scaffold.mjs --apply-effects ./my-site --hero-bg stars --headline typewriter` (same flags as above; `--preset` replaces the whole set, single flags change only their slot). It rewrites only `src/components/fx/`, the `data-fx-*` attributes on `<html>` and the `effects` entry in `src/content/site.json`. Never regenerate a project just to change an effect. Then rebuild (`npm run build`) or let `npm run dev` hot-reload.
 4. **Write the config** to `site.json` (see `reference/config.md`; `examples/*.json` are complete worked configs - `examples/minimal.json` is just a brand name).
 5. **Scaffold:**
    ```bash

@@ -5,8 +5,8 @@ canvas.fx-bg { width: 100%; height: 100%; display: block; }
 .fx-sr { position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
 
 /* On the sign-in pages a background sits behind the card. */
-.login-wrap { position: relative; overflow: hidden; }
-.login-wrap > :not(.fx-bg) { position: relative; z-index: 1; }
+.login-wrap:has(> .fx-bg) { position: relative; overflow: hidden; }
+.login-wrap:has(> .fx-bg) > :not(.fx-bg) { position: relative; z-index: 1; }
 
 @media (prefers-reduced-motion: reduce) {
   .fx-bg, .fx-bg *, .fx-bg::before, .fx-bg::after { animation: none !important; }

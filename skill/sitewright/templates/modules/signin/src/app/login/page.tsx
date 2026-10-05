@@ -1,8 +1,6 @@
 import { LogoMark } from '@/components/brand/Logo';
 import site from '@/content/site.json';
-//#if fx_login_bg
 import { LoginBackground } from '@/components/fx';
-//#endif
 
 export const dynamic = 'force-dynamic';
 
@@ -14,9 +12,7 @@ export default async function Login({
   const { next = '__LOGIN_REDIRECT__', error } = await searchParams;
   return (
     <main className="login-wrap">
-      {/*#if fx_login_bg*/}
       <LoginBackground />
-      {/*#endif*/}
       <div className="login-card">
         <span className="brand-mark big"><LogoMark size={44} /></span>
         <p className="eyebrow">{site.signin.eyebrow}</p>

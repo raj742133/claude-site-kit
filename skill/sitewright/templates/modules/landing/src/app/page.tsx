@@ -12,15 +12,7 @@ import { LandingHeader } from '@/components/landing/LandingHeader';
 import { RevealOnScroll } from '@/components/landing/Reveal';
 import { Story } from '@/components/landing/Story';
 import { DownloadBar, DownloadCard, HowToInstall, type DownloadInfo } from '@/components/landing/Download';
-//#if !fx_bg&!fx_nobg
-import { Territory } from '@/components/landing/Territory';
-//#endif
-//#if fx_bg
-import { HeroBackground } from '@/components/fx';
-//#endif
-//#if fx_headline
-import { Headline } from '@/components/fx';
-//#endif
+import { HeroBackground, Headline } from '@/components/fx';
 import { SmoothScroll } from '@/components/landing/SmoothScroll';
 import { Route } from '@/components/landing/Route';
 //#if proof
@@ -48,19 +40,11 @@ const mb = (r: AppReleaseRow) => `${Math.round(Number(r.size_bytes) / 1048576) |
 const day = (d: string | Date) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 //#endif
 
-/** "Every cup, {accent} to order." -> the words around the accent, so the accent can be drawn in the brand colour. */
-function headline() {
-  const [before, after] = L.headline.split('{accent}');
-  if (after === undefined) return <>{L.headline}</>;
-  return <>{before}<em>{L.accent}</em>{after}</>;
-}
-//#if fx_headline
-/** The same words as parts, for the animated headline in components/fx. */
+/** "Every cup, {accent} to order." -> the words around the accent, so <Headline> can draw the accent in the brand colour (and animate it, if an effect is chosen). */
 function headlineParts() {
   const [before, after] = L.headline.split('{accent}');
   return after === undefined ? { before: L.headline } : { before: before ?? '', accent: L.accent, after };
 }
-//#endif
 
 export default async function Home() {
   // `as` keeps TypeScript from narrowing this to `null` on sites without the publishing module (it is never assigned there).
@@ -124,23 +108,14 @@ export default async function Home() {
         <div className="route-host">
           <Route />
           <section className="lp-hero" id="get">
-            {/*#if !fx_bg&!fx_nobg*/}
-            <Territory />
-            {/*#endif*/}
-            {/*#if fx_bg*/}
             <HeroBackground />
-            {/*#endif*/}
             <div className="lp-wrap lp-hero-grid">
               <div>
                 {newBadge ? (
                   <a href={info ? '#releases' : '#story'} className="lp-badge"><b>{L.badge?.tag ?? 'New'}</b>{newBadge}</a>
                 ) : null}
                 <h1 className="lp-h1">
-                  {/*#if fx_headline*/}
                   <Headline {...headlineParts()} />
-                  {/*#else*/}
-                  {headline()}
-                  {/*#endif*/}
                 </h1>
                 <p className="lp-sub">{L.sub}</p>
                 <DownloadCard info={info} locked={locked} autoAsk label={L.downloadLabel} action={L.primaryAction} />
