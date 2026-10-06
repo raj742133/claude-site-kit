@@ -1,0 +1,17 @@
+{
+  "_comment": "A single module: the landing page only.",
+  "brand": {
+    "name": "Orbit Labs",
+    "tagline": "Small tools for big skies.",
+    "colors": {
+      "primary": "#4338ca",
+      "signal": "#0ea5e9"
+    },
+    "logo": {
+      "style": "hex"
+    }
+  },
+  "modules": [
+    "landing"
+  ]
+}

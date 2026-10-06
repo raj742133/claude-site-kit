@@ -1,0 +1,28 @@
+{
+  "_comment": "Near-white brand colours: the colour derivation must keep text readable.",
+  "brand": {
+    "name": "Sunny Side Bakery",
+    "tagline": "Fresh from the oven.",
+    "colors": {
+      "primary": "#fff1a8",
+      "signal": "#fde68a"
+    },
+    "logo": {
+      "style": "drop"
+    }
+  },
+  "vocab": {
+    "record": "bake",
+    "records": "bakes",
+    "device": "tablet",
+    "artifact": "price list"
+  },
+  "modules": [
+    "landing",
+    "signin",
+    "dashboard",
+    "connect",
+    "mfa",
+    "publishing"
+  ]
+}

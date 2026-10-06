@@ -47,7 +47,11 @@ export async function getDb(): Promise<Db> {
     // absolute path starts `C:` - which parses as a scheme and fails with a message about URLs
     // that says nothing about drive letters. Relative to cwd sidesteps it on every platform.
     const dir = dsn.slice('pglite://'.length) || '.pgdata';
-    const pg = await PGlite.create({ dataDir: dir });
+    // `new` + `waitReady`, not `PGlite.create`: awaiting `create` resolves to the instance itself, and
+    // `next dev` serialises awaited values for its debug stream - which walks into the WebAssembly
+    // memory and answers every server-rendered page with "ArrayBuffer is not detachable".
+    const pg = new PGlite({ dataDir: dir });
+    await pg.waitReady;
     cached = {
       kind: 'pglite',
       async query<T>(text: string, params: unknown[] = []) {

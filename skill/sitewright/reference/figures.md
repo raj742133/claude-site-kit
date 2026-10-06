@@ -4,7 +4,23 @@ Small isometric drawings that answer the pointer: a padlock whose shackle lifts 
 
 Nineteen of the 22 figures are **[Hairline](https://github.com/lucasmarkes/hairline)** by Lucas Marques, MIT licensed (`templates/fx/figures/LICENSE-hairline.txt` is copied into every project that uses them and must stay). **`bars`, `scanner` and `parcel`** are written for this kit on the same engine, to Hairline's ten rules.
 
-## Using them
+## Just use one in your code
+
+Every generated project has a `Figure` component. Put a figure anywhere in your own pages, by name; nothing to register, no command to run:
+
+```tsx
+import { Figure } from '@/components/fx';
+
+<Figure name="padlock" />                 // any of the 22, anywhere
+<Figure name="terrain" intensity={0.9} /> // how strongly it answers the pointer, 0 to 1
+<Figure name="vault" className="my-hero-art" />
+```
+
+The project finds it and brings the figure in by itself: while `npm run dev` runs (a few seconds after you save), before every `npm run build` (the build stops, naming the file and suggesting the right name, if a figure doesn't exist), or on demand with `npm run figures`. Only the figures you use are part of the site; the rest of the library stays in `scripts/lib/figures` and costs nothing. Nothing is removed on its own (`npm run figures -- --prune` drops the unused). The figure is an empty 5:4 box that takes the width you give its parent (`.fx-fig` in `fx.css`), so size it with a wrapper or `className`.
+
+## The site's places
+
+`effects.figures` still puts figures in the places the generator knows (below), and `--apply-effects` changes them; `<Figure name>` is for everything else.
 
 ```jsonc
 "effects": {
@@ -80,6 +96,9 @@ Rules of thumb: one figure per place, never the same figure twice on a page; kee
 - Colours come from `--surface`, `--raised`, `--ink`, `--primary` through the six `--hairline-*` properties in `fx.css`, so a re-themed site re-themes its figures.
 
 ## How it is wired
+
+`src/components/fx/figures/config.json` holds the places, the figure chosen for each and the names used in code; `npm run figures` rewrites `Slots.tsx` from it and from what your code uses.
+
 
 `src/components/fx/figures/` holds the engine (`core/`, `mount.ts`), only the chosen figures (`engines/`, `factories/`) and `Slots.tsx`. Pages render `<Figure place="signin" />` from `@/components/fx`; every site has these in place from the start (a place with no figure renders nothing), so `--apply-effects` swaps figures by rewriting this folder alone. Change which figure a place shows by editing the `CHOSEN` line in `Slots.tsx` by hand if you prefer.
 

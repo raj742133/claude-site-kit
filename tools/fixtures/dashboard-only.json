@@ -1,0 +1,14 @@
+{
+  "_comment": "A single module: dashboard only (its dependencies come with it).",
+  "brand": {
+    "name": "Tallyboard",
+    "tagline": "Everything counted.",
+    "colors": {
+      "primary": "#0f766e",
+      "signal": "#f59e0b"
+    }
+  },
+  "modules": [
+    "dashboard"
+  ]
+}

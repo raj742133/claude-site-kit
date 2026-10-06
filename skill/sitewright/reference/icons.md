@@ -81,7 +81,7 @@ node scripts/scaffold.mjs --apply-icons ./my-site --icons auto                  
 
 ## Where an icon comes from
 
-In order: (1) the pack shipped with the kit, 200+ common Lucide icons (`templates/icons/lucide.json`, ISC; each project carries its own copy in `scripts/icons/pack`), so a site gets icons with no network; (2) a locally installed `@iconify-json/<set>` (`npm i -D @iconify-json/tabler`); (3) the cache from an earlier run (`~/.cache/sitewright/icons`); (4) the Iconify API, unless `--offline-icons`. A name that is nowhere is an error that tells you how to find the right one, and nothing is generated.
+In order: (1) the pack shipped with the kit, 200+ common Lucide icons (`templates/icons/lucide.json`, ISC; each project carries its own copy in `scripts/lib/pack`), so a site gets icons with no network; (2) a locally installed `@iconify-json/<set>` (`npm i -D @iconify-json/tabler`); (3) the cache from an earlier run (`~/.cache/sitewright/icons`); (4) the Iconify API, unless `--offline-icons`. A name that is nowhere is an error that tells you how to find the right one, and nothing is generated.
 
 ## Licences
 

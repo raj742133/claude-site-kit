@@ -1,6 +1,6 @@
 // Icons for generated sites. Config names icons as "prefix:name" (Iconify ids, the same ids the better-icons tool finds:
 // github.com/better-auth/better-icons, MIT) or as a bare "name" in the site's default set (lucide). At generation time each icon is
-// resolved to its SVG once, checked, and written into the project as plain data (src/components/icons/icons.ts), so a built site makes
+// resolved to its SVG once, checked, and written into the project as plain data (src/components/icons/icons.data.json), so a built site makes
 // no icon requests and has no icon dependency.
 //
 // Where an icon comes from, in this order:
@@ -18,6 +18,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
+import { walkSrc, readSource, readTag, attrValues, closest } from './scan.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 // In the skill the pack is under templates/icons; a generated project carries its own copy in ./pack next to this file.
@@ -51,6 +52,7 @@ const SAFE_VALUE = /^[#\w\s.,:;()%+\-/*]*$/;
 
 /** Re-builds an icon body from allowed elements and attributes only. Returns null when anything else is present. Ids are made unique per icon. */
 export function sanitizeBody(body, uid = 'i') {
+  // uid === null checks a body that was already cleaned (ids keep their names), so it can be compared with the original
   if (typeof body !== 'string' || !body.trim() || body.length > 20000) return null;
   const tag = /<\s*(\/?)\s*([A-Za-z][\w:-]*)((?:\s+[^<>]*?)?)\s*(\/?)\s*>/g;
   let out = '', last = 0, depth = 0, m;
@@ -79,10 +81,10 @@ export function sanitizeBody(body, uid = 'i') {
     parts.push({ name, attrs, self: !!self });
   }
   if (body.slice(last).trim() !== '' || depth !== 0 || !parts.length) return null;
-  const re = (v) => v.replace(/url\(#([\w-]+)\)/g, (x, id) => (ids.has(id) ? `url(#${uid}-${id})` : x));
+  const re = (v) => (uid === null ? v : v.replace(/url\(#([\w-]+)\)/g, (x, id) => (ids.has(id) ? `url(#${uid}-${id})` : x)));
   for (const p of parts) {
     if (p.close) { out += `</${p.close}>`; continue; }
-    const a = p.attrs.map(([k, v]) => ` ${k}="${k === 'id' ? `${uid}-${v}` : re(v)}"`).join('');
+    const a = p.attrs.map(([k, v]) => ` ${k}="${k === 'id' && uid !== null ? `${uid}-${v}` : re(v)}"`).join('');
     out += `<${p.name}${a}${p.self ? '/' : ''}>`;
   }
   return out;
@@ -161,10 +163,7 @@ export async function searchIcons(query, { prefix, limit = 24, fetchImpl = fetch
 export function closestIcons(name, prefix = DEFAULT_SET, limit = 3) {
   const pack = kitPack(prefix) ?? installedSet(prefix);
   if (!pack) return [];
-  const names = [...new Set(Object.keys(pack.icons ?? {}).concat(Object.keys(pack.aliases ?? {})))];
-  const lev = (a, b) => { const d = Array.from({ length: a.length + 1 }, (_, i) => [i]); for (let j = 1; j <= b.length; j++) d[0][j] = j;
-    for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); return d[a.length][b.length]; };
-  return names.map((n) => ({ n, d: n.includes(name) || name.includes(n) ? 1 : lev(name, n) })).filter((x) => x.d <= Math.max(2, Math.floor(name.length / 4))).sort((x, y) => x.d - y.d || x.n.localeCompare(y.n)).slice(0, limit).map((x) => `${prefix}:${x.n}`);
+  return closest(name, Object.keys(pack.icons ?? {}).concat(Object.keys(pack.aliases ?? {})), limit).map((n) => `${prefix}:${n}`);
 }
 
 /** Searches the icons available without the network: names in the kit's pack and any installed set. */
@@ -284,7 +283,8 @@ export const iconFor = (text, exclude = new Set(), map = {}, set = DEFAULT_SET) 
     const id = normalizeId(icon, set);
     if (id && wordIn(word, t) && !exclude.has(id)) return id;
   }
-  for (const [re, name] of KEYWORDS) { const id = `${set}:${name}`; if (re.test(t) && !exclude.has(id)) return id; }
+  // the built-in words name Lucide icons (the set the kit ships), whatever the site's default set is; for another set, use icons.map
+  for (const [re, name] of KEYWORDS) { const id = `${DEFAULT_SET}:${name}`; if (re.test(t) && !exclude.has(id)) return id; }
   return null;
 };
 const NAV = { dashboard: 'layout-dashboard', connect: 'smartphone', publishing: 'package', team: 'users', home: 'house' };
@@ -335,7 +335,7 @@ export function planIcons(cfg, modules, { auto = false, set = DEFAULT_SET, map =
     for (const slot of slots) {
       if (slot.get()) continue;
       const ex = takenIn(slot.key);
-      const fb = slot.fallback ? `${set}:${slot.fallback}` : null;
+      const fb = slot.fallback ? `${DEFAULT_SET}:${slot.fallback}` : null;
       const id = (fb && !ex.has(fb) ? fb : null) ?? iconFor(slot.label, ex, map, set);
       if (id) { slot.set(id); used.add(id); ex.add(id); }
     }
@@ -344,10 +344,10 @@ export function planIcons(cfg, modules, { auto = false, set = DEFAULT_SET, map =
 }
 
 /** The files a generated project gets: the icon data the site draws from, the licence facts for the notice, and the notice itself. */
-export function iconFiles({ icons, sets, custom = {}, forMap = {} }) {
+export function iconFiles({ icons, sets, custom = {}, forMap = {}, set = DEFAULT_SET }) {
   const all = { ...icons, ...custom };
   const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => a.localeCompare(b)));
-  const data = JSON.stringify({ icons: sorted(Object.fromEntries(Object.entries(all).map(([id, v]) => [id, { b: v.body ?? v.b, w: v.w, h: v.h }]))), for: sorted(forMap) }, null, 1) + '\n';
+  const data = JSON.stringify({ set, icons: sorted(Object.fromEntries(Object.entries(all).map(([id, v]) => [id, { b: v.body ?? v.b, w: v.w, h: v.h }]))), for: sorted(forMap) }, null, 1) + '\n';
   const setsJson = JSON.stringify(sorted(sets), null, 1) + '\n';
   return { data, sets: setsJson, notice: noticeText({ ids: Object.keys(all), sets }) };
 }
@@ -375,34 +375,8 @@ export function noticeText({ ids, sets }) {
 }
 
 // ---- finding icons in the code of a project ------------------------------------------------------------------------------------
-const SKIP_DIRS = new Set(['node_modules', '.next', '.git', 'icons']);
-const SCAN_EXT = /\.(tsx?|jsx?|mjs|cjs|json|mdx?)$/;
 const NAMEISH = /^(?:[a-z0-9]+(?:-[a-z0-9]+)*:)?[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
-function* walkSrc(dir) {
-  let entries = [];
-  try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
-  for (const e of entries) {
-    const p = path.join(dir, e.name);
-    if (e.isDirectory()) { if (!SKIP_DIRS.has(e.name) || (e.name === 'icons' && !p.endsWith(path.join('components', 'icons')))) yield* walkSrc(p); }
-    else if (SCAN_EXT.test(e.name)) yield p;
-  }
-}
-
-/** The text of a JSX tag that starts at `i` (just after "<Icon"), up to its closing ">" - braces and quotes respected. */
-function readTag(src, i) {
-  let depth = 0, q = null;
-  for (let j = i; j < Math.min(src.length, i + 600); j++) {
-    const c = src[j];
-    if (q) { if (c === q && src[j - 1] !== '\\') q = null; continue; }
-    if (c === '"' || c === "'" || c === '`') { q = c; continue; }
-    if (c === '{') depth++;
-    else if (c === '}') depth--;
-    else if (c === '>' && depth === 0) return src.slice(i, j);
-  }
-  return src.slice(i, i + 600);
-}
-const literals = (expr) => [...expr.matchAll(/["'`]([^"'`$\\]+)["'`]/g)].map((m) => m[1]);
+const ownIcons = (dir) => dir.endsWith(path.join('components', 'icons')); // the generated icon data is not source
 
 /**
  * Every icon a project asks for in its code:
@@ -413,15 +387,13 @@ const literals = (expr) => [...expr.matchAll(/["'`]([^"'`$\\]+)["'`]/g)].map((m)
 export function scanSource(root) {
   const hard = new Map(), soft = new Map(), texts = new Map();
   const add = (m, id, file) => { if (!m.has(id)) m.set(id, new Set()); m.get(id).add(path.relative(root, file).replace(/\\/g, '/')); };
-  for (const file of walkSrc(path.join(root, 'src'))) {
-    let src; try { if (fs.statSync(file).size > 400_000) continue; src = fs.readFileSync(file, 'utf8'); } catch { continue; }
-    if (file.endsWith(path.join('content', 'site.json'))) continue; // read by slot, below
+  for (const file of walkSrc(path.join(root, 'src'), ownIcons)) {
+    const src = readSource(file);
+    if (src === null || file.endsWith(path.join('content', 'site.json'))) continue; // the content file is read by slot, below
     for (const m of src.matchAll(/<Icon\b/g)) {
       const tag = readTag(src, m.index + 5);
-      const nm = /\bname\s*=\s*(?:"([^"]*)"|'([^']*)'|\{([^{}]*)\})/.exec(tag);
-      if (nm) for (const v of nm[3] !== undefined ? literals(nm[3]) : [nm[1] ?? nm[2]]) if (v && NAMEISH.test(v)) add(hard, v, file);
-      const fr = /\bfor\s*=\s*(?:"([^"]*)"|'([^']*)'|\{([^{}]*)\})/.exec(tag);
-      if (fr) for (const v of fr[3] !== undefined ? literals(fr[3]) : [fr[1] ?? fr[2]]) if (v) add(texts, v, file);
+      for (const v of attrValues(tag, 'name')) if (v && NAMEISH.test(v)) add(hard, v, file);
+      for (const v of attrValues(tag, 'for')) if (v) add(texts, v, file);
     }
     for (const m of src.matchAll(/["']?\bicon["']?\s*[:=]\s*(?:"([^"]+)"|'([^']+)')/g)) { const v = m[1] ?? m[2]; if (NAMEISH.test(v) && v !== 'none') add(soft, v, file); }
     for (const m of src.matchAll(/(?:\/\/|\/\*|\{\/\*)\s*icons?:\s*([^\n*]+)/g)) for (const v of m[1].split(/[\s,]+/)) if (v && NAMEISH.test(v)) add(hard, v, file);
@@ -464,6 +436,8 @@ export async function syncIcons({ root = process.cwd(), offline = false, allow =
   const remote = [...new Set([...wantHard, ...wantSoft])].filter((i) => !i.startsWith('custom:') && !cur.icons[i]);
   const res = remote.length ? await resolveIcons(remote, { offline, allowLicenses: allow }) : { icons: {}, sets: {}, missing: [], problems: [], notes: [] };
   const problems = [...custom.problems, ...res.problems], notes = [...res.notes];
+  // what is already in the data is drawn into pages as markup, so it is checked too (a hand edit or a bad merge must not slip a script in)
+  for (const [id, v] of Object.entries(cur.icons)) if (sanitizeBody(v.b, null) === null) problems.push(`${id}: icons.data.json holds markup that is not a plain drawing (a script, link, style or text), so it was removed from the file (and the build stopped once so you notice). If the icon is a real one, use it by name again and it comes back clean.`);
   const missingHard = res.missing.filter((i) => wantHard.has(i));
   for (const i of res.missing.filter((i) => !wantHard.has(i))) notes.push(`${i} (${where.get(i)?.[0] ?? 'a prop called icon'}) is not an icon in the ${i.split(':')[0]} set, so it was left alone`);
   for (const i of customWant) if (!custom.icons[i]) problems.push(`${i}: no such custom icon (define it under icons.custom in src/content/site.json).`);
@@ -472,12 +446,12 @@ export async function syncIcons({ root = process.cwd(), offline = false, allow =
   // merge: what is there, plus what was found; with prune, only what the code uses
   const keep = prune ? new Set([...wantHard, ...wantSoft]) : null;
   const icons = {};
-  for (const [id, v] of Object.entries(cur.icons)) if (!keep || keep.has(id)) icons[id] = v;
+  for (const [id, v] of Object.entries(cur.icons)) if ((!keep || keep.has(id)) && sanitizeBody(v.b, null) !== null) icons[id] = v;
   for (const [id, v] of Object.entries(res.icons)) icons[id] = { b: v.body, w: v.w, h: v.h };
   for (const [id, v] of Object.entries(custom.icons)) if (!keep || keep.has(id) || customWant.includes(id)) icons[id] = { b: v.body, w: v.w, h: v.h };
   const nextSets = { ...sets, ...res.sets };
   if (Object.keys(custom.icons).length) nextSets.custom = { name: 'custom' };
-  const files = iconFiles({ icons: Object.fromEntries(Object.entries(icons).map(([id, v]) => [id, { body: v.b, w: v.w, h: v.h }])), sets: nextSets, forMap });
+  const files = iconFiles({ icons: Object.fromEntries(Object.entries(icons).map(([id, v]) => [id, { body: v.b, w: v.w, h: v.h }])), sets: nextSets, forMap, set });
   const changed = files.data !== (fs.existsSync(P.data) ? fs.readFileSync(P.data, 'utf8') : '');
   const added = Object.keys(icons).filter((id) => !cur.icons[id]), removed = Object.keys(cur.icons).filter((id) => !icons[id]);
   if (changed && !check) {

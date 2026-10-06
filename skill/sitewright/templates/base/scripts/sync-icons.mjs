@@ -7,7 +7,7 @@
 //   npm run icons -- --check    change nothing, fail if something is missing        --prune   drop icons the code no longer uses
 //   npm run icons -- --offline  never use the network      --allow-license mdi    allow a set whose licence is not for products
 // It runs by itself before `npm run build` (and stops the build if an icon cannot be found), and while `npm run dev` runs.
-import { syncIcons } from './icons/icons.mjs';
+import { syncIcons } from './lib/icons.mjs';
 
 const args = process.argv.slice(2);
 const flag = (f) => args.includes(f);

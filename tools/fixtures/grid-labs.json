@@ -1,0 +1,23 @@
+{
+  "_comment": "Effects: the tech-grid preset (perspective grid, decode headline, spotlight cards, scroll progress).",
+  "brand": {
+    "name": "Grid Labs",
+    "tagline": "Infrastructure you can read.",
+    "colors": {
+      "primary": "#047857",
+      "signal": "#22d3ee"
+    },
+    "logo": {
+      "style": "monogram"
+    }
+  },
+  "effects": {
+    "preset": "tech-grid"
+  },
+  "modules": [
+    "landing",
+    "signin",
+    "dashboard",
+    "connect"
+  ]
+}

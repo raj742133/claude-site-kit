@@ -1,4 +1,4 @@
-import { FOR, ICONS } from './icons';
+import { FOR, ICONS, SET } from './icons';
 
 /**
  * One icon, drawn inline in the colour of the text around it (currentColor) and 1em high, so it follows the font size, the theme
@@ -12,8 +12,8 @@ import { FOR, ICONS } from './icons';
  */
 export function Icon({ name, for: text, className }: { name?: string | null; for?: string; className?: string }) {
   const id = name || (text ? FOR[text.toLowerCase().trim()] : undefined);
-  const key = id && !ICONS[id] && !id.includes(':') ? `lucide:${id}` : id;
-  const icon = key ? ICONS[key] ?? (id ? ICONS[id] : undefined) : undefined;
+  const key = id ? (id.includes(':') ? id : `${SET}:${id}`) : undefined;
+  const icon = key ? ICONS[key] : undefined;
   if (!icon) return null;
   return (
     <svg

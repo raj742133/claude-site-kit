@@ -195,11 +195,9 @@ export function effectPlan(r, { all = false } = {}) {
     for (const id of new Set(Object.values(r.figures))) use(FIGURES, id);
     if (Object.keys(r.figures).length) css.add('figures');
   }
-  // the figures' shared engine and its licence travel with whichever figures were chosen
-  if ([...files].some((f) => f.startsWith('figures/factories/'))) {
-    for (const f of FIGURE_COMMON) files.add(f);
-    css.add('figures');
-  }
+  // the figures' shared engine and its licence travel with whichever figures were chosen; their style is always there, so a figure used by name in your own code is styled too
+  if ([...files].some((f) => f.startsWith('figures/factories/'))) for (const f of FIGURE_COMMON) files.add(f);
+  css.add('figures');
   return { files: [...files], css: [...css], micro: [...micro] };
 }
 

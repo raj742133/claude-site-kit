@@ -1,0 +1,14 @@
+{
+  "_comment": "A single module: signin only (its dependencies come with it).",
+  "brand": {
+    "name": "Gatekeeper",
+    "tagline": "One password, one door.",
+    "colors": {
+      "primary": "#1d4ed8",
+      "signal": "#06b6d4"
+    }
+  },
+  "modules": [
+    "signin"
+  ]
+}

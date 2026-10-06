@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # Fast, on every push: every script parses, and every example and fixture config generates a project.
+  quick:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Every script parses
+        run: |
+          for f in $(git ls-files 'skill/**/*.mjs' 'tools/*.mjs' 'skill/**/templates/base/scripts/*.mjs'); do node --check "$f" || exit 1; done
+      - name: Every example and fixture config is valid
+        run: |
+          for f in skill/sitewright/examples/*.json tools/fixtures/*.json; do node skill/sitewright/scripts/scaffold.mjs --config "$f" --check > /dev/null || { echo "invalid: $f"; exit 1; }; done
+      - name: The installer works and is executable
+        run: |
+          test -x install.sh
+          ./install.sh --dir "$RUNNER_TEMP/skills"
+          node "$RUNNER_TEMP/skills/sitewright/scripts/scaffold.mjs" --config skill/sitewright/examples/coffee.json --out "$RUNNER_TEMP/site" --quiet --offline-icons
+          test -f "$RUNNER_TEMP/site/scripts/sync-icons.mjs"
+
+  # Slow, on pull requests: build every example (plain and with every layer on) and every fixture, and drive each one in Chromium.
+  regress:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Playwright and Chromium
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Build and drive every site
+        run: node tools/regress.mjs --parallel 2
