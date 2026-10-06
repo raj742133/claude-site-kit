@@ -36,6 +36,7 @@
       <a href="#how">How it works</a>
       <a href="#gallery">Gallery</a>
       <a href="#effects">Effects</a>
+      <a href="#new">New</a>
       <a href="#install">Install</a>
       <a href="#tested">Tested</a>
       <a href="#faq">FAQ</a>
@@ -71,7 +72,7 @@
       </div>
       <div class="facts reveal">
         <div><b>6</b>modules, pick any</div>
-        <div><b>87</b>browser checks on the full kit</div>
+        <div><b>88</b>browser checks on the full kit</div>
         <div><b>3</b>screen widths tested</div>
         <div><b>0</b>invented facts or numbers</div>
       </div>
@@ -386,6 +387,28 @@ sitewright: wrote 56 files to ./bean-and-barrel
   </div>
 </section>
 
+<!-- ============================ NEW: ZERO SETUP ============================ -->
+<section class="band" id="new">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">New</span>
+      <h2>Write the code. The kit does the rest.</h2>
+      <p>Nothing to register. Use an icon or figure and the project wires it up as you work.</p>
+    </div>
+    <div class="code reveal"><span class="lbl">Just write it; <code>npm run dev</code> picks it up on save</span><pre tabindex="0"><code>&lt;Icon name="rocket" /&gt;
+&lt;Icon name={ok ? 'check' : 'x'} /&gt;
+&lt;Icon for="Shipped orders" /&gt;  <span class="c">// icon from the words</span>
+&lt;Figure place="connect" /&gt;      <span class="c">// pointer-reactive drawing</span></code></pre></div>
+    <div class="feat">
+      <div class="reveal"><h3>Icons follow your code</h3><p>Missing icons are fetched while <code>npm run dev</code> runs and before every build. Typos come back with a &ldquo;did you mean&rdquo;.</p></div>
+      <div class="reveal"><h3>Licences checked</h3><p>Attribution goes into a NOTICE file for you; a set you cannot use is refused.</p></div>
+      <div class="reveal"><h3>Dev server fixed</h3><p><code>npm run dev</code> no longer 500s on database pages, and every test run starts it to be sure.</p></div>
+      <div class="reveal"><h3>Single-module sites work</h3><p>Sign-in-only sites get a proper home page instead of a redirect loop.</p></div>
+    </div>
+    <p class="reveal" style="margin-top:22px"><a class="btn" href="icons/">Browse the icons</a></p>
+  </div>
+</section>
+
 <!-- ============================ BACKEND ============================ -->
 <section id="backend">
   <div class="wrap">
@@ -482,8 +505,8 @@ npx playwright install chromium</code></pre><button class="copy" type="button" d
       <p>Every example below was scaffolded from its config, type-checked, built for production and exercised with Playwright in Chromium. Results are checks passed out of checks run on the final templates.</p>
     </div>
     <div class="tested reveal">
-      <div><b>25</b><span>site builds generated and run, plain and with every layer on</span></div>
-      <div><b>1,551</b><span>browser checks passed across the 25 builds</span></div>
+      <div><b>15</b><span>different sites generated and run</span></div>
+      <div><b>910</b><span>browser checks passed across the fifteen sites</span></div>
       <div><b>3</b><span>viewports: 1280, 390, 360 px</span></div>
       <div><b>2</b><span>real Android APKs parsed, published and downloaded back</span></div>
       <div><b>6&times;</b><span>warm-cache load of every page type, no hydration errors</span></div>
@@ -492,21 +515,21 @@ npx playwright install chromium</code></pre><button class="copy" type="button" d
       <table>
         <thead><tr><th>Site</th><th>What it exercises</th><th>Result</th></tr></thead>
         <tbody>
-          <tr><td>Bean &amp; Barrel</td><td>all six modules, PDF/ZIP publishing, testers</td><td class="ok">87 / 87</td></tr>
-          <tr><td>PulseFit</td><td>all six modules, two real Android APKs parsed and published</td><td class="ok">77 / 77</td></tr>
-          <tr><td>Halden Legal</td><td>landing, sign-in, dashboard, connect; monogram logo, navy and gold</td><td class="ok">60 / 60</td></tr>
-          <tr><td>Pixel Studio</td><td>landing and MFA only</td><td class="ok">34 / 34</td></tr>
-          <tr><td>Sunny Side Bakery</td><td>near-white brand colours (contrast adjustment)</td><td class="ok">49 / 49</td></tr>
-          <tr><td>Midnight Courier</td><td>near-black brand colours, other fonts, PDF/CSV publishing</td><td class="ok">45 / 45</td></tr>
-          <tr><td>Quotes, tags, braces</td><td>a brand name full of <code>"</code>, <code>&lt;b&gt;</code>, <code>{x}</code>, backticks and a backslash</td><td class="ok">57 / 57</td></tr>
-          <tr><td>Orbit Labs</td><td>a single module: landing only</td><td class="ok">12 / 12</td></tr>
-          <tr><td>Field Notes Press</td><td>a single module: publishing only (brings MFA and the API)</td><td class="ok">24 / 24</td></tr>
-          <tr><td>Acme Co</td><td>just a brand name, everything else defaulted</td><td class="ok">75 / 75</td></tr>
-          <tr><td>Bean &amp; Barrel + effects</td><td>aurora-glass preset, beams behind the sign-in card, cursor glow, scroll progress, count-up</td><td class="ok">102 / 102</td></tr>
+          <tr><td>Bean &amp; Barrel</td><td>all six modules, PDF/ZIP publishing, testers</td><td class="ok">88 / 88</td></tr>
+          <tr><td>PulseFit</td><td>all six modules; real-APK checks need the APK files, not run in the latest pass</td><td class="ok">65 / 65</td></tr>
+          <tr><td>Halden Legal</td><td>landing, sign-in, dashboard, connect; monogram logo, navy and gold</td><td class="ok">61 / 61</td></tr>
+          <tr><td>Pixel Studio</td><td>landing and MFA only</td><td class="ok">35 / 35</td></tr>
+          <tr><td>Sunny Side Bakery</td><td>near-white brand colours (contrast adjustment)</td><td class="ok">76 / 76</td></tr>
+          <tr><td>Midnight Courier</td><td>near-black brand colours, other fonts, PDF/CSV publishing</td><td class="ok">76 / 76</td></tr>
+          <tr><td>Quotes, tags, braces</td><td>a brand name full of <code>"</code>, <code>&lt;b&gt;</code>, <code>{x}</code>, backticks and a backslash</td><td class="ok">76 / 76</td></tr>
+          <tr><td>Orbit Labs</td><td>a single module: landing only</td><td class="ok">13 / 13</td></tr>
+          <tr><td>Field Notes Press</td><td>a single module: publishing only (brings MFA and the API)</td><td class="ok">25 / 25</td></tr>
+          <tr><td>Acme Co</td><td>just a brand name, everything else defaulted</td><td class="ok">76 / 76</td></tr>
+          <tr><td>Bean &amp; Barrel + effects</td><td>aurora-glass preset, beams behind the sign-in card, cursor glow, scroll progress, count-up</td><td class="ok">113 / 113</td></tr>
           <tr><td>Play House</td><td>particles, split letters, ripple buttons, tilt cards, click sparks, stars on sign-in</td><td class="ok">70 / 70</td></tr>
-          <tr><td>Ripple Works</td><td>waves, rotating headline word, magnetic buttons, glow-border cards, slide reveal</td><td class="ok">36 / 36</td></tr>
-          <tr><td>Grid Labs</td><td>tech-grid preset: perspective grid, decode headline, spotlight cards</td><td class="ok">60 / 60</td></tr>
-          <tr><td>Effect Lab</td><td>the live effects gallery: every background, headline, button, card, reveal and extra</td><td class="ok">9 / 9</td></tr>
+          <tr><td>Ripple Works</td><td>waves, rotating headline word, magnetic buttons, glow-border cards, slide reveal</td><td class="ok">60 / 60</td></tr>
+          <tr><td>Grid Labs</td><td>tech-grid preset: perspective grid, decode headline, spotlight cards</td><td class="ok">65 / 65</td></tr>
+          <tr><td>Effect Lab</td><td>the live effects gallery: every background, headline, button, card, reveal and extra</td><td class="ok">11 / 11</td></tr>
         </tbody>
       </table>
     </div>

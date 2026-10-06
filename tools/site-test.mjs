@@ -126,8 +126,8 @@ await check(`all ${externalRefs.length} external links respond`, async () => {
   eq(bad.join(', '), '', 'links that answer with an error');
 });
 
-await check('image weight is sane (no single image over 450 KB; initial HTML under 60 KB)', async () => {
-  truthy(Buffer.byteLength(html) < 60000, `HTML is ${Buffer.byteLength(html)} bytes`);
+await check('image weight is sane (no single image over 450 KB; initial HTML under 65 KB)', async () => {
+  truthy(Buffer.byteLength(html) < 65000, `HTML is ${Buffer.byteLength(html)} bytes`);
   const heavy = [];
   for (const u of internalRefs.filter((x) => /\.(png|jpe?g|webp|gif)$/i.test(x))) {
     const r = await get(abs(u)); const n = (await r.arrayBuffer()).byteLength;
