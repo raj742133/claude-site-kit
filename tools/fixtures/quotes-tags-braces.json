@@ -1,0 +1,19 @@
+{
+  "_comment": "A brand name full of characters that mean something to JSX, CSS and template strings: a double quote, <b>, {x}, backticks and a backslash. Nothing may break the build or reach the page as markup.",
+  "brand": {
+    "name": "Q\"uotes <b>& {x} `ticks` \\ back",
+    "tagline": "It's \"all\" fine <i>here</i> {y} `z` \\n",
+    "colors": {
+      "primary": "#2255cc",
+      "signal": "#18a0b8"
+    }
+  },
+  "modules": [
+    "landing",
+    "signin",
+    "dashboard",
+    "connect",
+    "mfa",
+    "publishing"
+  ]
+}

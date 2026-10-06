@@ -39,7 +39,7 @@
   <div class="sec-head">
     <span class="eyebrow">Icons</span>
     <h1>209 icons that work with no network.</h1>
-    <p>These ship inside Sitewright, so a site can have icons without asking anyone for them. Click one to copy its name, then put it in your config (<code>"icon": "coffee"</code>) or let <code>icons: auto</code> pick. Behind them is the whole <a href="https://iconify.design" rel="noopener">Iconify</a> library, 200,000+ open icons in 150+ sets, which you reach by naming a set: <code>tabler:home</code>, <code>mdi:account</code>.</p>
+    <p>These ship inside Sitewright, so a site can have icons without asking anyone for them. Click one to copy its name and write it in your code (<code>&lt;Icon name="coffee" /&gt;</code>), or describe what you need (<code>&lt;Icon for="Shipped orders" /&gt;</code>) and let it pick. You never register an icon anywhere. Behind them is the whole <a href="https://iconify.design" rel="noopener">Iconify</a> library, 200,000+ open icons in 150+ sets, which you reach by naming a set: <code>tabler:home</code>, <code>mdi:account</code>.</p>
   </div>
 
   <div class="ic-sets" aria-label="Icon sets">
@@ -355,10 +355,11 @@
   <p class="ic-empty" id="ic-empty" hidden>No icon matches that. Try a shorter word, or search the full library with <code>node scaffold.mjs --list-icons &lt;word&gt;</code>.</p>
 
   <div class="ic-how card-like">
-    <h2>Using them</h2>
-<pre tabindex="0" aria-label="Commands for using icons"><code>node scaffold.mjs --config site.json --out ./my-site --icons auto
-node scaffold.mjs --list-icons coffee                                 # search the full library
-node scaffold.mjs --apply-icons ./my-site --icon stats.0=package      # change one later, in a second</code></pre>
+    <h2>Using them: just write the icon</h2>
+<pre tabindex="0" aria-label="Using an icon in code"><code>&lt;Icon name="rocket" /&gt;            // write it where you want it. Nothing to register.
+&lt;Icon name="tabler:home" /&gt;        // any other set
+&lt;Icon for="Shipped orders" /&gt;      // or describe it, and the fitting icon is chosen</code></pre>
+    <p>The project finds every icon its code asks for and brings in the ones that are missing, while <code>npm run dev</code> runs and before every build. Your own words are set once (<code>"icons": { "map": { "roast": "coffee" } }</code>) and apply everywhere. Say <code>icons: auto</code> and the navigation, stat cards and chips get theirs too.</p>
     <p class="muted">Lucide is ISC licensed (with some icons derived from Feather, MIT); the licence text is written into every site that uses them. Other sets keep their own licences, which the generator records and checks. <a href="https://github.com/raj742133/sitewright/blob/main/skill/sitewright/reference/icons.md" rel="noopener">Full guide</a>.</p>
   </div>
 </main>

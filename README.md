@@ -155,9 +155,18 @@ The backgrounds, headline animations and micro-interactions are original, depend
 
 Say `icons: "auto"` and the navigation, stat cards, status chips, features list and story steps get icons where a title clearly names one (an order is a box, a delivery a truck, a warning a triangle); or name them yourself. They are inline SVG from the open sets behind [Iconify](https://iconify.design) (200,000+ icons in 150+ sets; [better-icons](https://github.com/better-auth/better-icons) is the tool that finds them), in the colour of the text around them, and a site carries only the ones it uses: no icon font, no library, no request at run time.
 
+In your own pages there is nothing to set up. Write the icon where you want it, and the project brings it in by itself (while `npm run dev` runs, and before every build):
+
+```tsx
+<Icon name="rocket" />          // 120 of these on a page are found and added in a fraction of a second
+<Icon name="tabler:home" />     // any other set
+<Icon for="Shipped orders" />   // or describe it, and the fitting icon is chosen
+```
+
+Your own words are set once and apply everywhere (`"icons": { "map": { "roast": "coffee" } }`). A typo is reported with the file and a suggestion. For the places the generator fills (navigation, stat cards, chips...), `icons: auto` or:
+
 ```bash
 node scaffold.mjs --config site.json --out ./my-site --icons auto
-node scaffold.mjs --list-icons coffee                                  # find names
 node scaffold.mjs --apply-icons ./my-site --icon stats.0=package       # change one later, in a second
 ```
 
@@ -195,7 +204,7 @@ node scaffold.mjs --config site.json --out ./my-site --figures auto
 node scaffold.mjs --apply-effects ./my-site --figures hero=bars        # change one place later, in a second
 ```
 
-They wear your brand colours and follow light and dark mode, answer touch as well as a mouse, hold still under reduced motion, and ship only the figures you chose. **Nineteen are [Hairline](https://github.com/lucasmarkes/hairline) by Lucas Marques (MIT, its licence travels with the files); `bars`, `scanner` and `parcel` are new here**, drawn on the same engine to Hairline's ten rules. Which figure fits where, and how to add your own: [`reference/figures.md`](skill/sitewright/reference/figures.md).
+Put one anywhere in your own pages by name, nothing to register: `<Figure name="padlock" />` is found and brought in by itself (while `npm run dev` runs, and before every build). They wear your brand colours and follow light and dark mode, answer touch as well as a mouse, hold still under reduced motion, and ship only the figures you chose. **Nineteen are [Hairline](https://github.com/lucasmarkes/hairline) by Lucas Marques (MIT, its licence travels with the files); `bars`, `scanner` and `parcel` are new here**, drawn on the same engine to Hairline's ten rules. Which figure fits where, and how to add your own: [`reference/figures.md`](skill/sitewright/reference/figures.md).
 
 > The idea comes from animated-component libraries such as [React Bits](https://reactbits.dev). Their licence (MIT with the Commons Clause) does not allow redistributing the components inside another package, so these effects are written from scratch for this kit.
 
@@ -208,7 +217,7 @@ You need [Claude Code](https://claude.com/claude-code) and Node.js 20 or newer. 
 ```bash
 git clone https://github.com/raj742133/sitewright
 cd sitewright
-./install.sh
+./install.sh        # or: bash install.sh   (if you downloaded a zip, which does not keep the executable bit)
 ```
 
 ### Windows (PowerShell)
@@ -275,7 +284,7 @@ The generator is plain Node. Even a brand name is enough:
 ```bash
 echo '{"brand":{"name":"Acme Co"}}' > site.json
 node ~/.claude/skills/sitewright/scripts/scaffold.mjs --config site.json --out ./my-site
-cd my-site && npm install && npx next build && npm start
+cd my-site && npm install && npm run build && npm start
 ```
 
 The generator prints the development password and ingest key it created (they are also in `.env.local`).
@@ -334,7 +343,7 @@ Each example was scaffolded from its config, type-checked, built for production 
 | Grid Labs | tech-grid preset: perspective grid, decode headline, spotlight cards | 60/60 |
 | Effect Lab | the live effects gallery: every background, headline, button, card, reveal and extra | 9/9 |
 
-Fifteen sites, 797 checks, all passing on the final templates.
+25 site builds (13 example runs, plain and with every layer on, plus 12 stress fixtures), 1,551 checks, all passing on the final templates. The per-site counts in the table above are from an earlier run; `node tools/regress.mjs` prints current ones. The real-Android-APK checks need the APK files and are skipped (and reported as skipped) when they are absent.
 
 Details of every check are in [`reference/testing.md`](skill/sitewright/reference/testing.md).
 
@@ -357,9 +366,11 @@ skill/sitewright/      the skill: SKILL.md, scripts, templates, examples, refere
   reference/           config keys, modules, design system, effects, testing, gotchas
 site/                  the website (static HTML/CSS/JS) plus demo/, the exported live effects gallery; deployed on Vercel
 launch/                the launch video (mp4, poster, plan) and the Hyperframes project that renders it
-tools/                 how the screenshots, banner and social image were made
+tools/                 regress.mjs (builds and drives every example, plain and with every layer on, in one table), site-test.mjs (the website), and how the screenshots, banner and social image were made
 install.sh, install.ps1
 ```
+
+After any change to the generator, the templates or the verifier, run `node tools/regress.mjs`: it scaffolds, type-checks, builds and drives every example (plain, and with figures, icons and effects switched on) and prints one table.
 
 To regenerate the screenshots: build the example sites, then run `tools/showcase.mjs` for each (see the header of that file).
 

@@ -300,7 +300,7 @@ sitewright: wrote 56 files to ./bean-and-barrel
         <p class="muted" style="font-size:13.5px;margin-top:12px">Small isometric drawings, placed where they mean something: a padlock on the sign-in card, a scanner on the connect page, a box that opens beside the releases, a bar chart where a dashboard is empty, a dish on the 404 page. Say <code>figures: auto</code> and each place gets its fitting figure, or choose them one by one. They wear your brand colours, and you can swap one later in a second. Nineteen come from <a href="https://github.com/lucasmarkes/hairline" rel="noopener">Hairline</a> by Lucas Marques (MIT); Bars, Scanner and Parcel are new.</p></div>
       <div class="req reveal"><h3>Icons, from 200,000+ open ones</h3>
         <div class="fx-chips"><span>Navigation</span><span>Stat cards</span><span>Status chips</span><span>Feature lists</span><span>Story steps</span></div>
-        <p class="muted" style="font-size:13.5px;margin-top:12px">Say <code>icons: auto</code> and the places a title clearly names get an icon (an order is a box, a delivery a truck); or pick your own, found with <a href="https://github.com/better-auth/better-icons" rel="noopener">better-icons</a>. Inline SVG in the colour of the text, only the icons you use, no library and no request at run time. Each set keeps its licence in a notice file, and every icon is checked for anything that is not a plain drawing before it is written.</p></div>
+        <p class="muted" style="font-size:13.5px;margin-top:12px">Write <code>&lt;Icon name="rocket" /&gt;</code> anywhere in your pages and it just works: the project finds it and brings the icon in by itself, as you save and before every build. No list to keep, no command to run. Describe it instead (<code>&lt;Icon for="Shipped orders" /&gt;</code>) and the fitting one is chosen, from your own vocabulary first. Say <code>icons: auto</code> and the navigation, stat cards and chips get theirs; <a href="https://github.com/better-auth/better-icons" rel="noopener">better-icons</a> finds the names. Inline SVG in the colour of the text, only the icons you use, no library and no request at run time. Each set keeps its licence in a notice file, and every icon is checked for anything that is not a plain drawing before it is written.</p></div>
     </div>
 
     <div class="fx-tiles two">
@@ -482,8 +482,8 @@ npx playwright install chromium</code></pre><button class="copy" type="button" d
       <p>Every example below was scaffolded from its config, type-checked, built for production and exercised with Playwright in Chromium. Results are checks passed out of checks run on the final templates.</p>
     </div>
     <div class="tested reveal">
-      <div><b>15</b><span>different sites generated and run</span></div>
-      <div><b>797</b><span>browser checks passed across the fifteen sites</span></div>
+      <div><b>25</b><span>site builds generated and run, plain and with every layer on</span></div>
+      <div><b>1,551</b><span>browser checks passed across the 25 builds</span></div>
       <div><b>3</b><span>viewports: 1280, 390, 360 px</span></div>
       <div><b>2</b><span>real Android APKs parsed, published and downloaded back</span></div>
       <div><b>6&times;</b><span>warm-cache load of every page type, no hydration errors</span></div>

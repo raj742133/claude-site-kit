@@ -1,0 +1,28 @@
+{
+  "_comment": "Effects: particles, split letters, ripple buttons, tilt cards, click sparks, stars behind the sign-in card.",
+  "brand": {
+    "name": "Play House",
+    "tagline": "Games for the whole family.",
+    "colors": {
+      "primary": "#db2777",
+      "signal": "#f59e0b"
+    }
+  },
+  "effects": {
+    "heroBackground": "particles",
+    "loginBackground": "stars",
+    "headline": "split-chars",
+    "buttons": "ripple",
+    "cards": "tilt",
+    "reveal": "scale",
+    "extras": [
+      "click-spark"
+    ]
+  },
+  "modules": [
+    "landing",
+    "signin",
+    "dashboard",
+    "connect"
+  ]
+}

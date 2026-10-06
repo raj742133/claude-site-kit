@@ -1,0 +1,32 @@
+{
+  "_comment": "Effects: waves, a rotating headline word, magnetic buttons, glow-border cards, a slide reveal.",
+  "brand": {
+    "name": "Ripple Works",
+    "tagline": "Water, well made.",
+    "colors": {
+      "primary": "#0369a1",
+      "signal": "#14b8a6"
+    }
+  },
+  "landing": {
+    "headline": "Water that is {accent}.",
+    "accent": "clean"
+  },
+  "effects": {
+    "heroBackground": "waves",
+    "headline": "rotate",
+    "rotateWords": [
+      "clean",
+      "cold",
+      "local"
+    ],
+    "buttons": "magnetic",
+    "cards": "glow-border",
+    "reveal": "slide"
+  },
+  "modules": [
+    "landing",
+    "signin",
+    "dashboard"
+  ]
+}

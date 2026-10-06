@@ -1,0 +1,14 @@
+{
+  "_comment": "A single module: mfa only (its dependencies come with it).",
+  "brand": {
+    "name": "Vaultside",
+    "tagline": "Accounts with a second factor.",
+    "colors": {
+      "primary": "#6d28d9",
+      "signal": "#f43f5e"
+    }
+  },
+  "modules": [
+    "mfa"
+  ]
+}

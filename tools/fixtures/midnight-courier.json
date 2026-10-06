@@ -1,0 +1,42 @@
+{
+  "_comment": "Near-black brand colours, other fonts, PDF/CSV publishing. A stress fixture for the colour derivation and the publishing module.",
+  "brand": {
+    "name": "Midnight Courier",
+    "tagline": "Overnight, door to door.",
+    "colors": {
+      "primary": "#0b0b12",
+      "signal": "#7c5cff"
+    },
+    "font": {
+      "body": "Space Grotesk",
+      "mono": "IBM Plex Mono"
+    },
+    "logo": {
+      "style": "circle"
+    }
+  },
+  "vocab": {
+    "record": "parcel",
+    "records": "parcels",
+    "device": "scanner",
+    "artifact": "manifest",
+    "area": "Dispatch"
+  },
+  "publishing": {
+    "extensions": [
+      ".pdf",
+      ".csv"
+    ],
+    "parseApk": false,
+    "title": "Manifests",
+    "sub": "Drop a manifest and every scanner is offered it."
+  },
+  "modules": [
+    "landing",
+    "signin",
+    "dashboard",
+    "connect",
+    "mfa",
+    "publishing"
+  ]
+}

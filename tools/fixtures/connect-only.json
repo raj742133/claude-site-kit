@@ -1,0 +1,14 @@
+{
+  "_comment": "A single module: connect only (its dependencies come with it).",
+  "brand": {
+    "name": "Linkpad",
+    "tagline": "One link to connect.",
+    "colors": {
+      "primary": "#be123c",
+      "signal": "#2563eb"
+    }
+  },
+  "modules": [
+    "connect"
+  ]
+}

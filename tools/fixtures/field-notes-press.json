@@ -1,0 +1,24 @@
+{
+  "_comment": "A single module: publishing only (it brings MFA and the API with it).",
+  "brand": {
+    "name": "Field Notes Press",
+    "tagline": "Notes from the field.",
+    "colors": {
+      "primary": "#7c2d12",
+      "signal": "#d97706"
+    },
+    "logo": {
+      "style": "square"
+    }
+  },
+  "publishing": {
+    "extensions": [
+      ".pdf",
+      ".zip"
+    ],
+    "parseApk": false
+  },
+  "modules": [
+    "publishing"
+  ]
+}
