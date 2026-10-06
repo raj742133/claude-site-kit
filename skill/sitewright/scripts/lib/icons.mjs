@@ -20,7 +20,8 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const PACK_DIR = path.join(HERE, '..', '..', 'templates', 'icons');
+// In the skill the pack is under templates/icons; a generated project carries its own copy in ./pack next to this file.
+const PACK_DIRS = [path.join(HERE, 'pack'), path.join(HERE, '..', '..', 'templates', 'icons')];
 export const DEFAULT_SET = 'lucide';
 export const API = 'https://api.iconify.design';
 
@@ -125,8 +126,8 @@ const cacheDir = () => process.env.SITEWRIGHT_ICON_CACHE || path.join(os.homedir
 const readJson = (f) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return null; } };
 
 function kitPack(prefix) {
-  const f = path.join(PACK_DIR, `${prefix}.json`);
-  return fs.existsSync(f) ? readJson(f) : null;
+  for (const dir of PACK_DIRS) { const f = path.join(dir, `${prefix}.json`); if (fs.existsSync(f)) return readJson(f); }
+  return null;
 }
 
 /** A locally installed @iconify-json/<prefix>, found from the working folder or the folder this script is run from. */
@@ -154,6 +155,16 @@ export async function searchIcons(query, { prefix, limit = 24, fetchImpl = fetch
   if (prefix) q.set('prefix', prefix);
   const r = await api(`/search?${q}`, fetchImpl);
   return r.icons ?? [];
+}
+
+/** Names close to a mistyped one (a letter off, swapped or missing), or containing it, among the icons usable without the network. */
+export function closestIcons(name, prefix = DEFAULT_SET, limit = 3) {
+  const pack = kitPack(prefix) ?? installedSet(prefix);
+  if (!pack) return [];
+  const names = [...new Set(Object.keys(pack.icons ?? {}).concat(Object.keys(pack.aliases ?? {})))];
+  const lev = (a, b) => { const d = Array.from({ length: a.length + 1 }, (_, i) => [i]); for (let j = 1; j <= b.length; j++) d[0][j] = j;
+    for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); return d[a.length][b.length]; };
+  return names.map((n) => ({ n, d: n.includes(name) || name.includes(n) ? 1 : lev(name, n) })).filter((x) => x.d <= Math.max(2, Math.floor(name.length / 4))).sort((x, y) => x.d - y.d || x.n.localeCompare(y.n)).slice(0, limit).map((x) => `${prefix}:${x.n}`);
 }
 
 /** Searches the icons available without the network: names in the kit's pack and any installed set. */
@@ -255,7 +266,7 @@ const KEYWORDS = [
   ['design|studio|creative|artwork|palette', 'palette'], ['learn|course|lesson|school|student|teach', 'graduation-cap'], ['farm|crop|harvest|grain', 'wheat'],
   ['ship|shipped|dispatch|shipment|deliver|delivered|delivery|courier|freight', 'truck'], ['order|parcel|package|release|version|artifact', 'package'],
   ['payment|invoice|billing|bill|fee|price|paid|subscription', 'credit-card'], ['revenue|sales|growth|trend|analytics|metric|stat', 'chart-line'],
-  ['customer|client|guest|member', 'user'], ['team|people|staff|crew|user', 'users'], ['schedule|appointment|booking|calendar', 'calendar'], ['time|hour|duration|deadline', 'clock'],
+  ['team|people|staff|crew|member|users|everyone|group', 'users'], ['customer|client|guest|person|profile|account|user', 'user'], ['schedule|appointment|booking|calendar', 'calendar'], ['time|hour|duration|deadline', 'clock'],
   ['pending|waiting|queue|review', 'hourglass'], ['attention|issue|problem|urgent|warning|alert|overdue', 'triangle-alert'], ['error|failed|rejected|cancel|declined', 'circle-x'],
   ['done|complete|ready|reviewed|approved|resolved|verified', 'circle-check'], ['new|fresh|latest', 'sparkles'],
   ['secure|security|private|password|sign|login|protect', 'lock'], ['scan|barcode|qr', 'qr-code'], ['photo|image|picture|gallery', 'image'],
@@ -264,7 +275,18 @@ const KEYWORDS = [
   ['guide|step|checklist|task|todo|plan', 'list-checks'], ['launch|begin|start', 'rocket'], ['search|find|lookup', 'search'], ['offline|connect|wifi|network', 'wifi'],
   ['phone|tablet|mobile|device|app', 'smartphone'], ['file|document|report|record|note', 'file-text'], ['share|send|invite', 'send'], ['download|install', 'download'],
 ].map(([stems, icon]) => [new RegExp(`\\b(?:${stems})\\w*`), icon]);
-export const iconFor = (text, exclude = new Set()) => { const t = String(text ?? '').toLowerCase(); for (const [re, name] of KEYWORDS) if (re.test(t) && !exclude.has(name)) return name; return null; };
+/** A word-boundary test for a user's own vocabulary ("roast" -> coffee): whole words, case-insensitive, a trailing s/es/ing allowed. */
+const wordIn = (word, text) => new RegExp(`\\b${String(word).toLowerCase().replace(/[^a-z0-9 -]/g, '')}\\w*`).test(text);
+/** The icon id for a piece of text: the person's own vocabulary first (`icons.map`), then the built-in words. `exclude` holds ids already used nearby. */
+export const iconFor = (text, exclude = new Set(), map = {}, set = DEFAULT_SET) => {
+  const t = String(text ?? '').toLowerCase();
+  for (const [word, icon] of Object.entries(map ?? {})) {
+    const id = normalizeId(icon, set);
+    if (id && wordIn(word, t) && !exclude.has(id)) return id;
+  }
+  for (const [re, name] of KEYWORDS) { const id = `${set}:${name}`; if (re.test(t) && !exclude.has(id)) return id; }
+  return null;
+};
 const NAV = { dashboard: 'layout-dashboard', connect: 'smartphone', publishing: 'package', team: 'users', home: 'house' };
 
 /**
@@ -296,47 +318,49 @@ export function iconSlots(cfg, modules = []) {
 }
 
 /** Normalises every icon in the config to a full id, and with `auto` fills the empty places that a word clearly names. Returns the ids in use. */
-export function planIcons(cfg, modules, { auto = false, set = DEFAULT_SET } = {}) {
+export function planIcons(cfg, modules, { auto = false, set = DEFAULT_SET, map = {} } = {}) {
   const used = new Set(), problems = [];
   const group = (k) => k.split('.')[0];
-  const taken = new Map(); // group -> icon names already in it, so one list never shows the same icon twice
+  const taken = new Map(); // group -> icon ids already in it, so one list never shows the same icon twice
+  const takenIn = (k) => taken.get(group(k)) ?? taken.set(group(k), new Set()).get(group(k));
   const slots = iconSlots(cfg, modules);
   for (const slot of slots) {
     const v = slot.get();
     if (!v) continue;
     const id = String(v).startsWith('custom:') ? String(v).toLowerCase() : normalizeId(v, set);
     if (!id) { problems.push(`${slot.key}: "${v}" is not an icon id. Use "prefix:name" (lucide:coffee) or just "coffee".`); slot.set(null); continue; }
-    slot.set(id); used.add(id);
-    (taken.get(group(slot.key)) ?? taken.set(group(slot.key), new Set()).get(group(slot.key))).add(id.split(':')[1]);
+    slot.set(id); used.add(id); takenIn(slot.key).add(id);
   }
   if (auto) {
     for (const slot of slots) {
       if (slot.get()) continue;
-      const ex = taken.get(group(slot.key)) ?? taken.set(group(slot.key), new Set()).get(group(slot.key));
-      const name = (slot.fallback && !ex.has(slot.fallback) ? slot.fallback : null) ?? iconFor(slot.label, ex);
-      if (name) { const id = `${set}:${name}`; slot.set(id); used.add(id); ex.add(name); }
+      const ex = takenIn(slot.key);
+      const fb = slot.fallback ? `${set}:${slot.fallback}` : null;
+      const id = (fb && !ex.has(fb) ? fb : null) ?? iconFor(slot.label, ex, map, set);
+      if (id) { slot.set(id); used.add(id); ex.add(id); }
     }
   }
   return { used: [...used], problems };
 }
 
-/** The files a generated project gets: the icon data, and a notice with every set's licence. */
-export function iconFiles({ icons, sets, custom }) {
-  const entries = Object.entries({ ...icons, ...custom }).sort(([a], [b]) => a.localeCompare(b));
-  const data = [
-    '// Generated by Sitewright: the icons this site uses, as sanitised SVG. Change them with `scaffold.mjs --apply-icons` (or edit site.json and run it).',
-    'export const ICONS: Record<string, { b: string; w: number; h: number }> = {',
-    ...entries.map(([id, v]) => `  ${JSON.stringify(id)}: { b: ${JSON.stringify(v.body)}, w: ${v.w}, h: ${v.h} },`),
-    '};',
-    '',
-  ].join('\n');
-  const used = (p) => Object.keys(icons).filter((id) => id.startsWith(`${p}:`)).map((id) => id.split(':')[1]);
-  const notice = [
+/** The files a generated project gets: the icon data the site draws from, the licence facts for the notice, and the notice itself. */
+export function iconFiles({ icons, sets, custom = {}, forMap = {} }) {
+  const all = { ...icons, ...custom };
+  const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => a.localeCompare(b)));
+  const data = JSON.stringify({ icons: sorted(Object.fromEntries(Object.entries(all).map(([id, v]) => [id, { b: v.body ?? v.b, w: v.w, h: v.h }]))), for: sorted(forMap) }, null, 1) + '\n';
+  const setsJson = JSON.stringify(sorted(sets), null, 1) + '\n';
+  return { data, sets: setsJson, notice: noticeText({ ids: Object.keys(all), sets }) };
+}
+
+export function noticeText({ ids, sets }) {
+  const used = (p) => ids.filter((id) => id.startsWith(`${p}:`)).map((id) => id.split(':')[1]).sort();
+  const custom = used('custom');
+  return [
     '# Icon notices',
     '',
-    'The icons in `icons.ts` come from the open icon sets below, through [Iconify](https://iconify.design). Each stays under its own licence.',
+    'The icons in `icons.data.json` come from the open icon sets below, through [Iconify](https://iconify.design). Each stays under its own licence.',
     '',
-    ...Object.entries(sets).flatMap(([p, s]) => [
+    ...Object.entries(sets).filter(([p]) => p !== 'custom' && used(p).length).flatMap(([p, s]) => [
       `## ${s.name ?? p} (\`${p}\`)`,
       '',
       `- Author: ${s.author?.name ?? 'see the set'}${s.author?.url ? ` (${s.author.url})` : ''}`,
@@ -346,7 +370,144 @@ export function iconFiles({ icons, sets, custom }) {
       ...(s.licenseText ? ['', '```', s.licenseText, '```'] : []),
       '',
     ]),
-    ...(Object.keys(custom).length ? ['## Your own icons (`custom`)', '', `Used: ${Object.keys(custom).map((i) => i.split(':')[1]).join(', ')}`, ''] : []),
+    ...(custom.length ? ['## Your own icons (`custom`)', '', `Used: ${custom.join(', ')}`, ''] : []),
   ].join('\n');
-  return { data, notice };
+}
+
+// ---- finding icons in the code of a project ------------------------------------------------------------------------------------
+const SKIP_DIRS = new Set(['node_modules', '.next', '.git', 'icons']);
+const SCAN_EXT = /\.(tsx?|jsx?|mjs|cjs|json|mdx?)$/;
+const NAMEISH = /^(?:[a-z0-9]+(?:-[a-z0-9]+)*:)?[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+function* walkSrc(dir) {
+  let entries = [];
+  try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
+  for (const e of entries) {
+    const p = path.join(dir, e.name);
+    if (e.isDirectory()) { if (!SKIP_DIRS.has(e.name) || (e.name === 'icons' && !p.endsWith(path.join('components', 'icons')))) yield* walkSrc(p); }
+    else if (SCAN_EXT.test(e.name)) yield p;
+  }
+}
+
+/** The text of a JSX tag that starts at `i` (just after "<Icon"), up to its closing ">" - braces and quotes respected. */
+function readTag(src, i) {
+  let depth = 0, q = null;
+  for (let j = i; j < Math.min(src.length, i + 600); j++) {
+    const c = src[j];
+    if (q) { if (c === q && src[j - 1] !== '\\') q = null; continue; }
+    if (c === '"' || c === "'" || c === '`') { q = c; continue; }
+    if (c === '{') depth++;
+    else if (c === '}') depth--;
+    else if (c === '>' && depth === 0) return src.slice(i, j);
+  }
+  return src.slice(i, i + 600);
+}
+const literals = (expr) => [...expr.matchAll(/["'`]([^"'`$\\]+)["'`]/g)].map((m) => m[1]);
+
+/**
+ * Every icon a project asks for in its code:
+ *   <Icon name="rocket" />   <Icon name={ok ? 'check' : 'x'} />   <Icon for="Shipped orders" />
+ *   icon="rocket" / icon: 'rocket' / "icon": "rocket" (in code and JSON)      // icons: rocket, truck   (for names built at run time)
+ * `hard` ids come from <Icon>, the content file and the comment; `soft` ones from a generic `icon` prop, which may belong to anything.
+ */
+export function scanSource(root) {
+  const hard = new Map(), soft = new Map(), texts = new Map();
+  const add = (m, id, file) => { if (!m.has(id)) m.set(id, new Set()); m.get(id).add(path.relative(root, file).replace(/\\/g, '/')); };
+  for (const file of walkSrc(path.join(root, 'src'))) {
+    let src; try { if (fs.statSync(file).size > 400_000) continue; src = fs.readFileSync(file, 'utf8'); } catch { continue; }
+    if (file.endsWith(path.join('content', 'site.json'))) continue; // read by slot, below
+    for (const m of src.matchAll(/<Icon\b/g)) {
+      const tag = readTag(src, m.index + 5);
+      const nm = /\bname\s*=\s*(?:"([^"]*)"|'([^']*)'|\{([^{}]*)\})/.exec(tag);
+      if (nm) for (const v of nm[3] !== undefined ? literals(nm[3]) : [nm[1] ?? nm[2]]) if (v && NAMEISH.test(v)) add(hard, v, file);
+      const fr = /\bfor\s*=\s*(?:"([^"]*)"|'([^']*)'|\{([^{}]*)\})/.exec(tag);
+      if (fr) for (const v of fr[3] !== undefined ? literals(fr[3]) : [fr[1] ?? fr[2]]) if (v) add(texts, v, file);
+    }
+    for (const m of src.matchAll(/["']?\bicon["']?\s*[:=]\s*(?:"([^"]+)"|'([^']+)')/g)) { const v = m[1] ?? m[2]; if (NAMEISH.test(v) && v !== 'none') add(soft, v, file); }
+    for (const m of src.matchAll(/(?:\/\/|\/\*|\{\/\*)\s*icons?:\s*([^\n*]+)/g)) for (const v of m[1].split(/[\s,]+/)) if (v && NAMEISH.test(v)) add(hard, v, file);
+  }
+  return { hard, soft, texts };
+}
+
+const dataPaths = (root) => ({ dir: path.join(root, 'src', 'components', 'icons'), data: path.join(root, 'src', 'components', 'icons', 'icons.data.json'), sets: path.join(root, 'src', 'components', 'icons', 'icons.sets.json'), notice: path.join(root, 'src', 'components', 'icons', 'NOTICE.md') });
+
+/**
+ * Brings a project's icon data in line with its code: finds the icons the code asks for and adds the ones that are missing (it never
+ * removes any unless `prune`, because a name built at run time cannot be seen). Nothing is touched, and no network used, when everything
+ * is already there.
+ */
+export async function syncIcons({ root = process.cwd(), offline = false, allow = [], prune = false, check = false } = {}) {
+  const P = dataPaths(root);
+  const site = readJson(path.join(root, 'src', 'content', 'site.json')) ?? {};
+  const block = typeof site.icons === 'object' && site.icons ? site.icons : {};
+  const set = block.set || DEFAULT_SET, map = block.map ?? {};
+  const cur = readJson(P.data) ?? { icons: {}, for: {} };
+  const sets = readJson(P.sets) ?? {};
+  const found = scanSource(root);
+  const wantHard = new Set(), wantSoft = new Set(), where = new Map();
+  const note = (id, files) => where.set(id, [...(where.get(id) ?? []), ...files]);
+  for (const [v, files] of found.hard) { const id = normalizeId(v, set); if (id) { wantHard.add(id); note(id, files); } }
+  for (const [v, files] of found.soft) { const id = normalizeId(v, set); if (id) { wantSoft.add(id); note(id, files); } }
+  // the content file: every place that can carry an icon, and the ones listed under icons.extra
+  for (const slot of iconSlots(site, site.modules ?? [])) { const v = slot.get(); if (v) { const id = String(v).startsWith('custom:') ? v : normalizeId(v, set); if (id) { wantHard.add(id); note(id, ['src/content/site.json']); } } }
+  for (const x of block.extra ?? []) { const id = normalizeId(x, set); if (id) wantHard.add(id); }
+  // <Icon for="..."> : words to icons, by the person's own vocabulary and then the built-in words
+  const forMap = prune ? {} : { ...(cur.for ?? {}) };
+  const noIcon = [];
+  for (const [text, files] of found.texts) {
+    const key = text.toLowerCase().trim();
+    const id = iconFor(key, new Set(), map, set);
+    if (id) { forMap[key] = id; wantHard.add(id); note(id, files); } else { delete forMap[key]; noIcon.push(`"${text}" (${[...files][0]})`); }
+  }
+  const custom = customIcons(block.custom);
+  const customWant = [...wantHard].filter((i) => i.startsWith('custom:'));
+  const remote = [...new Set([...wantHard, ...wantSoft])].filter((i) => !i.startsWith('custom:') && !cur.icons[i]);
+  const res = remote.length ? await resolveIcons(remote, { offline, allowLicenses: allow }) : { icons: {}, sets: {}, missing: [], problems: [], notes: [] };
+  const problems = [...custom.problems, ...res.problems], notes = [...res.notes];
+  const missingHard = res.missing.filter((i) => wantHard.has(i));
+  for (const i of res.missing.filter((i) => !wantHard.has(i))) notes.push(`${i} (${where.get(i)?.[0] ?? 'a prop called icon'}) is not an icon in the ${i.split(':')[0]} set, so it was left alone`);
+  for (const i of customWant) if (!custom.icons[i]) problems.push(`${i}: no such custom icon (define it under icons.custom in src/content/site.json).`);
+  const suggest = (id) => { const [p, n] = id.split(':'); const alt = closestIcons(n, p); return alt.length ? `  did you mean ${alt.join(', ')}?` : ''; };
+
+  // merge: what is there, plus what was found; with prune, only what the code uses
+  const keep = prune ? new Set([...wantHard, ...wantSoft]) : null;
+  const icons = {};
+  for (const [id, v] of Object.entries(cur.icons)) if (!keep || keep.has(id)) icons[id] = v;
+  for (const [id, v] of Object.entries(res.icons)) icons[id] = { b: v.body, w: v.w, h: v.h };
+  for (const [id, v] of Object.entries(custom.icons)) if (!keep || keep.has(id) || customWant.includes(id)) icons[id] = { b: v.body, w: v.w, h: v.h };
+  const nextSets = { ...sets, ...res.sets };
+  if (Object.keys(custom.icons).length) nextSets.custom = { name: 'custom' };
+  const files = iconFiles({ icons: Object.fromEntries(Object.entries(icons).map(([id, v]) => [id, { body: v.b, w: v.w, h: v.h }])), sets: nextSets, forMap });
+  const changed = files.data !== (fs.existsSync(P.data) ? fs.readFileSync(P.data, 'utf8') : '');
+  const added = Object.keys(icons).filter((id) => !cur.icons[id]), removed = Object.keys(cur.icons).filter((id) => !icons[id]);
+  if (changed && !check) {
+    fs.mkdirSync(P.dir, { recursive: true });
+    fs.writeFileSync(P.data, files.data); fs.writeFileSync(P.sets, files.sets); fs.writeFileSync(P.notice, files.notice);
+  }
+  return { added, removed, changed, missing: missingHard, problems, notes, noIcon, hints: missingHard.map((i) => `${i}${where.get(i) ? ` (used in ${where.get(i)[0]})` : ''}${suggest(i)}`), count: Object.keys(icons).length };
+}
+
+/** Watches a project's source and keeps its icons in line while the dev server runs. Returns a function that stops it. */
+export async function watchProject(root = process.cwd(), opts = {}, log = console.log) {
+  let busy = false, again = false, timer = null;
+  const run = async (first) => {
+    if (busy) { again = true; return; }
+    busy = true;
+    try {
+      const r = await syncIcons({ root, ...opts });
+      if (r.added.length) log(`icons: added ${r.added.join(', ')}`);
+      for (const h of r.hints) log(`icons: not found: ${h}`);
+      for (const p of r.problems) log(`icons: ${p}`);
+      for (const n of r.noIcon) log(`icons: nothing fits ${n}; name an icon instead, or add the word to icons.map`);
+      if (first && !r.added.length && !r.hints.length && !r.problems.length) log(`icons: ${r.count} ready`);
+    } catch (e) { log(`icons: ${e.message}`); }
+    busy = false;
+    if (again) { again = false; run(false); }
+  };
+  await run(true);
+  let watcher = null, poll = null;
+  const onChange = (_t, f) => { if (f && /(^|[\\/])components[\\/]icons[\\/]/.test(String(f))) return; clearTimeout(timer); timer = setTimeout(() => run(false), 250); };
+  try { watcher = fs.watch(path.join(root, 'src'), { recursive: true }, onChange); }
+  catch { poll = setInterval(() => run(false), 3000); }
+  return () => { watcher?.close(); if (poll) clearInterval(poll); clearTimeout(timer); };
 }

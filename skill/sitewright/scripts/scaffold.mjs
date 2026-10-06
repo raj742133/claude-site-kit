@@ -26,7 +26,7 @@ import { buildPalette, paletteCss, onColour } from './lib/color.mjs';
 import { logoComponent, faviconSvg, LOGO_STYLES } from './lib/logo.mjs';
 import { resolveEffects, effectsMenu, BUTTON_SELECTOR, CARD_SELECTOR } from './effects.mjs';
 import { generateFx, fxHtmlAttrs, FX_GENERATED } from './lib/fxgen.mjs';
-import { iconSlots, planIcons, resolveIcons, customIcons, iconFiles, normalizeId, searchIcons, searchLocal, DEFAULT_SET } from './lib/icons.mjs';
+import { iconSlots, planIcons, resolveIcons, customIcons, iconFiles, normalizeId, searchIcons, searchLocal, syncIcons, DEFAULT_SET } from './lib/icons.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const TEMPLATES = path.join(HERE, '..', 'templates');
@@ -145,7 +145,7 @@ async function iconStep(cfg, modules, o) {
     sl.set(val === '' || val === 'none' ? null : val);
   }
   const custom = customIcons(block.custom);
-  const plan = planIcons(cfg, modules, { auto: !!block.auto, set });
+  const plan = planIcons(cfg, modules, { auto: !!block.auto, set, map: block.map ?? {} });
   const extra = (block.extra ?? []).map((x) => normalizeId(x, set) ?? fail(`icons.extra: "${x}" is not an icon id.`));
   const ids = [...plan.used, ...extra];
   const wantCustom = ids.filter((i) => i.startsWith('custom:'));
@@ -171,24 +171,36 @@ if (a['list-icons'] !== undefined) {
   process.exit(0);
 }
 
-/** `--apply-icons <project>`: change the icons of an existing project in place. Pages are not touched: only icons.ts, NOTICE.md, nav.json and site.json. */
+/** `--apply-icons <project>`: change which icon a place has, in an existing project. Pages are not touched: only site.json, nav.json and the icon data. */
 if (a['apply-icons']) {
   const dir = path.resolve(a['apply-icons']);
-  const siteFile = path.join(dir, 'src/content/site.json'), navFile = path.join(dir, 'src/content/nav.json'), icFile = path.join(dir, 'src/components/icons/icons.ts');
+  const siteFile = path.join(dir, 'src/content/site.json'), navFile = path.join(dir, 'src/content/nav.json');
   if (!fs.existsSync(siteFile) || !fs.existsSync(navFile)) fail(`${dir} does not look like a Sitewright project.`);
-  if (!fs.existsSync(icFile) || !fs.readFileSync(path.join(dir, 'src/components/SiteHeader.tsx'), 'utf8').includes('Icon')) fail('this project was generated before icons existed. Regenerate it once with the current Sitewright, then --apply-icons works.');
+  if (!fs.existsSync(path.join(dir, 'scripts/sync-icons.mjs'))) fail('this project was generated before icons followed the code. Regenerate it once with the current Sitewright; after that, icons follow your code by themselves.');
   const o = iconOpts();
-  if (o.auto === undefined && !o.none && !Object.keys(o.assign).length && !o.set) fail('nothing to apply: pass --icons auto|none, --icon place=icon,... or --icon-set (see reference/icons.md).');
+  if (o.auto === undefined && !o.none && !Object.keys(o.assign).length && !o.set && !a['prune-icons']) fail('nothing to apply: pass --icons auto|none, --icon place=icon,... or --icon-set (see reference/icons.md).');
   const site = JSON.parse(fs.readFileSync(siteFile, 'utf8'));
-  const out = await iconStep(site, site.modules ?? [], o);
-  fs.writeFileSync(icFile, out.data);
-  fs.writeFileSync(path.join(dir, 'src/components/icons/NOTICE.md'), out.notice);
+  const block = typeof site.icons === 'string' ? (site.icons = { auto: site.icons === 'auto' }) : (site.icons ??= {});
+  if (o.set) block.set = o.set;
+  if (o.auto !== undefined) block.auto = o.auto;
+  const mods = site.modules ?? [];
+  const slots = iconSlots(site, mods);
+  if (o.none) for (const sl of slots) sl.set(null);
+  for (const [key, val] of Object.entries(o.assign)) {
+    const sl = slots.find((x) => x.key === key);
+    if (!sl) fail(`--icon: there is no place "${key}" in this site. Places here: ${slots.map((x) => x.key).join(', ')}`);
+    sl.set(val === '' || val === 'none' ? null : val);
+  }
+  const plan = planIcons(site, mods, { auto: !!block.auto && o.auto !== false, set: block.set || DEFAULT_SET, map: block.map ?? {} });
+  if (plan.problems.length) fail(`icons:\n  - ${plan.problems.join('\n  - ')}`);
+  fs.writeFileSync(siteFile, JSON.stringify(site, null, 2) + '\n');
   const nav = JSON.parse(fs.readFileSync(navFile, 'utf8'));
   for (const it of nav.items) { const ic = site.nav?.icons?.[it.id]; if (ic) it.icon = ic; else delete it.icon; }
   fs.writeFileSync(navFile, JSON.stringify(nav, null, 2) + '\n');
-  fs.writeFileSync(siteFile, JSON.stringify(site, null, 2) + '\n');
-  console.log(`sitewright: icons updated in ${dir}\n  ${out.count} icons: ${[...out.data.matchAll(/^  "([^"]+)":/gm)].map((m) => m[1]).join(', ') || 'none'}`);
-  for (const n of out.notes) console.log(`  note: ${n}`);
+  const r = await syncIcons({ root: dir, offline: o.offline, allow: o.allow, prune: !!a['prune-icons'] });
+  if (r.hints.length || r.problems.length) fail(`icons:\n  - ${[...r.hints.map((h) => `not found: ${h}`), ...r.problems].join('\n  - ')}`);
+  console.log(`sitewright: icons updated in ${dir}\n  ${r.count} icons${r.added.length ? `, added ${r.added.join(', ')}` : ''}${r.removed.length ? `, removed ${r.removed.join(', ')}` : ''}`);
+  for (const n of r.notes) console.log(`  note: ${n}`);
   process.exit(0);
 }
 
@@ -381,8 +393,12 @@ else if (has('mfa')) nav.push({ id: 'team', label: cfg.nav.team, href: '/admin' 
 if (has('landing')) nav.push({ id: 'home', label: cfg.nav.home, href: '/' });
 for (const it of nav) { const ic = cfg.nav.icons?.[it.id]; if (ic) it.icon = ic; }
 put('src/content/nav.json', JSON.stringify({ items: nav, homeAfterLogin: loginRedirect }, null, 2) + '\n');
-put('src/components/icons/icons.ts', iconResult.data);
+put('src/components/icons/icons.data.json', iconResult.data);
+put('src/components/icons/icons.sets.json', iconResult.sets);
 put('src/components/icons/NOTICE.md', iconResult.notice);
+// the project keeps its own copy of the icon sync (and the small pack it uses), so it needs nothing from this skill afterwards
+put('scripts/icons/icons.mjs', fs.readFileSync(path.join(HERE, 'lib', 'icons.mjs'), 'utf8'));
+put('scripts/icons/pack/lucide.json', fs.readFileSync(path.join(TEMPLATES, 'icons', 'lucide.json'), 'utf8'));
 
 // the content file the components read: exactly the resolved config, minus build-only keys
 const site = { ...cfg, modules, flags: [...flags], effects: fx };
@@ -396,7 +412,7 @@ if (flags.has('s3')) Object.assign(deps, { '@aws-sdk/client-s3': '^3.700.0', '@a
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([x], [y]) => x.localeCompare(y)));
 put('package.json', JSON.stringify({
   name: slug, version: '0.1.0', private: true, description: cfg.brand.description,
-  scripts: { dev: 'next dev', build: 'next build', start: 'next start', lint: 'next lint' },
+  scripts: { dev: 'node scripts/dev.mjs', prebuild: 'node scripts/sync-icons.mjs --build', build: 'next build', start: 'next start', lint: 'next lint', icons: 'node scripts/sync-icons.mjs' },
   dependencies: sorted(deps), devDependencies: sorted(devDeps),
 }, null, 2) + '\n');
 

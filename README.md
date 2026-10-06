@@ -155,9 +155,18 @@ The backgrounds, headline animations and micro-interactions are original, depend
 
 Say `icons: "auto"` and the navigation, stat cards, status chips, features list and story steps get icons where a title clearly names one (an order is a box, a delivery a truck, a warning a triangle); or name them yourself. They are inline SVG from the open sets behind [Iconify](https://iconify.design) (200,000+ icons in 150+ sets; [better-icons](https://github.com/better-auth/better-icons) is the tool that finds them), in the colour of the text around them, and a site carries only the ones it uses: no icon font, no library, no request at run time.
 
+In your own pages there is nothing to set up. Write the icon where you want it, and the project brings it in by itself (while `npm run dev` runs, and before every build):
+
+```tsx
+<Icon name="rocket" />          // 120 of these on a page are found and added in a fraction of a second
+<Icon name="tabler:home" />     // any other set
+<Icon for="Shipped orders" />   // or describe it, and the fitting icon is chosen
+```
+
+Your own words are set once and apply everywhere (`"icons": { "map": { "roast": "coffee" } }`). A typo is reported with the file and a suggestion. For the places the generator fills (navigation, stat cards, chips...), `icons: auto` or:
+
 ```bash
 node scaffold.mjs --config site.json --out ./my-site --icons auto
-node scaffold.mjs --list-icons coffee                                  # find names
 node scaffold.mjs --apply-icons ./my-site --icon stats.0=package       # change one later, in a second
 ```
 

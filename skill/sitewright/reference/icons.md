@@ -4,7 +4,35 @@ Sites made with Sitewright have icons where they help: in the navigation, on sta
 
 A generated site carries **only the icons it uses**, as plain inline SVG in the colour of the text around it. No icon font, no icon library, no request at run time. Nothing is added unless chosen: a place with no icon looks exactly as it did.
 
-## Using them
+## Just use them in your code
+
+Every generated project has an `Icon` component. Write the icon where you want it; nothing to register, no command to run:
+
+```tsx
+import { Icon } from '@/components/icons/Icon';
+
+<Icon name="rocket" />                      // the site's icon set (Lucide unless icons.set says otherwise)
+<Icon name="tabler:home" />                 // any other set: prefix:name
+<Icon name={ok ? 'circle-check' : 'circle-x'} />
+<Icon for="Shipped orders" />               // describe it: the icon that fits these words is chosen for you
+<Icon for={order.status} />                 // (a fixed text only; see below for names built at run time)
+```
+
+The project finds every icon its code asks for and brings in the ones that are missing: while `npm run dev` runs (a few seconds after you save), before every `npm run build` (the build stops, naming the file, if an icon cannot be found), or on demand with `npm run icons`. It looks in `<Icon name>` and `<Icon for>`, in any `icon="..."` / `icon: "..."` prop or JSON value, and in a comment such as `// icons: gift, wine` (the way to list names that are built at run time, like ``name={`status-${s}`}``). A typo is reported with the file and a suggestion (`rockt` → `did you mean lucide:rocket`).
+
+It never removes an icon on its own (a name built at run time can't be seen); `npm run icons -- --prune` drops the ones the code no longer uses. Nothing is fetched when everything is already there, so a build on a server with no internet works as long as the icons were brought in during development, which is how it normally goes.
+
+### Your words, once
+
+The built-in words cover common titles (orders, delivery, payment, team, schedule, ...). For your own vocabulary, say it once and it applies everywhere: `<Icon for>`, `icons: auto` and everything else that reads titles.
+
+```jsonc
+"icons": { "auto": true, "map": { "roast": "coffee", "grinder": "settings", "shipped": "tabler:truck-delivery" } }
+```
+
+Your words win over the built-in ones; a word matches whole words in any case, so `roast` also fits "Roasting" but not "toast". If nothing fits a text, `sync-icons` says so and the place keeps no icon, never a guess.
+
+## Where the generator puts icons by itself
 
 ```jsonc
 "icons": "auto"                       // fill the places a title clearly names, leave the rest alone
@@ -23,7 +51,7 @@ Name an icon anywhere a place takes one, as `"prefix:name"` (`lucide:coffee`, `t
 | `features.next.<n>` | the optional fourth item of an upcoming feature: `[name, text, beingBuilt, "gift"]` | in place of the dot |
 | `story.<n>` | `landing.story.steps[n].icon` | beside the step's time label |
 
-`extra` lists icons to include without a place, for code you add yourself (`import { Icon } from '@/components/icons/Icon'`, then `<Icon name="mdi:home" />`).
+`extra` lists icons to include without a place. You rarely need it now: an `<Icon name="mdi:home" />` in code is found by itself.
 
 ### `auto`
 
@@ -36,7 +64,9 @@ Reads each title for whole words and only fills what it is sure of: nav links, t
 
 Style: keep one set per site (the default, Lucide, is a clean 24 px outline set that suits the rest of the design). Mixing sets looks accidental.
 
-## Command line, and changing them later
+## Command line (optional), and changing the generated places later
+
+You never need these to use an icon in code. They are for the places the generator fills (navigation, stat cards, chips, features, story) and for Claude to drive.
 
 ```bash
 node scripts/scaffold.mjs --config site.json --out ./my-site --icons auto
@@ -47,15 +77,15 @@ node scripts/scaffold.mjs --apply-icons ./my-site --icons none                  
 node scripts/scaffold.mjs --apply-icons ./my-site --icons auto                       # fill any empty places
 ```
 
-`--apply-icons` rewrites only `src/components/icons/icons.ts` and `NOTICE.md`, the icon entries in `src/content/site.json` and `nav.json`. Pages and styles, and everything you edited, are untouched. A project generated before icons existed needs one regeneration first (the command says so).
+`--apply-icons` rewrites only the icon entries in `src/content/site.json` and `nav.json`, then runs the same sync as the project's own `npm run icons` (so it also brings in what the code asks for). Pages and styles, and everything you edited, are untouched. A project generated before icons followed the code needs one regeneration first (the command says so).
 
 ## Where an icon comes from
 
-In order: (1) the pack shipped with the kit, 200+ common Lucide icons (`templates/icons/lucide.json`, ISC), so a site gets icons with no network; (2) a locally installed `@iconify-json/<set>` (`npm i -D @iconify-json/tabler`); (3) the cache from an earlier run (`~/.cache/sitewright/icons`); (4) the Iconify API, unless `--offline-icons`. A name that is nowhere is an error that tells you how to find the right one, and nothing is generated.
+In order: (1) the pack shipped with the kit, 200+ common Lucide icons (`templates/icons/lucide.json`, ISC; each project carries its own copy in `scripts/icons/pack`), so a site gets icons with no network; (2) a locally installed `@iconify-json/<set>` (`npm i -D @iconify-json/tabler`); (3) the cache from an earlier run (`~/.cache/sitewright/icons`); (4) the Iconify API, unless `--offline-icons`. A name that is nowhere is an error that tells you how to find the right one, and nothing is generated.
 
 ## Licences
 
-Every set has its own licence, read from Iconify (or the set's own info) and written into the project's `src/components/icons/NOTICE.md` with the author, the icons used and, for the kit's pack, the full licence text.
+Every set has its own licence, read from Iconify (or the set's own info) and written into the project's `src/components/icons/NOTICE.md` (the facts in `icons.sets.json`) with the author, the icons used and, for the kit's pack, the full licence text.
 
 - MIT, ISC, Apache-2.0, CC0, BSD, OFL and similar: used freely; the notice file is all that is needed.
 - **CC BY** (for example Font Awesome Free): allowed, with a warning and a ready-made credit line in `NOTICE.md`: credit has to be visible to people, so add it to the footer or a credits page.

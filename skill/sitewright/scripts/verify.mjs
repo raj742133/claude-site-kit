@@ -1096,6 +1096,19 @@ async function checkIcons(browser) {
   });
 }
 
+/** The project keeps its own icons in line with its code (`npm run icons`): every icon the code asks for is already in the data, and the sync agrees. */
+async function checkIconSync() {
+  if (!fs.existsSync(path.join(SITE, 'scripts', 'sync-icons.mjs'))) return;
+  section = 'icons';
+  await check('the icons in the project match what its code asks for (npm run icons --check)', async () => {
+    const { spawnSync } = await import('node:child_process');
+    const r = spawnSync(process.execPath, ['scripts/sync-icons.mjs', '--check', '--offline'], { cwd: SITE, encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`sync-icons --check failed: ${(r.stderr || r.stdout).trim().split('\n').slice(0, 3).join(' | ')}`);
+    const data = JSON.parse(fs.readFileSync(path.join(SITE, 'src/components/icons/icons.data.json'), 'utf8'));
+    for (const [id, v] of Object.entries(data.icons)) if (!v.b || !v.w || !v.h) throw new Error(`icon ${id} has no drawing or size`);
+  });
+}
+
 async function checkHydration(browser) {
   section = 'hydration';
   // Real browsers hit pages with a WARM cache (scripts already downloaded for the page before). That is when a server-rendered page
@@ -1133,6 +1146,7 @@ try {
   await checkEffects(browser);
   await checkFigures(browser);
   await checkIcons(browser);
+  await checkIconSync();
   await checkAdmin(browser);
   await checkHydration(browser);
   section = 'console';
