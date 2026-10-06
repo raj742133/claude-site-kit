@@ -70,6 +70,13 @@
         <button type="button" class="ic-chip" data-cat="work-health-and-nature">Work, health and nature <span>24</span></button>
     </div>
   </div>
+  <div class="ic-fmt" role="group" aria-label="What a click copies">
+    <span>Click copies</span>
+    <button type="button" class="ic-chip on" data-fmt="jsx" aria-pressed="true"><code>&lt;Icon name="plus" /&gt;</code></button>
+    <button type="button" class="ic-chip" data-fmt="name" aria-pressed="false"><code>plus</code></button>
+    <button type="button" class="ic-chip" data-fmt="id" aria-pressed="false"><code>lucide:plus</code></button>
+    <span class="ic-keys"><kbd>/</kbd> search</span>
+  </div>
   <p class="ic-note" id="ic-note" role="status" aria-live="polite">Click an icon to copy its id.</p>
 
     <section class="ic-cat" id="interface" data-cat="interface">
@@ -383,7 +390,7 @@
     try { localStorage.setItem(KEY, root.dataset.theme); } catch (e) {}
   });
   var q = document.getElementById('ic-q'), note = document.getElementById('ic-note'), empty = document.getElementById('ic-empty');
-  var cats = [].slice.call(document.querySelectorAll('.ic-cat')), chips = [].slice.call(document.querySelectorAll('.ic-chip')), cat = 'all';
+  var cats = [].slice.call(document.querySelectorAll('.ic-cat')), chips = [].slice.call(document.querySelectorAll('.ic-chip[data-cat]')), cat = 'all';
   function apply() {
     var words = q.value.toLowerCase().split(/[\s,-]+/).filter(Boolean), shown = 0;
     cats.forEach(function (c) {
@@ -395,17 +402,29 @@
       c.hidden = n === 0; shown += n;
     });
     empty.hidden = shown !== 0;
-    note.textContent = shown + (shown === 1 ? ' icon' : ' icons') + (words.length || cat !== 'all' ? ' match' : '') + '. Click one to copy its id.';
+    note.textContent = shown + (shown === 1 ? ' icon' : ' icons') + (words.length || cat !== 'all' ? ' match' : '') + '. Click one to copy it.';
   }
   q.addEventListener('input', apply);
   chips.forEach(function (b) { b.addEventListener('click', function () { cat = b.dataset.cat; chips.forEach(function (x) { x.classList.toggle('on', x === b); }); apply(); }); });
+  var fmt = 'jsx', fmts = [].slice.call(document.querySelectorAll('.ic-fmt [data-fmt]'));
+  try { fmt = localStorage.getItem('sitewright-ic-fmt') || fmt; } catch (e) {}
+  function setFmt(f) { fmt = f; fmts.forEach(function (x) { var on = x.dataset.fmt === f; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); }); try { localStorage.setItem('sitewright-ic-fmt', f); } catch (e) {} }
+  setFmt(['jsx', 'name', 'id'].indexOf(fmt) > -1 ? fmt : 'jsx');
+  fmts.forEach(function (b) { b.addEventListener('click', function () { setFmt(b.dataset.fmt); }); });
+  function text(id) { var name = id.replace(/^[^:]+:/, ''); return fmt === 'jsx' ? '<Icon name="' + name + '" />' : fmt === 'name' ? name : id; }
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('.ic-card'); if (!b) return;
-    var id = b.dataset.id;
-    function done() { note.textContent = 'Copied ' + id; b.classList.add('copied'); setTimeout(function () { b.classList.remove('copied'); }, 900); }
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(id).then(done, function () { note.textContent = id; });
-    else note.textContent = id;
+    var t = text(b.dataset.id);
+    function done() { note.textContent = 'Copied ' + t; b.classList.add('copied'); setTimeout(function () { b.classList.remove('copied'); }, 900); }
+    function fallback() { var a = document.createElement('textarea'); a.value = t; a.style.position = 'fixed'; a.style.opacity = '0'; document.body.appendChild(a); a.select(); var ok = false; try { ok = document.execCommand('copy'); } catch (x) {} a.remove(); if (ok) done(); else note.textContent = 'Copy this: ' + t; }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, fallback); else fallback();
   });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === '/' && !/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) { e.preventDefault(); q.focus(); q.select(); }
+    else if (e.key === 'Escape' && document.activeElement === q) { q.value = ''; apply(); q.blur(); }
+  });
+  var m = /[?&]q=([^&]*)/.exec(location.search); if (m) { q.value = decodeURIComponent(m[1].replace(/\+/g, ' ')); }
+  apply();
 })();
 </script>
 </body>
